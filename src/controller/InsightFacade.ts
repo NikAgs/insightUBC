@@ -9,26 +9,34 @@ import Log from "../Util";
 export default class InsightFacade implements IInsightFacade {
 
     private helpers: Helpers = null;
-
+    private stringZip: any = null;
     constructor() {
         this.helpers = new Helpers();
         Log.trace('InsightFacadeImpl::init()');
+        this.helpers.convertToBase64('/home/aman/Desktop/courses.zip')
+            .then((res: InsightResponse) => {
+                // console.log(res);
+                console.log("Loaded initial zip");
+                this.stringZip = res.body;
+                this.addDataset('courses', this.stringZip);
+            });
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-        return new Promise((fulfill, reject) => {
-            this.helpers.uncompressFile('courses.zip')
-                .then((response) => {
+        // return new Promise((fulfill, reject) => {
+        //     this.helpers.uncompressFile('/home/aman/Desktop/courses.zip')
+        //         .then((response) => {
 
-                })
-                .catch((err) => {
-                    reject({
-                        code: 400,
-                        body: "Test Failed"
-                    })
-                });
-        });
-
+        //         })
+        //         .catch((err) => {
+        //             reject({
+        //                 code: 400,
+        //                 body: "Test Failed"
+        //             })
+        //         });
+        // });
+        console.log("Content Recieved, adding to Dataset");
+        return null;
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
