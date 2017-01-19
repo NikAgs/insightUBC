@@ -38,7 +38,6 @@ export default class InsightFacade implements IInsightFacade {
                     })
                 });
         });
-
     }
 
     removeDataset(id: string): Promise<InsightResponse> {

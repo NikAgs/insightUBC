@@ -20,8 +20,40 @@ export interface courseRecord {
     courses_audit: number;
 }
 
+interface OPTIONS {
+    COLUMNS: [string];
+    ORDER: string;
+    FORM: 'TABLE';
+}
+
+interface FILTER extends LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION {
+    SCOMPARISON?: SCOMPARISON;
+    NEGATION?: NEGATION;
+}
+
+interface LOGICCOMPARISON {
+    "AND"?: [FILTER];
+    "OR"?: [FILTER];
+}
+
+interface MCOMPARISON {
+    "LT"?: Object;
+    "GT"?: Object;
+    "EQ"?: Object;
+}
+
+interface SCOMPARISON {
+    "IS"?: Object;
+}
+
+interface NEGATION {
+    "NOT"?: FILTER
+}
+
 export interface QueryRequest {
     // you can define your own structure that complies with the EBNF here
+    WHERE: FILTER;
+    OPTIONS: OPTIONS;
 }
 
 export interface IInsightFacade {
