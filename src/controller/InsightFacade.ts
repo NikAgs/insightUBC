@@ -14,11 +14,13 @@ export default class InsightFacade implements IInsightFacade {
         this.helpers = new Helpers();
         Log.trace('InsightFacadeImpl::init()');
         this.helpers.convertToBase64('/home/aman/Desktop/courses.zip')
-            .then((res: InsightResponse) => {
+            .then((res: string) => {
                 // console.log(res);
                 console.log("Loaded initial zip");
-                this.stringZip = res.body;
+                this.stringZip = res;
                 this.addDataset('courses', this.stringZip);
+            }).catch((err)=>{
+                console.log(err);
             });
     }
 
@@ -26,7 +28,7 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((fulfill, reject) => {
             this.helpers.uncompressFile(content)
                 .then((response) => {
-                    console.log("Content Recieved, adding to Dataset");
+                    console.log("Content Recieved, adding to Dataset", response);
                     fulfill(null);
                 })
                 .catch((err) => {

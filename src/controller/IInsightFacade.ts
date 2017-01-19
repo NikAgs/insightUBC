@@ -9,6 +9,17 @@ export interface InsightResponse {
     body: {}; // the actual response
 }
 
+export interface courseRecord {
+    courses_dept: string;
+    courses_id: string;
+    courses_avg: number;
+    courses_instructor: string;
+    courses_title: string;
+    courses_pass: number;
+    courses_fail: number;
+    courses_audit: number;
+}
+
 export interface QueryRequest {
     // you can define your own structure that complies with the EBNF here
 }
