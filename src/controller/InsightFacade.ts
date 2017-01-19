@@ -23,20 +23,20 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-        // return new Promise((fulfill, reject) => {
-        //     this.helpers.uncompressFile('/home/aman/Desktop/courses.zip')
-        //         .then((response) => {
+        return new Promise((fulfill, reject) => {
+            this.helpers.uncompressFile(content)
+                .then((response) => {
+                    console.log("Content Recieved, adding to Dataset");
+                    fulfill(null);
+                })
+                .catch((err) => {
+                    reject({
+                        code: 400,
+                        body: "Test Failed"
+                    })
+                });
+        });
 
-        //         })
-        //         .catch((err) => {
-        //             reject({
-        //                 code: 400,
-        //                 body: "Test Failed"
-        //             })
-        //         });
-        // });
-        console.log("Content Recieved, adding to Dataset");
-        return null;
     }
 
     removeDataset(id: string): Promise<InsightResponse> {

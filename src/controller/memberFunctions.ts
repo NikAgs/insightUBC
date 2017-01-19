@@ -26,21 +26,36 @@ export default class Helpers {
                     }
                     let result = buffer.toString('base64', 0, bufferSize);
                     fs.close(fd);
-                    fulfill({ code: '200', body: {result} });
+                    fulfill({ code: '200', body: { result: result } });
                 });
             });
-            // console.log("Filename", file);
-            // var new_zip = new JSZip();
-            // new_zip.loadAsync(file)
-            //     .then(function (zip) {
-            //         console.log(zip);
-            //         // you now have every files contained in the loaded zip
-            //         // new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
-            //     })
-            //     .catch((err) => {
-            //         console.log(err);
-            //         reject(err);
-            //     })
+
+        });
+    }
+
+    uncompressFile(fileString: any): Promise<any> {
+        // console.log("Filename", file);
+        // new_zip.loadAsync(file)
+        //     .then(function (zip) {
+        //         console.log(zip);
+        //         // you now have every files contained in the loaded zip
+        //         // new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //         reject(err);
+        //     })
+        return new Promise((fulfill, reject) => {
+            let zip = JSZip();
+            // console.log(fileString.result, "Here");
+            zip.loadAsync(fileString, { "base64": true }).then((response) => {
+                console.log(response.file('CPSC110').asText(), "Here");
+                console.log(response,"NOW");
+                fulfill(response);
+            }).catch((err) => {
+                console.log(err);
+                reject(err);
+            });
         });
     }
 }
