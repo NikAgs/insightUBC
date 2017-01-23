@@ -26,27 +26,25 @@ interface OPTIONS {
     FORM: 'TABLE';
 }
 
-interface FILTER extends LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION {
-    SCOMPARISON?: SCOMPARISON;
-    NEGATION?: NEGATION;
-}
+export interface FILTER extends LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION {
+};
 
-interface LOGICCOMPARISON {
+export interface LOGICCOMPARISON {
     "AND"?: [FILTER];
     "OR"?: [FILTER];
 }
 
-interface MCOMPARISON {
+export interface MCOMPARISON {
     "LT"?: Object;
     "GT"?: Object;
     "EQ"?: Object;
 }
 
-interface SCOMPARISON {
+export interface SCOMPARISON {
     "IS"?: Object;
 }
 
-interface NEGATION {
+export interface NEGATION {
     "NOT"?: FILTER
 }
 

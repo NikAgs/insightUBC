@@ -45,6 +45,7 @@ describe("InsightSpec", function () {
                 "FORM": "TABLE"
             }
         }
+        insFac.performQuery(query);
         return null;
     });
 });

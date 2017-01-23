@@ -1,7 +1,7 @@
 /**
  * This is the main programmatic entry point for the project.
  */
-import { IInsightFacade, InsightResponse, QueryRequest } from "./IInsightFacade";
+import { IInsightFacade, InsightResponse, QueryRequest, FILTER, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION } from "./IInsightFacade";
 import Helpers from './memberFunctions'
 
 import Log from "../Util";
@@ -19,7 +19,7 @@ export default class InsightFacade implements IInsightFacade {
                 console.log("Loaded initial zip");
                 this.stringZip = res;
                 this.addDataset('courses', this.stringZip);
-            }).catch((err)=>{
+            }).catch((err) => {
                 console.log(err);
             });
     }
@@ -45,6 +45,14 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     performQuery(query: QueryRequest): Promise<InsightResponse> {
-        return null;
+        return new Promise((fulfill, reject) => {
+            let filter = query.WHERE;
+            let optionsRequest = query.OPTIONS;
+            this.helpers.runForFilter(filter)
+                .then((response) => {
+                    console.log(response);
+                    fulfill(response);
+                });
+        })
     }
 }
