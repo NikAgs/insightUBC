@@ -48,4 +48,44 @@ describe("InsightSpec", function () {
         insFac.performQuery(query);
         return null;
     });
+    it("Should be able to echo", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "OR": [
+                    {
+                        "AND": [
+                            {
+                                "GT": {
+                                    "courses_avg": 90
+                                }
+                            },
+                            {
+                                "IS": {
+                                    "courses_dept": "adhe"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "NOT": {
+                            "EQ": {
+                                "courses_avg": 95
+                            }
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        insFac.performQuery(query);
+        return null;
+    });
 });

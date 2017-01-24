@@ -4,45 +4,7 @@ import * as fs from 'fs';
 import { IInsightFacade, InsightResponse, QueryRequest, FILTER, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION } from "./IInsightFacade";
 
 
-let filterForString = (filter: Object) => {
-    return new Promise((fulfill, reject) => {
-        let columnName: string;
-        let value: string;
-        for (let key in filter) {
-            columnName = key;
-            value = (<any>filter)[key];
-        }
-        console.log(columnName, value);
-    })
-}
 
-let filterForMath = (filter: Object, comp: string) => {
-    return new Promise((fulfill, reject) => {
-        let columnName: string;
-        let value: string;
-        for (let key in filter) {
-            columnName = key;
-            value = (<any>filter)[key];
-        }
-        switch (comp) {
-            case "GT": {
-                console.log(columnName, value, "In GT");
-                break;
-            }
-            case "LT": {
-                console.log(columnName, value, "In LT");
-                break;
-            }
-            case "EQ": {
-                console.log(columnName, value, "In Eq");
-                break;
-            }
-            default: {
-                console.log("err");
-            }
-        }
-    });
-}
 
 
 export default class Helpers {
@@ -92,38 +54,98 @@ export default class Helpers {
         });
     }
 
-    runForFilter(query: FILTER): Promise<InsightResponse> {
-        let filterKeys = Object.keys(query);
-        let promiseArray: any = [];
-        filterKeys.forEach(key => {
-            if (key === "IS") {
-                let x = filterForString(query[key])
-                    .then((value) => {
-                        return value;
-                    })
-                    .catch((err) => {
-                        // reject(err);
-                    });
-                promiseArray.push(x);
+    filterForString(filter: Object): Promise<any> {
+        return new Promise((fulfill, reject) => {
+            let columnName: string;
+            let value: string;
+            for (let key in filter) {
+                columnName = key;
+                value = (<any>filter)[key];
             }
-            else if (key === "GT" || key === "LT" || key === "EQ") {
-                let x = filterForMath(query[key], key)
-                    .then((value) => {
-                        return value;
-                    })
-                    .catch((err) => {
-                        // reject(err);
-                    });
-                promiseArray.push(x);
-            }
-            else if (key === "AND" || key === "OR") {
+            console.log(columnName, value);
+            fulfill(null);
+        })
+    }
 
+    filterForMath(filter: Object, comp: string): Promise<any> {
+        return new Promise((fulfill, reject) => {
+            let columnName: string;
+            let value: string;
+            for (let key in filter) {
+                columnName = key;
+                value = (<any>filter)[key];
             }
-            else if (key === "NOT") {
-
+            switch (comp) {
+                case "GT": {
+                    console.log(columnName, value, "In GT");
+                    break;
+                }
+                case "LT": {
+                    console.log(columnName, value, "In LT");
+                    break;
+                }
+                case "EQ": {
+                    console.log(columnName, value, "In Eq");
+                    break;
+                }
+                default: {
+                    console.log("err");
+                }
             }
+            fulfill(null);
         });
+    }
+   
+    runForFilter(query: FILTER): Promise<InsightResponse> {
+        return new Promise((fulfill, reject) => {
+            let filterKeys = Object.keys(query);
+            filterKeys.forEach(key => {
+                if (key === "IS") {
+                    this.filterForString(query[key])
+                        .then((records) => {
+                            fulfill(records);
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        });
+                }
+                else if (key === "GT" || key === "LT" || key === "EQ") {
+                    this.filterForMath(query[key], key)
+                        .then((records) => {
+                            fulfill(records);
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        });
+                }
+                else if (key === "AND" || key === "OR") {
+                    let filters = query[key];
+                    let promiseArray: any = [];
+                    filters.forEach(filter => {
+                        promiseArray.push(this.runForFilter(filter));
+                    });
+                    Promise.all(promiseArray)
+                        .then(records => {
+                            // Check of key == AND || OR
+                            //Check for records in each element
+                            console.log(key);
+                            fulfill(records);
+                        })
+                        .catch(err => {
+                            //throw err
+                            console.log(err);
+                        });
+                }
+                else if (key === "NOT") {
+                    this.runForFilter(query[key])
+                        .then(records => {
+                            console.log(key);
+                            //Need to find records that do not exist in the returned array
+                            fulfill(records);
+                        })
+                }
+            });
 
-        return null;
+        })
     }
 }
