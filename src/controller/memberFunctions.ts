@@ -1,11 +1,7 @@
-import * as JSZip from 'jszip'
 import Log from "../Util";
 import * as fs from 'fs';
 import { IInsightFacade, InsightResponse, QueryRequest, FILTER, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
-
-
-
-
+let JSZip = require("jszip");
 
 export default class Helpers {
 
@@ -44,47 +40,60 @@ export default class Helpers {
         });
     }
 
+    loadFromFile(file: any): Promise<[Object]> {
+        return new Promise((fulfill, reject) => {
+            let arr: courseRecord[] = [];
+            file.async("string")
+                .then(function (str: any) {
+                    var jsonArr = JSON.parse(str);
+                    for (let i in jsonArr.result) {
+                        var course: courseRecord = {};
+                        var entry = jsonArr.result[i];
+                        course.courses_dept = entry.Subject;
+                        course.courses_id = entry.id;
+                        course.courses_audit = entry.Audit;
+                        course.courses_avg = entry.Avg;
+                        course.courses_fail = entry.Fail;
+                        course.courses_pass = entry.Pass;
+                        course.courses_title = entry.Title;
+                        course.courses_instructor = entry.Professors;
+                        arr.push(course);
+                    }
+                    // console.log("In file function", arr.length);
+                    fulfill(arr);
+                }).catch((err: any) => {
+                    console.log("Error", err);
+                    reject(err);
+                });
+        })
+    }
+
     // Parses the base64 fileString into an array of courseRecords 
     parseData(fileString: any): Promise<[courseRecord]> {
-        var JSZip = require("jszip");
-        var arr: courseRecord[] = [];
+        let promiseArray: any = [];
+        let self = this;
         return new Promise((fulfill, reject) => {
             JSZip.loadAsync(fileString, { base64: true })
                 .then(function (zip: any) {
                     zip.folder("courses")
                         .forEach(function (relativePath: any, file: any) {
-                            file.async("string")
-                                .then(function (str: any) {
-                                    var jsonArr = JSON.parse(str);
-
-                                    for (let i in jsonArr.result) {
-                                        var course: courseRecord = {};
-                                        var entry = jsonArr.result[i];
-                                        for (let key in entry) {
-                                            switch (key) {
-                                                case "Subject": { course.courses_dept = entry[key]; break; }
-                                                case "id": { course.courses_id = entry[key]; break; }
-                                                case "Avg": { course.courses_avg = parseFloat(entry[key]); break; }
-                                                case "Professor": { course.courses_instructor = entry[key]; break; }
-                                                case "Title": { course.courses_title = entry[key]; break; }
-                                                case "Pass": { course.courses_pass = parseInt(entry[key]); break; }
-                                                case "Fail": { course.courses_fail = parseInt(entry[key]); break; }
-                                                case "Audit": { course.courses_audit = parseInt(entry[key]); break; }
-                                            }
-                                        }
-                                        arr.push(course);
-                                    }
-
-                                });
-                        })
-                    Promise.all(arr).then(val => {
-                        fulfill(val);
-                    });
-
+                            promiseArray.push(self.loadFromFile(file));
+                        });
+                    console.log("promiseArray:", promiseArray.length);
+                    Promise.all(promiseArray)
+                        .then(val => {
+                            console.log("In promise all", val.length);
+                            fulfill(val);
+                        }).catch(err=>{
+                            console.log(err);
+                            reject(err);
+                        });
                 })
                 .catch(function (err: any) {
+                    console.log(err);
                     reject(err);
                 });
+
         });
     }
 
