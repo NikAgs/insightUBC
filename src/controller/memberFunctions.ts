@@ -12,7 +12,7 @@ export default class Helpers {
     convertToBase64(file: string): Promise<string> {
         return new Promise(function (fulfill, reject) {
             fs.open(file, 'r', function (err, fd) {
-                console.log(fd);
+                //console.log(fd);
                 if (fd) {
                     fs.fstat(fd, function (err, stats) {
                         var bufferSize = stats.size,
@@ -79,10 +79,10 @@ export default class Helpers {
                         .forEach(function (relativePath: any, file: any) {
                             promiseArray.push(self.loadFromFile(file));
                         });
-                    console.log("promiseArray:", promiseArray.length);
+                    //console.log("promiseArray:", promiseArray.length);
                     Promise.all(promiseArray)
                         .then(val => {
-                            console.log("In promise all", val.length);
+                            //console.log("In promise all", val.length);
                             fulfill(val);
                         }).catch(err=>{
                             console.log(err);

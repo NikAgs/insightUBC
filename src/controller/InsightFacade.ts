@@ -13,8 +13,8 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         this.helpers = new Helpers();
         Log.trace('InsightFacadeImpl::init()');
-        // this.helpers.convertToBase64('/Users/TheNik/Downloads/courses.zip')
-        this.helpers.convertToBase64('/home/aman/Desktop/courses.zip')
+        this.helpers.convertToBase64('/Users/TheNik/Downloads/courses.zip')
+            //this.helpers.convertToBase64('/home/aman/Desktop/courses.zip')
             .then((res: string) => {
                 // console.log(res);
                 console.log("Loaded initial zip");
@@ -26,25 +26,56 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-        console.log("In addDataset");
+        //console.log("In addDataset");
+        let fs = require("fs");
+        let code = 201;
+        fs.readFile(id, (err: any, data: any) => {
+            if (err) {
+                if (err.code === "ENOENT") {
+                    code = 204;   // File doesn't exist
+                }
+            }
+        });
+
         return new Promise((fulfill, reject) => {
             this.helpers.parseData(content)
                 .then((response) => {
-                    console.log("Content Recieved, adding to Dataset", response.length);
-                    fulfill(null);
+                    //console.log("Content Recieved, adding to Dataset", response.length);
+                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                        fulfill({
+                            code: code,
+                            body: {}
+                        });
+                    });
                 })
                 .catch((err) => {
                     console.log(err);
                     reject({
                         code: 400,
-                        body: "Test Failed"
+                        body: { "error": err }
                     });
                 });
         });
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
-        return null;
+        let fs = require("fs");
+        return new Promise((fulfill, reject) => {
+            fs.readFile(id, (err: any, data: any) => {
+                if (err) {
+                    reject({
+                        code: 404,
+                        body: {}
+                    });
+                } else {
+                    fs.unlink(id);
+                    fulfill({
+                        code: 204,
+                        body: {}
+                    });
+                }
+            });
+        });
     }
 
     performQuery(query: QueryRequest): Promise<InsightResponse> {
