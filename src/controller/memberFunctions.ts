@@ -208,7 +208,7 @@ export default class Helpers {
         });
     }
 
-    runForFilter(query: FILTER): Promise<InsightResponse> {
+    runForFilter(query: FILTER): Promise<[Object]> {
         let self = this;
         if (self.dataSet.length == 0) {
             self.loadData();
@@ -238,16 +238,29 @@ export default class Helpers {
                 }
                 else if (key === "AND" || key === "OR") {
                     let filters = query[key];
-                    let promiseArray: any = [];
+                    let promiseArray: [Promise<[Object]>];
+                    let finalObj: any = [];
                     filters.forEach(filter => {
-                        promiseArray.push(this.runForFilter(filter));
+                        if (promiseArray && promiseArray.length > 0)
+                            promiseArray.push(this.runForFilter(filter));
+                        else
+                            promiseArray = [this.runForFilter(filter)];
                     });
                     Promise.all(promiseArray)
                         .then(records => {
                             // Check of key == AND || OR
+                            if (key === "OR") {
+                                finalObj = records[0].concat(records[1]);
+                                console.log(finalObj.length, "OR lenght");
+                            }
+                            else if (key === "AND") {
+                                finalObj = records[0].filter(function (n) {
+                                    return records[1].indexOf(n) != -1;
+                                });
+                            }
                             //Check for records in each element
-                            console.log(key);
-                            fulfill(records);
+                            // console.log(key);
+                            fulfill(finalObj);
                         })
                         .catch(err => {
                             //throw err
@@ -258,8 +271,16 @@ export default class Helpers {
                     this.runForFilter(query[key])
                         .then(records => {
                             console.log(key);
+                            let finalObj: any = [];
+                            console.log("Records length", records.length);
+                            self.dataSet.forEach((courseArray => {
+                                let test = courseArray.filter(function (n: courseRecord) {
+                                    return records.indexOf(n) === -1;
+                                });
+                                finalObj = finalObj.concat(test);
+                            }));
                             //Need to find records that do not exist in the returned array
-                            fulfill(records);
+                            fulfill(finalObj);
                         })
                 }
             });

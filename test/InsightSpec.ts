@@ -35,11 +35,11 @@ describe("InsightSpec", function () {
         fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
                 insFac.addDataset("courses", data)
-                    .then(res =>{
+                    .then(res => {
                         console.log(res);
                         done();
                     })
-                    .catch(err=>{
+                    .catch(err => {
                         console.error(err);
                     });
             }
@@ -68,44 +68,82 @@ describe("InsightSpec", function () {
         insFac.performQuery(query);
         return null;
     });
-    // it("Should be able to echo", function () {
-    //     let query: QueryRequest = {
-    //         "WHERE": {
-    //             "OR": [
-    //                 {
-    //                     "AND": [
-    //                         {
-    //                             "GT": {
-    //                                 "courses_avg": 90
-    //                             }
-    //                         },
-    //                         {
-    //                             "IS": {
-    //                                 "courses_dept": "adhe"
-    //                             }
-    //                         }
-    //                     ]
-    //                 },
-    //                 {
-    //                     "NOT": {
-    //                         "EQ": {
-    //                             "courses_avg": 95
-    //                         }
-    //                     }
-    //                 }
-    //             ]
-    //         },
-    //         "OPTIONS": {
-    //             "COLUMNS": [
-    //                 "courses_dept",
-    //                 "courses_id",
-    //                 "courses_avg"
-    //             ],
-    //             "ORDER": "courses_avg",
-    //             "FORM": "TABLE"
-    //         }
-    //     }
-    //     insFac.performQuery(query);
-    //     return null;
-    // });
+
+    it("Should be able to echo", function (done) {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "GT": {
+                            "courses_avg": 90
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "adhe"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        insFac.performQuery(query)
+            .then(res => {
+                done();
+            });
+        // return null;
+    });
+
+    it("Should be able to echo", function (done) {
+        let query: QueryRequest = {
+            "WHERE": {
+                "OR": [
+                    {
+                        "AND": [
+                            {
+                                "GT": {
+                                    "courses_avg": 90
+                                }
+                            },
+                            {
+                                "IS": {
+                                    "courses_dept": "adhe"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "NOT":
+                        {
+                            "LT": {
+                                "courses_avg": 95
+                            }
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        insFac.performQuery(query)
+            .then(res => {
+                done();
+            });
+        // return null;
+    });
 });
