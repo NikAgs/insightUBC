@@ -5,6 +5,7 @@ let JSZip = require("jszip");
 
 export default class Helpers {
 
+    private dataSet: [any];
     constructor() {
         Log.trace('HelpersImpl::init()');
     }
@@ -19,7 +20,6 @@ export default class Helpers {
                             chunkSize = 512,
                             buffer = new Buffer(bufferSize),
                             bytesRead = 0;
-
                         while (bytesRead < bufferSize) {
                             if ((bytesRead + chunkSize) > bufferSize) {
                                 chunkSize = (bufferSize - bytesRead);
@@ -29,6 +29,7 @@ export default class Helpers {
                         }
                         let result = buffer.toString('base64', 0, bufferSize);
                         fs.close(fd);
+                        fs.writeFile("coursesBase64", result);
                         fulfill(result);
                     });
                 }
@@ -82,9 +83,11 @@ export default class Helpers {
                     //console.log("promiseArray:", promiseArray.length);
                     Promise.all(promiseArray)
                         .then(val => {
-                            //console.log("In promise all", val.length);
+                            // console.log("In promise all", val.length);
+                            self.dataSet = val;
                             fulfill(val);
-                        }).catch(err=>{
+                        })
+                        .catch(err => {
                             console.log(err);
                             reject(err);
                         });
@@ -97,7 +100,16 @@ export default class Helpers {
         });
     }
 
-    filterForString(filter: Object): Promise<any> {
+    loadData() {
+        fs.readFile("courses", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                this.dataSet = JSON.parse(data);
+            }
+        });
+    }
+
+    filterForString(filter: Object): Promise<[Object]> {
+        let self = this;
         return new Promise((fulfill, reject) => {
             let columnName: string;
             let value: string;
@@ -105,15 +117,31 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            console.log(columnName, value);
-            fulfill(null);
+            let finalObj: [Object];
+            console.log(self.dataSet.length);
+            self.dataSet.forEach(course => {
+                if (course.length > 0) {
+                    course.forEach((record: any) => {
+                        if (record[columnName] == value) {
+                            if (finalObj && finalObj.length > 0)
+                                finalObj.push(record);
+                            else {
+                                finalObj = [record];
+                            }
+                        }
+                    })
+                }
+            });
+            fulfill(finalObj);
         })
     }
 
-    filterForMath(filter: Object, comp: string): Promise<any> {
+    filterForMath(filter: Object, comp: string): Promise<[Object]> {
+        let self = this;
         return new Promise((fulfill, reject) => {
             let columnName: string;
             let value: string;
+            let finalObj: [Object];
             for (let key in filter) {
                 columnName = key;
                 value = (<any>filter)[key];
@@ -121,31 +149,77 @@ export default class Helpers {
             switch (comp) {
                 case "GT": {
                     console.log(columnName, value, "In GT");
+                    self.dataSet.forEach(course => {
+                        if (course.length > 0) {
+                            course.forEach((record: any) => {
+                                if (record[columnName] > value) {
+                                    if (finalObj && finalObj.length > 0)
+                                        finalObj.push(record);
+                                    else {
+                                        finalObj = [record];
+                                    }
+                                }
+                            })
+                        }
+                    });
+                    fulfill(finalObj)
                     break;
                 }
                 case "LT": {
                     console.log(columnName, value, "In LT");
+                    self.dataSet.forEach(course => {
+                        if (course.length > 0) {
+                            course.forEach((record: any) => {
+                                if (record[columnName] < value) {
+                                    if (finalObj && finalObj.length > 0)
+                                        finalObj.push(record);
+                                    else {
+                                        finalObj = [record];
+                                    }
+                                }
+                            })
+                        }
+                    });
+                    fulfill(finalObj)
                     break;
                 }
                 case "EQ": {
                     console.log(columnName, value, "In Eq");
+                    self.dataSet.forEach(course => {
+                        if (course.length > 0) {
+                            course.forEach((record: any) => {
+                                if (record[columnName] == value) {
+                                    if (finalObj && finalObj.length > 0)
+                                        finalObj.push(record);
+                                    else {
+                                        finalObj = [record];
+                                    }
+                                }
+                            })
+                        }
+                    });
+                    fulfill(finalObj)
                     break;
                 }
                 default: {
                     console.log("err");
                 }
             }
-            fulfill(null);
         });
     }
 
     runForFilter(query: FILTER): Promise<InsightResponse> {
+        let self = this;
+        if (self.dataSet.length == 0) {
+            self.loadData();
+        }
         return new Promise((fulfill, reject) => {
             let filterKeys = Object.keys(query);
             filterKeys.forEach(key => {
                 if (key === "IS") {
                     this.filterForString(query[key])
                         .then((records) => {
+                            // console.log(records);
                             fulfill(records);
                         })
                         .catch((err) => {
@@ -155,6 +229,7 @@ export default class Helpers {
                 else if (key === "GT" || key === "LT" || key === "EQ") {
                     this.filterForMath(query[key], key)
                         .then((records) => {
+                            // console.log(records);
                             fulfill(records);
                         })
                         .catch((err) => {
