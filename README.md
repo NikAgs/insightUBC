@@ -1,5 +1,6 @@
 # CPSC 310 Project
 
+
 This is the base project for CPSC310. You will extend this codebase for all of the deliverables in the project. Please keep your repository private.
 
 The [course webpage](https://github.com/ubccpsc/310/tree/2017jan) is your best resource for additional details about the project, AutoTest, and the specific requirements of each project deliverable. These resources will be frequently updated as the term progresses.
