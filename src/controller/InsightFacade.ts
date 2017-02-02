@@ -88,9 +88,15 @@ export default class InsightFacade implements IInsightFacade {
             let optionsRequest = query.OPTIONS;
             this.helpers.runForFilter(filter)
                 .then((response) => {
-                    console.log(response);
-                    fulfill(response);
-                }).catch(err => {
+                    // console.log(response);
+                    // fulfill(response);
+                    this.helpers.runForOptions(response, optionsRequest)
+                        .then((response) => {
+                            console.log(response);
+                            fulfill(response);
+                        });
+                })
+                .catch(err => {
                     console.log(err);
                 });
         })

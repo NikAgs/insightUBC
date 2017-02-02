@@ -1,6 +1,6 @@
 import Log from "../Util";
 import * as fs from 'fs';
-import { IInsightFacade, InsightResponse, QueryRequest, FILTER, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
+import { IInsightFacade, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
 let JSZip = require("jszip");
 
 export default class Helpers {
@@ -285,6 +285,25 @@ export default class Helpers {
                 }
             });
 
+        })
+    }
+
+    runForOptions(records: [courseRecord], options: OPTIONS): Promise<[Object]> {
+        return new Promise((fulfill, reject) => {
+            let columns = options.COLUMNS;
+            let order = options.ORDER;
+            let finalRecords :any = [];
+            records.forEach((record : any)=>{
+                let recordObj:any = {};
+                columns.forEach(columnName=>{
+                    recordObj[columnName] = record[columnName];
+                })
+                finalRecords.push(recordObj);
+            });
+            finalRecords.sort((a:any,b:any)=>{
+                return a[order]>b[order] ? 1 : -1;
+            });
+            fulfill(finalRecords);
         })
     }
 }

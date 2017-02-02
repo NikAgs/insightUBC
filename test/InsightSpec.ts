@@ -136,7 +136,7 @@ describe("InsightSpec", function () {
                     "courses_id",
                     "courses_avg"
                 ],
-                "ORDER": "courses_avg",
+                "ORDER": "courses_dept",
                 "FORM": "TABLE"
             }
         }

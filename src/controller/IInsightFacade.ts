@@ -20,7 +20,7 @@ export interface courseRecord {
     courses_audit?: number;
 }
 
-interface OPTIONS {
+export interface OPTIONS {
     COLUMNS: [string];
     ORDER: string;
     FORM: 'TABLE';
