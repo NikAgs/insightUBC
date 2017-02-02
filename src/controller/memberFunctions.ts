@@ -70,20 +70,18 @@ export default class Helpers {
     }
 
     // Parses the base64 fileString into an array of courseRecords 
-    parseData(fileString: any): Promise<[courseRecord]> {
+    parseData(id: string, fileString: string): Promise<[courseRecord]> {
         let promiseArray: any = [];
         let self = this;
         return new Promise((fulfill, reject) => {
             JSZip.loadAsync(fileString, { base64: true })
                 .then(function (zip: any) {
-                    zip.folder("courses")
+                    zip.folder(id)
                         .forEach(function (relativePath: any, file: any) {
                             promiseArray.push(self.loadFromFile(file));
                         });
-                    //console.log("promiseArray:", promiseArray.length);
                     Promise.all(promiseArray)
                         .then(val => {
-                            // console.log("In promise all", val.length);
                             self.dataSet = val;
                             fulfill(val);
                         })

@@ -34,21 +34,35 @@ export default class InsightFacade implements IInsightFacade {
                     console.log(err);
                     if (err.code === "ENOENT") {
                         reject({
-                            code: 204,
-                            body: {}
+                            code: 400,
+                            body: {
+                                "error": err
+                            }
                         });
                     }
                 }
                 else {
-                    this.helpers.parseData(content)
+                    this.helpers.parseData(id, content)
                         .then((response) => {
-                            // console.log("Content Recieved, adding to Dataset", response.length);
-                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                fulfill({
-                                    code: 201,
-                                    body: {}
-                                });
+                            fs.exists(id, function (exists) {
+                                if (exists) {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 201,
+                                            body: {}
+                                        });
+                                    });    // Do something
+                                }
+                                else {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 204,
+                                            body: {}
+                                        });
+                                    });
+                                }
                             });
+
                         })
                         .catch((err) => {
                             console.log(err);

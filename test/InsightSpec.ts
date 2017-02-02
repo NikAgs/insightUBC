@@ -37,6 +37,12 @@ describe("InsightSpec", function () {
                 insFac.addDataset("courses", data)
                     .then(res => {
                         console.log(res);
+                        expect(res).to.deep.equal(
+                            {
+                                code: 201,
+                                body: {}
+                            }
+                        )
                         done();
                     })
                     .catch(err => {
