@@ -31,7 +31,31 @@ describe("InsightSpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
-    it("Should add to dataSet", (done) => {
+    it("Should add new dataSet", (done) => {
+        fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                insFac.addDataset("courses", data)
+                    .then(res => {
+                        console.log(res);
+                        expect(res).to.deep.equal(
+                            {
+                                code: 204,
+                                body: {}
+                            }
+                        )
+                        done();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+            }
+            else {
+                console.log(err);
+            }
+        });
+    });
+
+    it("Should add to existing dataSet", (done) => {
         fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
                 insFac.addDataset("courses", data)
@@ -55,7 +79,7 @@ describe("InsightSpec", function () {
         });
     });
 
-    it("Should be able to echo", function () {
+    it("Should return code 200", function (done) {
         let query: QueryRequest = {
             "WHERE": {
                 "GT": {
@@ -71,11 +95,14 @@ describe("InsightSpec", function () {
                 "FORM": "TABLE"
             }
         }
-        insFac.performQuery(query);
-        return null;
+        insFac.performQuery(query)
+            .then(res => {
+                expect(res.code).to.equal(200);
+                done();
+            });
     });
 
-    it("Should be able to echo", function (done) {
+    it("Should return code 200", function (done) {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [
@@ -103,12 +130,13 @@ describe("InsightSpec", function () {
         }
         insFac.performQuery(query)
             .then(res => {
+                expect(res.code).to.equal(200);
                 done();
             });
         // return null;
     });
 
-    it("Should be able to echo", function (done) {
+    it("Should return code 200", function (done) {
         let query: QueryRequest = {
             "WHERE": {
                 "OR": [
@@ -148,8 +176,17 @@ describe("InsightSpec", function () {
         }
         insFac.performQuery(query)
             .then(res => {
+                expect(res.code).to.equal(200);
                 done();
             });
         // return null;
     });
+
+    it("Should removeDataSet", (done) => {
+        insFac.removeDataset("courses")
+            .then(res => {
+                expect(res.code).to.equal(204);
+                done();
+            })
+    })
 });
