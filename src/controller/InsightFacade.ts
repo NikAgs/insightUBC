@@ -106,7 +106,7 @@ export default class InsightFacade implements IInsightFacade {
                     // fulfill(response);
                     this.helpers.runForOptions(response, optionsRequest)
                         .then((response) => {
-                            console.log(response);
+                            // console.log(response);
                             fulfill(
                                 {
                                     code: 200,

@@ -116,7 +116,7 @@ export default class Helpers {
                 value = (<any>filter)[key];
             }
             let finalObj: [Object];
-            console.log(self.dataSet.length);
+            // console.log(self.dataSet.length);
             self.dataSet.forEach(course => {
                 if (course.length > 0) {
                     course.forEach((record: any) => {
@@ -146,7 +146,7 @@ export default class Helpers {
             }
             switch (comp) {
                 case "GT": {
-                    console.log(columnName, value, "In GT");
+                    // console.log(columnName, value, "In GT");
                     self.dataSet.forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
@@ -164,7 +164,7 @@ export default class Helpers {
                     break;
                 }
                 case "LT": {
-                    console.log(columnName, value, "In LT");
+                    // console.log(columnName, value, "In LT");
                     self.dataSet.forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
@@ -182,7 +182,7 @@ export default class Helpers {
                     break;
                 }
                 case "EQ": {
-                    console.log(columnName, value, "In Eq");
+                    // console.log(columnName, value, "In Eq");
                     self.dataSet.forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
@@ -249,7 +249,7 @@ export default class Helpers {
                             // Check of key == AND || OR
                             if (key === "OR") {
                                 finalObj = records[0].concat(records[1]);
-                                console.log(finalObj.length, "OR lenght");
+                                // console.log(finalObj.length, "OR lenght");
                             }
                             else if (key === "AND") {
                                 finalObj = records[0].filter(function (n) {
@@ -268,9 +268,9 @@ export default class Helpers {
                 else if (key === "NOT") {
                     this.runForFilter(query[key])
                         .then(records => {
-                            console.log(key);
+                            // console.log(key);
                             let finalObj: any = [];
-                            console.log("Records length", records.length);
+                            // console.log("Records length", records.length);
                             self.dataSet.forEach((courseArray => {
                                 let test = courseArray.filter(function (n: courseRecord) {
                                     return records.indexOf(n) === -1;
