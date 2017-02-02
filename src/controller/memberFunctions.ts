@@ -201,6 +201,7 @@ export default class Helpers {
                 }
                 default: {
                     console.log("err");
+                    reject("Error")
                 }
             }
         });
@@ -263,6 +264,7 @@ export default class Helpers {
                         .catch(err => {
                             //throw err
                             console.log(err);
+                            reject(err);
                         });
                 }
                 else if (key === "NOT") {
@@ -281,6 +283,9 @@ export default class Helpers {
                             fulfill(finalObj);
                         })
                 }
+                else {
+                    reject("Error: Filter not found");
+                }
             });
 
         })
@@ -290,16 +295,16 @@ export default class Helpers {
         return new Promise((fulfill, reject) => {
             let columns = options.COLUMNS;
             let order = options.ORDER;
-            let finalRecords :any = [];
-            records.forEach((record : any)=>{
-                let recordObj:any = {};
-                columns.forEach(columnName=>{
+            let finalRecords: any = [];
+            records.forEach((record: any) => {
+                let recordObj: any = {};
+                columns.forEach(columnName => {
                     recordObj[columnName] = record[columnName];
                 })
                 finalRecords.push(recordObj);
             });
-            finalRecords.sort((a:any,b:any)=>{
-                return a[order]>b[order] ? 1 : -1;
+            finalRecords.sort((a: any, b: any) => {
+                return a[order] > b[order] ? 1 : -1;
             });
             fulfill(finalRecords);
         })

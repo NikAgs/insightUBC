@@ -188,5 +188,5 @@ describe("InsightSpec", function () {
                 expect(res.code).to.equal(204);
                 done();
             })
-    })
+    });
 });
