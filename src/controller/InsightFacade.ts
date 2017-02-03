@@ -29,35 +29,51 @@ export default class InsightFacade implements IInsightFacade {
     addDataset(id: string, content: string): Promise<InsightResponse> {
         // console.log("In addDataset");
         return new Promise((fulfill, reject) => {
-            this.helpers.parseData(id, content)
-                .then((response) => {
-                    fs.exists(id, function (exists) {
-                        if (exists) {
-                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                fulfill({
-                                    code: 201,
-                                    body: {}
-                                });
-                            });
-                        }
-                        else {
-                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                fulfill({
-                                    code: 204,
-                                    body: {}
-                                });
-                            });
-                        }
-                    });
-
-                })
-                .catch((err) => {
+            fs.readFile(id, (err: any, data: any) => {
+                if (err) {
                     console.log(err);
-                    reject({
-                        code: 400,
-                        body: { "error": err }
-                    });
-                });
+                    if (err.code === "ENOENT") {
+                        reject({
+                            code: 400,
+                            body: {
+                                "error": err
+                            }
+                        });
+                    }
+                }
+                else {
+                    this.helpers.parseData(id, content)
+                        .then((response) => {
+                            fs.exists(id, function (exists) {
+                                if (exists) {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 201,
+                                            body: {}
+                                        });
+                                    });    // Do something
+                                }
+                                else {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 204,
+                                            body: {}
+                                        });
+                                    });
+                                }
+                            });
+
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            reject({
+                                code: 400,
+                                body: { "error": err }
+                            });
+                        });
+                }
+            });
+
         });
     }
 
@@ -102,6 +118,7 @@ export default class InsightFacade implements IInsightFacade {
                         });
                 })
                 .catch(err => {
+                    console.log(err);
                     reject({
                         code: 400,
                         body: {
