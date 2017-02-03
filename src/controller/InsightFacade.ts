@@ -28,7 +28,7 @@ export default class InsightFacade implements IInsightFacade {
                                     code: 201,
                                     body: {}
                                 });
-                            });    // Do something
+                            });
                         }
                         else {
                             fs.writeFile(id, JSON.stringify(response), function (err: any) {

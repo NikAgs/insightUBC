@@ -47,10 +47,12 @@ describe("InsightSpec", function () {
                     })
                     .catch(err => {
                         console.error(err);
+                        done();
                     });
             }
             else {
                 console.log(err);
+                done();
             }
         });
     });
@@ -71,10 +73,12 @@ describe("InsightSpec", function () {
                     })
                     .catch(err => {
                         console.error(err);
+                        done();
                     });
             }
             else {
                 console.log(err);
+                done();
             }
         });
     });
@@ -98,6 +102,10 @@ describe("InsightSpec", function () {
         insFac.performQuery(query)
             .then(res => {
                 expect(res.code).to.equal(200);
+                done();
+            })
+            .catch(err=>{
+                console.log(err);
                 done();
             });
     });
@@ -131,6 +139,10 @@ describe("InsightSpec", function () {
         insFac.performQuery(query)
             .then(res => {
                 expect(res.code).to.equal(200);
+                done();
+            })
+            .catch(err=>{
+                console.log(err);
                 done();
             });
         // return null;
@@ -178,6 +190,10 @@ describe("InsightSpec", function () {
             .then(res => {
                 expect(res.code).to.equal(200);
                 done();
+            })
+            .catch(err=>{
+                console.log(err);
+                done();
             });
         // return null;
     });
@@ -188,5 +204,9 @@ describe("InsightSpec", function () {
                 expect(res.code).to.equal(204);
                 done();
             })
+            .catch(err=>{
+                console.log(err);
+                done();
+            });
     });
 });
