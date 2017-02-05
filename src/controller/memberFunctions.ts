@@ -5,7 +5,7 @@ let JSZip = require("jszip");
 
 export default class Helpers {
 
-    private dataSet: [any];
+    public dataSet: Map<string, any[]> = new Map<any, any>();
     constructor() {
         Log.trace('HelpersImpl::init()');
     }
@@ -82,7 +82,6 @@ export default class Helpers {
                         });
                     Promise.all(promiseArray)
                         .then(val => {
-                            self.dataSet = val;
                             fulfill(val);
                         })
                         .catch(err => {
@@ -97,7 +96,7 @@ export default class Helpers {
 
         });
     }
-
+    /*
     loadData() {
         fs.readFile("courses", 'utf8', (err: any, data: any) => {
             if (!err) {
@@ -105,6 +104,7 @@ export default class Helpers {
             }
         });
     }
+    */
 
     filterForString(filter: Object): Promise<[Object]> {
         let self = this;
@@ -117,7 +117,7 @@ export default class Helpers {
             }
             let finalObj: [Object];
             // console.log(self.dataSet.length);
-            self.dataSet.forEach(course => {
+            self.dataSet.get("courses").forEach(course => {
                 if (course.length > 0) {
                     course.forEach((record: any) => {
                         if (record[columnName] == value) {
@@ -147,7 +147,7 @@ export default class Helpers {
             switch (comp) {
                 case "GT": {
                     // console.log(columnName, value, "In GT");
-                    self.dataSet.forEach(course => {
+                    self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
                                 if (record[columnName] > value) {
@@ -165,7 +165,7 @@ export default class Helpers {
                 }
                 case "LT": {
                     // console.log(columnName, value, "In LT");
-                    self.dataSet.forEach(course => {
+                    self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
                                 if (record[columnName] < value) {
@@ -183,7 +183,7 @@ export default class Helpers {
                 }
                 case "EQ": {
                     // console.log(columnName, value, "In Eq");
-                    self.dataSet.forEach(course => {
+                    self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
                                 if (record[columnName] == value) {
@@ -209,10 +209,15 @@ export default class Helpers {
 
     runForFilter(query: FILTER): Promise<[Object]> {
         let self = this;
-        if (self.dataSet.length == 0) {
-            self.loadData();
-        }
         return new Promise((fulfill, reject) => {
+            if (!self.dataSet.has("courses")) {
+                reject({
+                    code: 424,
+                    body: {
+                        "missing": ["courses"]
+                    }
+                })
+            }
             let filterKeys = Object.keys(query);
             filterKeys.forEach(key => {
                 if (key === "IS") {
@@ -273,7 +278,7 @@ export default class Helpers {
                             // console.log(key);
                             let finalObj: any = [];
                             // console.log("Records length", records.length);
-                            self.dataSet.forEach((courseArray => {
+                            self.dataSet.get("courses").forEach((courseArray => {
                                 let test = courseArray.filter(function (n: courseRecord) {
                                     return records.indexOf(n) === -1;
                                 });

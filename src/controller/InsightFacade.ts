@@ -14,66 +14,42 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         this.helpers = new Helpers();
         Log.trace('InsightFacadeImpl::init()');
-        // this.helpers.convertToBase64('/Users/TheNik/Downloads/courses.zip')
-        // this.helpers.convertToBase64('/home/aman/Desktop/courses.zip')
-        //     .then((res: string) => {
-        //         // console.log(res);
-        //         console.log("Loaded initial zip");
-        //         this.stringZip = res;
-        //         this.addDataset('courses', this.stringZip);
-        //     }).catch((err) => {
-        //         console.log(err);
-        //     });
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
         // console.log("In addDataset");
+        let self = this;
         return new Promise((fulfill, reject) => {
-            fs.readFile(id, (err: any, data: any) => {
-                if (err) {
+            this.helpers.parseData(id, content)
+                .then((response) => {
+                    fs.exists(id, function (exists) {
+                        if (exists) {
+                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                fulfill({
+                                    code: 201,
+                                    body: {}
+                                });
+                            });
+                        }
+                        else {
+                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                fulfill({
+                                    code: 204,
+                                    body: {}
+                                });
+                            });
+                        }
+                        self.helpers.dataSet.set(id,response);
+                    });
+
+                })
+                .catch((err) => {
                     console.log(err);
-                    if (err.code === "ENOENT") {
-                        reject({
-                            code: 400,
-                            body: {
-                                "error": err
-                            }
-                        });
-                    }
-                }
-                else {
-                    this.helpers.parseData(id, content)
-                        .then((response) => {
-                            fs.exists(id, function (exists) {
-                                if (exists) {
-                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                        fulfill({
-                                            code: 201,
-                                            body: {}
-                                        });
-                                    });
-                                }
-                                else {
-                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                        fulfill({
-                                            code: 204,
-                                            body: {}
-                                        });
-                                    });
-                                }
-                            });
-
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            reject({
-                                code: 400,
-                                body: { "error": err }
-                            });
-                        });
-                }
-            });
-
+                    reject({
+                        code: 400,
+                        body: { "error": err }
+                    });
+                });
         });
     }
 
@@ -87,6 +63,7 @@ export default class InsightFacade implements IInsightFacade {
                     });
                 } else {
                     fs.unlink(id);
+                    this.helpers.dataSet.delete(id);
                     fulfill({
                         code: 204,
                         body: {}
