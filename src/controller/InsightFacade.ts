@@ -106,9 +106,10 @@ export default class InsightFacade implements IInsightFacade {
                                     result: response
                                 }
                             });
-                    }).catch(err => {
-                        reject(err);
                     })
+                    .catch(err => {
+                        reject(err);
+                    });
             }
         })
     }

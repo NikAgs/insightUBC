@@ -411,6 +411,52 @@ describe("InsightSpec", function () {
         // return null;
     });
 
+    it("Should return for partial name", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "IS": {
+                            "courses_title": "intro"
+                        }
+                    },
+                    {
+                        "OR": [{
+                            "IS": {
+                                "courses_id": 110
+                            }
+                        },
+                        {
+                            "GT": {
+                                "courses_pass": 94.75
+                            }
+                        }]
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_title",
+                    "courses_id",
+                    "courses_pass"
+                ],
+                "ORDER": "courses_id"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                expect(res.code).to.equal(200);
+                console.log(res.body);
+                // console.log(res.body.result.length)
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+        // return null;
+    });
+
+
     it("Should return code 200", function () {
         let query: QueryRequest = {
             "WHERE": {

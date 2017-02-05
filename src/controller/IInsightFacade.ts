@@ -18,6 +18,7 @@ export interface courseRecord {
     courses_pass?: number;
     courses_fail?: number;
     courses_audit?: number;
+    courses_uuid?: number;
 }
 
 export interface OPTIONS {

@@ -18,7 +18,8 @@ export default class Helpers {
         "courses_title",
         "courses_pass",
         "courses_fail",
-        "courses_audit"]
+        "courses_audit",
+        "courses_uuid"]
 
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
@@ -30,13 +31,14 @@ export default class Helpers {
                         var course: courseRecord = {};
                         var entry = jsonArr.result[i];
                         course.courses_dept = entry.Subject;
-                        course.courses_id = entry.id;
+                        course.courses_id = entry.Section;
                         course.courses_audit = entry.Audit;
                         course.courses_avg = entry.Avg;
                         course.courses_fail = entry.Fail;
                         course.courses_pass = entry.Pass;
                         course.courses_title = entry.Title;
                         course.courses_instructor = entry.Professors;
+                        course.courses_uuid = entry.id;
                         arr.push(course);
                     }
                     // console.log("In file function", arr.length);
@@ -84,7 +86,7 @@ export default class Helpers {
                 }
             });
             fulfill();
-        })
+        });
     }
 
     checkForOptions(options: OPTIONS) {
@@ -93,7 +95,7 @@ export default class Helpers {
             let columns = options.COLUMNS;
             let order = options.ORDER;
             let form = options.FORM;
-            if (form && form !== "TABLE") {
+            if (form !== "TABLE") {
                 reject({
                     code: 400,
                     error: "Only TABLE form is supported"
@@ -135,7 +137,8 @@ export default class Helpers {
                     self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
-                                if (record[columnName].includes(value)) {
+                                let recordValue: string = "" + record[columnName];
+                                if (recordValue.includes(value)) {
                                     if (finalObj && finalObj.length > 0)
                                         finalObj.push(record);
                                     else {
@@ -171,7 +174,8 @@ export default class Helpers {
                             self.dataSet.get("courses").forEach(course => {
                                 if (course.length > 0) {
                                     course.forEach((record: any) => {
-                                        if (record[columnName] > value) {
+                                        let recordValue = record[columnName];
+                                        if (recordValue > value) {
                                             if (finalObj && finalObj.length > 0)
                                                 finalObj.push(record);
                                             else {
@@ -181,7 +185,7 @@ export default class Helpers {
                                     })
                                 }
                             });
-                            fulfill(finalObj)
+                            fulfill(finalObj);
                             break;
                         }
                         case "LT": {
@@ -199,7 +203,7 @@ export default class Helpers {
                                     })
                                 }
                             });
-                            fulfill(finalObj)
+                            fulfill(finalObj);
                             break;
                         }
                         case "EQ": {
@@ -217,7 +221,7 @@ export default class Helpers {
                                     })
                                 }
                             });
-                            fulfill(finalObj)
+                            fulfill(finalObj);
                             break;
                         }
                     }
@@ -252,8 +256,8 @@ export default class Helpers {
                 }
                 else if (key === "GT" || key === "LT" || key === "EQ") {
                     this.filterForMath(query[key], key)
-                        .then((records) => {
-                            fulfill(records);
+                        .then((recordsFromMath) => {
+                            fulfill(recordsFromMath);
                         })
                         .catch((err) => {
                             reject(
@@ -346,6 +350,7 @@ export default class Helpers {
     runForOptions(records: [courseRecord], options: OPTIONS): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
+            // console.log("BEFORE OPTIONS", records.length);
             let columns = options.COLUMNS;
             let order = options.ORDER;
             let form = options.FORM;
@@ -360,6 +365,8 @@ export default class Helpers {
             finalRecords.sort((a: any, b: any) => {
                 return a[order] > b[order] ? 1 : -1;
             });
+            // console.log("BEFORE OPTIONS", finalRecords.length);
+
             fulfill(finalRecords);
         });
     }
