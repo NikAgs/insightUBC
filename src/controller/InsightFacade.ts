@@ -22,16 +22,8 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((fulfill, reject) => {
             this.helpers.parseData(id, content)
                 .then((response) => {
-                    fs.exists(id, function (exists) {
-                        if (exists) {
-                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                fulfill({
-                                    code: 201,
-                                    body: {}
-                                });
-                            });
-                        }
-                        else {
+                    fs.access(id, function (err) {
+                        if (err && err.code === 'ENOENT') {
                             fs.writeFile(id, JSON.stringify(response), function (err: any) {
                                 fulfill({
                                     code: 204,
@@ -39,7 +31,15 @@ export default class InsightFacade implements IInsightFacade {
                                 });
                             });
                         }
-                        self.helpers.dataSet.set(id,response);
+                        else {
+                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                fulfill({
+                                    code: 201,
+                                    body: {}
+                                });
+                            });
+                        }
+                        self.helpers.dataSet.set(id, response);
                     });
 
                 })
