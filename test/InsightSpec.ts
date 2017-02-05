@@ -55,31 +55,31 @@ describe("InsightSpec", function () {
         });
     });
 
-    // it("Should add to existing dataSet", (done) => {
-    //     fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
-    //         if (!err) {
-    //             insFac.addDataset("courses", data)
-    //                 .then(res => {
-    //                     console.log(res);
-    //                     expect(res).to.deep.equal(
-    //                         {
-    //                             code: 201,
-    //                             body: {}
-    //                         }
-    //                     )
-    //                     done();
-    //                 })
-    //                 .catch(err => {
-    //                     console.error(err);
-    //                     done();
-    //                 });
-    //         }
-    //         else {
-    //             console.log(err);
-    //             expect.fail();
-    //         }
-    //     });
-    // });
+    it("Should add to existing dataSet", (done) => {
+        return fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                insFac.addDataset("courses", data)
+                    .then(res => {
+                        console.log(res);
+                        expect(res).to.deep.equal(
+                            {
+                                code: 201,
+                                body: {}
+                            }
+                        )
+                        done();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        done();
+                    });
+            }
+            else {
+                console.log(err);
+                expect.fail();
+            }
+        });
+    });
 
     it("Should return code 200", function () {
         let query: QueryRequest = {
@@ -234,4 +234,5 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
+
 });

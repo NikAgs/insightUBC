@@ -77,7 +77,7 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((fulfill, reject) => {
             let filter = query.WHERE;
             let optionsRequest = query.OPTIONS;
-            if (!this.helpers.dataSet.has("courses") || this.helpers.dataSet.get("courses").length < 1) {
+            if (!this.helpers.dataSet.has("courses")) {
                 reject({
                     code: 424,
                     body: {
@@ -106,7 +106,6 @@ export default class InsightFacade implements IInsightFacade {
                         reject(err);
                     });
             }
-            return null;
         })
     }
 }
