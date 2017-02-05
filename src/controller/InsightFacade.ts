@@ -74,6 +74,38 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     performQuery(query: QueryRequest): Promise<InsightResponse> {
-        return null;
+        return new Promise((fulfill, reject) => {
+            let filter = query.WHERE;
+            let optionsRequest = query.OPTIONS;
+            if (!this.helpers.dataSet.has("courses")) {
+                reject({
+                    code: 424,
+                    body: {
+                        "missing": ["courses"]
+                    }
+                });
+            }
+            else {
+                this.helpers.runForFilter(filter)
+                    .then((response) => {
+                        this.helpers.runForOptions(response, optionsRequest)
+                            .then((response) => {
+                                fulfill(
+                                    {
+                                        code: 200,
+                                        body: {
+                                            render: 'TABLE',
+                                            result: response
+                                        }
+                                    });
+                            }).catch(err => {
+                                reject(err);
+                            });
+                    })
+                    .catch(err => {
+                        reject(err);
+                    });
+            }
+        })
     }
 }
