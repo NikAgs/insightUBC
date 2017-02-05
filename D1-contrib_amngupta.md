@@ -3,7 +3,7 @@
 
 ## Contributions
 - Made test cases for the complete deliverable
-- Made the interface for `courseRecords` and `QueryEngine` c1fb4d9  79c5205
+- Made the interface for `courseRecords` and `QueryEngine` c1fb4d96def1cfc4237a53e229617c2378d46026  79c5205
 - Made the `performQuery` functionality
   - Created recursive function `runForFilter` which calls different funtions depending on the comparitor 485024a
   - Created function `runForOptions` which alters the table to the specified options in the query request d054391
