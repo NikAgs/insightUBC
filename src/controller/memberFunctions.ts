@@ -59,14 +59,13 @@ export default class Helpers {
                         .forEach(function (relativePath: any, file: any) {
                             promiseArray.push(self.loadFromFile(file));
                         });
-                    Promise.all(promiseArray)
+                    return promiseArray;
+                })
+                .then((response: any) => {
+                    Promise.all(response)
                         .then(val => {
                             fulfill(val);
                         })
-                        .catch(err => {
-                            console.log(err);
-                            reject(err);
-                        });
                 })
                 .catch(function (err: any) {
                     console.log(err);
