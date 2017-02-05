@@ -3,12 +3,12 @@
 
 ## Contributions
 - Made test cases for the complete deliverable
-- Made the interface for `courseRecords` and `QueryEngine` c1fb4d96def1cfc4237a53e229617c2378d46026  79c5205
+- Made the interface for `courseRecords` and `QueryEngine` [c1fb4d9] (https://github.com/CS310-2017Jan/cpsc310project_team114/commit/c1fb4d9)   [79c5205] (https://github.com/CS310-2017Jan/cpsc310project_team114/commit/79c5205) 
 - Made the `performQuery` functionality
-  - Created recursive function `runForFilter` which calls different funtions depending on the comparitor 485024a
-  - Created function `runForOptions` which alters the table to the specified options in the query request d054391
-  - The `performQuery` functionality also uses `checkColumnIsValid` function to ensure the column is valid 08a369f
-- Contributed to `addDataset` funtion bf89960
+  - Created recursive function `runForFilter` which calls different funtions depending on the comparitor [485024a]  (https://github.com/CS310-2017Jan/cpsc310project_team114/commit/485024a) 
+  - Created function `runForOptions` which alters the table to the specified options in the query request [d054391] (https://github.com/CS310-2017Jan/cpsc310project_team114/commit/d054391) 
+  - The `performQuery` functionality also uses `checkColumnIsValid` function to ensure the column is valid [08a369f] (https://github.com/CS310-2017Jan/cpsc310project_team114/commit/08a369f) 
+- Contributed to `addDataset` funtion [bf89960] (https://github.com/CS310-2017Jan/cpsc310project_team114/commit/bf89960) 
   - Created `loadFromFile` function that parses the raw data into the specified format 
   - Helped fixing `parseData` function that parses the base64 String into a file
 
