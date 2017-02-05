@@ -10,36 +10,15 @@ export default class Helpers {
         Log.trace('HelpersImpl::init()');
     }
 
-    // convertToBase64(file: string): Promise<string> {
-    //     return new Promise(function (fulfill, reject) {
-    //         fs.open(file, 'r', function (err, fd) {
-    //             //console.log(fd);
-    //             if (fd) {
-    //                 fs.fstat(fd, function (err, stats) {
-    //                     var bufferSize = stats.size,
-    //                         chunkSize = 512,
-    //                         buffer = new Buffer(bufferSize),
-    //                         bytesRead = 0;
-    //                     while (bytesRead < bufferSize) {
-    //                         if ((bytesRead + chunkSize) > bufferSize) {
-    //                             chunkSize = (bufferSize - bytesRead);
-    //                         }
-    //                         fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-    //                         bytesRead += chunkSize;
-    //                     }
-    //                     let result = buffer.toString('base64', 0, bufferSize);
-    //                     fs.close(fd);
-    //                     fs.writeFile("coursesBase64", result);
-    //                     fulfill(result);
-    //                 });
-    //             }
-    //             else {
-    //                 reject(err);
-    //             }
-    //         });
-
-    //     });
-    // }
+    public columnNames: [String] =
+    ["courses_dept",
+        "courses_id",
+        "courses_avg",
+        "courses_instructor",
+        "courses_title",
+        "courses_pass",
+        "courses_fail",
+        "courses_audit"]
 
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
@@ -96,15 +75,18 @@ export default class Helpers {
 
         });
     }
-    /*
-    loadData() {
-        fs.readFile("courses", 'utf8', (err: any, data: any) => {
-            if (!err) {
-                this.dataSet = JSON.parse(data);
-            }
-        });
+
+    checkColumnIsValid(columnNames: [string]): Promise<boolean> {
+        let self = this;
+        return new Promise((fulfill, reject) => {
+            columnNames.forEach(column => {
+                if (self.columnNames.indexOf(column) == -1) {
+                    fulfill(false);
+                }
+            });
+            fulfill(true);
+        })
     }
-    */
 
     filterForString(filter: Object): Promise<[Object]> {
         let self = this;
@@ -115,22 +97,31 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            let finalObj: [Object];
-            // console.log(self.dataSet.length);
-            self.dataSet.get("courses").forEach(course => {
-                if (course.length > 0) {
-                    course.forEach((record: any) => {
-                        if (record[columnName] == value) {
-                            if (finalObj && finalObj.length > 0)
-                                finalObj.push(record);
-                            else {
-                                finalObj = [record];
+            self.checkColumnIsValid([columnName])
+                .then(res => {
+                    if (res) {
+                        let finalObj: [Object];
+                        // console.log(self.dataSet.length);
+                        self.dataSet.get("courses").forEach(course => {
+                            if (course.length > 0) {
+                                course.forEach((record: any) => {
+                                    if (record[columnName].includes(value)) {
+                                        if (finalObj && finalObj.length > 0)
+                                            finalObj.push(record);
+                                        else {
+                                            finalObj = [record];
+                                        }
+                                    }
+                                })
                             }
-                        }
-                    })
-                }
-            });
-            fulfill(finalObj);
+                        });
+                        fulfill(finalObj);
+                    }
+                    else {
+                        reject(columnName);
+                    }
+                })
+
         })
     }
 
@@ -144,66 +135,75 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            switch (comp) {
-                case "GT": {
-                    // console.log(columnName, value, "In GT");
-                    self.dataSet.get("courses").forEach(course => {
-                        if (course.length > 0) {
-                            course.forEach((record: any) => {
-                                if (record[columnName] > value) {
-                                    if (finalObj && finalObj.length > 0)
-                                        finalObj.push(record);
-                                    else {
-                                        finalObj = [record];
+            self.checkColumnIsValid([columnName])
+                .then(res => {
+                    if (res) {
+                        switch (comp) {
+                            case "GT": {
+                                // console.log(columnName, value, "In GT");
+                                self.dataSet.get("courses").forEach(course => {
+                                    if (course.length > 0) {
+                                        course.forEach((record: any) => {
+                                            if (record[columnName] > value) {
+                                                if (finalObj && finalObj.length > 0)
+                                                    finalObj.push(record);
+                                                else {
+                                                    finalObj = [record];
+                                                }
+                                            }
+                                        })
                                     }
-                                }
-                            })
-                        }
-                    });
-                    fulfill(finalObj)
-                    break;
-                }
-                case "LT": {
-                    // console.log(columnName, value, "In LT");
-                    self.dataSet.get("courses").forEach(course => {
-                        if (course.length > 0) {
-                            course.forEach((record: any) => {
-                                if (record[columnName] < value) {
-                                    if (finalObj && finalObj.length > 0)
-                                        finalObj.push(record);
-                                    else {
-                                        finalObj = [record];
+                                });
+                                fulfill(finalObj)
+                                break;
+                            }
+                            case "LT": {
+                                // console.log(columnName, value, "In LT");
+                                self.dataSet.get("courses").forEach(course => {
+                                    if (course.length > 0) {
+                                        course.forEach((record: any) => {
+                                            if (record[columnName] < value) {
+                                                if (finalObj && finalObj.length > 0)
+                                                    finalObj.push(record);
+                                                else {
+                                                    finalObj = [record];
+                                                }
+                                            }
+                                        })
                                     }
-                                }
-                            })
-                        }
-                    });
-                    fulfill(finalObj)
-                    break;
-                }
-                case "EQ": {
-                    // console.log(columnName, value, "In Eq");
-                    self.dataSet.get("courses").forEach(course => {
-                        if (course.length > 0) {
-                            course.forEach((record: any) => {
-                                if (record[columnName] == value) {
-                                    if (finalObj && finalObj.length > 0)
-                                        finalObj.push(record);
-                                    else {
-                                        finalObj = [record];
+                                });
+                                fulfill(finalObj)
+                                break;
+                            }
+                            case "EQ": {
+                                // console.log(columnName, value, "In Eq");
+                                self.dataSet.get("courses").forEach(course => {
+                                    if (course.length > 0) {
+                                        course.forEach((record: any) => {
+                                            if (record[columnName] == value) {
+                                                if (finalObj && finalObj.length > 0)
+                                                    finalObj.push(record);
+                                                else {
+                                                    finalObj = [record];
+                                                }
+                                            }
+                                        })
                                     }
-                                }
-                            })
+                                });
+                                fulfill(finalObj)
+                                break;
+                            }
+                            default: {
+                                console.log("err");
+                                reject("Error")
+                            }
                         }
-                    });
-                    fulfill(finalObj)
-                    break;
-                }
-                default: {
-                    console.log("err");
-                    reject("Error")
-                }
-            }
+                    }
+                    else {
+                        reject(columnName);
+                    }
+                })
+
         });
     }
 
@@ -227,7 +227,13 @@ export default class Helpers {
                             fulfill(records);
                         })
                         .catch((err) => {
-                            reject(err);
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "Missing key: " + err
+                                    }
+                                });
                         });
                 }
                 else if (key === "GT" || key === "LT" || key === "EQ") {
@@ -237,13 +243,27 @@ export default class Helpers {
                             fulfill(records);
                         })
                         .catch((err) => {
-                            reject(err);
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "Missing key: " + err
+                                    }
+                                });
                         });
                 }
                 else if (key === "AND" || key === "OR") {
                     let filters = query[key];
                     let promiseArray: [Promise<[Object]>];
                     let finalObj: any = [];
+                    if (filters.length < 2) {
+                        reject({
+                            code: 400,
+                            body: {
+                                "error": "Must have at least two filters"
+                            }
+                        })
+                    }
                     filters.forEach(filter => {
                         if (promiseArray && promiseArray.length > 0)
                             promiseArray.push(this.runForFilter(filter));
@@ -252,24 +272,24 @@ export default class Helpers {
                     });
                     Promise.all(promiseArray)
                         .then(records => {
-                            // Check of key == AND || OR
                             if (key === "OR") {
                                 finalObj = records[0].concat(records[1]);
-                                // console.log(finalObj.length, "OR lenght");
                             }
                             else if (key === "AND") {
                                 finalObj = records[0].filter(function (n) {
                                     return records[1].indexOf(n) != -1;
                                 });
                             }
-                            //Check for records in each element
-                            // console.log(key);
                             fulfill(finalObj);
                         })
                         .catch(err => {
-                            //throw err
-                            console.log(err);
-                            reject(err);
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "Missing key: " + err
+                                    }
+                                });
                         });
                 }
                 else if (key === "NOT") {
@@ -284,12 +304,27 @@ export default class Helpers {
                                 });
                                 finalObj = finalObj.concat(test);
                             }));
-                            //Need to find records that do not exist in the returned array
                             fulfill(finalObj);
+                        })
+                        .catch(err => {
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "Missing key: " + err
+                                    }
+                                });
                         })
                 }
                 else {
-                    reject("Error: Filter not found");
+                    reject(
+                        {
+                            code: 400,
+                            body: {
+                                "error": "Filter " + key + " not found"
+                            }
+                        }
+                    );
                 }
             });
 
@@ -297,21 +332,88 @@ export default class Helpers {
     }
 
     runForOptions(records: [courseRecord], options: OPTIONS): Promise<[Object]> {
+        let self = this;
         return new Promise((fulfill, reject) => {
             let columns = options.COLUMNS;
             let order = options.ORDER;
-            let finalRecords: any = [];
-            records.forEach((record: any) => {
-                let recordObj: any = {};
-                columns.forEach(columnName => {
-                    recordObj[columnName] = record[columnName];
+            let form = options.FORM;
+            if (form && form !== "TABLE") {
+                reject({
+                    code: 400,
+                    error: "Only TABLE form is supported"
                 })
-                finalRecords.push(recordObj);
-            });
-            finalRecords.sort((a: any, b: any) => {
-                return a[order] > b[order] ? 1 : -1;
-            });
-            fulfill(finalRecords);
+            }
+            let finalRecords: any = [];
+            self.checkColumnIsValid(columns)
+                .then(res => {
+                    if (res) {
+                        if (columns.indexOf(order) == -1) {
+                            reject({
+                                code: 400,
+                                error: "You can only sort on column declared in OPTIONS"
+                            })
+                        }
+                        records.forEach((record: any) => {
+                            let recordObj: any = {};
+                            columns.forEach(columnName => {
+                                recordObj[columnName] = record[columnName];
+                            })
+                            finalRecords.push(recordObj);
+                        });
+                        finalRecords.sort((a: any, b: any) => {
+                            return a[order] > b[order] ? 1 : -1;
+                        });
+                        fulfill(finalRecords);
+                    }
+                    else {
+                        reject({
+                            code: 400,
+                            "error": "Some of the columns in OPTIONS are not valid"
+                        })
+                    }
+                });
+
         })
     }
+
+    // convertToBase64(file: string): Promise<string> {
+    //     return new Promise(function (fulfill, reject) {
+    //         fs.open(file, 'r', function (err, fd) {
+    //             //console.log(fd);
+    //             if (fd) {
+    //                 fs.fstat(fd, function (err, stats) {
+    //                     var bufferSize = stats.size,
+    //                         chunkSize = 512,
+    //                         buffer = new Buffer(bufferSize),
+    //                         bytesRead = 0;
+    //                     while (bytesRead < bufferSize) {
+    //                         if ((bytesRead + chunkSize) > bufferSize) {
+    //                             chunkSize = (bufferSize - bytesRead);
+    //                         }
+    //                         fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+    //                         bytesRead += chunkSize;
+    //                     }
+    //                     let result = buffer.toString('base64', 0, bufferSize);
+    //                     fs.close(fd);
+    //                     fs.writeFile("coursesBase64", result);
+    //                     fulfill(result);
+    //                 });
+    //             }
+    //             else {
+    //                 reject(err);
+    //             }
+    //         });
+
+    //     });
+    // }
+
+    /*
+   loadData() {
+       fs.readFile("courses", 'utf8', (err: any, data: any) => {
+           if (!err) {
+               this.dataSet = JSON.parse(data);
+           }
+       });
+   }
+   */
 }

@@ -23,7 +23,7 @@ export interface courseRecord {
 export interface OPTIONS {
     COLUMNS: [string];
     ORDER: string;
-    FORM: 'TABLE';
+    FORM ?: 'TABLE';
 }
 
 export interface FILTER extends LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION {

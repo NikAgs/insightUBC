@@ -83,7 +83,6 @@ export default class InsightFacade implements IInsightFacade {
                     // fulfill(response);
                     this.helpers.runForOptions(response, optionsRequest)
                         .then((response) => {
-                            // console.log(response);
                             fulfill(
                                 {
                                     code: 200,
@@ -95,13 +94,7 @@ export default class InsightFacade implements IInsightFacade {
                         });
                 })
                 .catch(err => {
-                    console.log(err);
-                    reject({
-                        code: 400,
-                        body: {
-                            "error": err
-                        }
-                    })
+                    reject(err)
                 });
         })
     }

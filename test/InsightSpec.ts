@@ -102,6 +102,36 @@ describe("InsightSpec", function () {
         insFac.performQuery(query)
             .then(res => {
                 expect(res.code).to.equal(200);
+                console.log(res.body);
+                done();
+            })
+            .catch(err=>{
+                console.log(err);
+                done();
+            });
+    });
+
+
+    it("Should return code 400", function (done) {
+        let query: QueryRequest = {
+            "WHERE": {
+                "GT": {
+                    "test": 98
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        insFac.performQuery(query)
+            .then(res => {
+                expect(res.code).to.deep.equal(400);
+                console.log(res.body);
                 done();
             })
             .catch(err=>{
@@ -139,6 +169,7 @@ describe("InsightSpec", function () {
         insFac.performQuery(query)
             .then(res => {
                 expect(res.code).to.equal(200);
+                // console.log(res.body);
                 done();
             })
             .catch(err=>{
@@ -189,6 +220,7 @@ describe("InsightSpec", function () {
         insFac.performQuery(query)
             .then(res => {
                 expect(res.code).to.equal(200);
+                // console.log(res.body);
                 done();
             })
             .catch(err=>{
