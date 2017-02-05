@@ -31,42 +31,44 @@ describe("InsightSpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
-    it("Should add new dataSet", () => {
-        return fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
+    it("Should add new dataSet", (done) => {
+        fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
-                insFac.addDataset("courses", data)
+                return insFac.addDataset("courses", data)
                     .then(res => {
-                        console.log(res, "Res");
+                        console.log(res, "204");
                         expect(res).to.deep.equal(
                             {
                                 code: 204,
                                 body: {}
                             }
-                        )
+                        );
+                    done();
                     })
                     .catch(err => {
                         console.error(err);
+                        done();
                     });
             }
             else {
-                console.log(err, "here");
+                console.log(err);
                 expect.fail();
             }
         });
     });
 
     it("Should add to existing dataSet", (done) => {
-        return fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
+        fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
-                insFac.addDataset("courses", data)
+                return insFac.addDataset("courses", data)
                     .then(res => {
-                        console.log(res);
+                        console.log(res, "201");
                         expect(res).to.deep.equal(
                             {
                                 code: 201,
                                 body: {}
                             }
-                        )
+                        );
                         done();
                     })
                     .catch(err => {
@@ -108,6 +110,205 @@ describe("InsightSpec", function () {
             });
     });
 
+    it("Test for EQ", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "EQ": {
+                    "courses_avg": 98
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Test for two filter", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "course_dept": 'cpsc'
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Wrong Options COLUMNS", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+
+                "NOT":
+                {
+                    "LT": {
+                        "courses_avg": 95
+                    }
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "test123",
+                    "helllo",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_dept",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Wrong FORM", function () {
+        let query: any = {
+            "WHERE": {
+
+                "NOT":
+                {
+                    "LT": {
+                        "courses_avg": 95
+                    }
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "course_title",
+                "FORM": "CHAIR"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Wrong Sort", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+
+                "NOT":
+                {
+                    "LT": {
+                        "courses_avg": 95
+                    }
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "course_title",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+        // return null;
+    });
+
+    it("Test for wrong filter", function () {
+        let query: any = {
+            "WHERE": {
+                "HE": {
+                    "courses_avg": 98
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Test for StringColumnName", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "IS": {
+                    "timeout": 'cpsc'
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
 
     it("Should return code 400", function () {
         let query: QueryRequest = {

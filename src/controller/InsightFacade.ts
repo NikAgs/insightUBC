@@ -39,7 +39,15 @@ export default class InsightFacade implements IInsightFacade {
                                 });
                             });
                         }
-                        self.helpers.dataSet.set(id, response);
+                        if (response.length > 0) {
+                            self.helpers.dataSet.set(id, response);
+                        }
+                        else {
+                            reject({
+                                code: 400,
+                                body: {}
+                            });
+                        }
                     });
 
                 })
@@ -86,25 +94,21 @@ export default class InsightFacade implements IInsightFacade {
                 });
             }
             else {
-                this.helpers.runForFilter(filter)
+                this.helpers.checkForOptions(optionsRequest)
+                    .then(() => this.helpers.runForFilter(filter))
+                    .then((response) => this.helpers.runForOptions(response, optionsRequest))
                     .then((response) => {
-                        this.helpers.runForOptions(response, optionsRequest)
-                            .then((response) => {
-                                fulfill(
-                                    {
-                                        code: 200,
-                                        body: {
-                                            render: 'TABLE',
-                                            result: response
-                                        }
-                                    });
-                            }).catch(err => {
-                                reject(err);
+                        fulfill(
+                            {
+                                code: 200,
+                                body: {
+                                    render: 'TABLE',
+                                    result: response
+                                }
                             });
-                    })
-                    .catch(err => {
+                    }).catch(err => {
                         reject(err);
-                    });
+                    })
             }
         })
     }

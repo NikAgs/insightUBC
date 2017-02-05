@@ -76,15 +76,47 @@ export default class Helpers {
         });
     }
 
-    checkColumnIsValid(columnNames: [string]): Promise<boolean> {
+    checkColumnIsValid(columnNames: [string]): Promise<{}> {
         let self = this;
         return new Promise((fulfill, reject) => {
             columnNames.forEach(column => {
                 if (self.columnNames.indexOf(column) == -1) {
-                    fulfill(false);
+                    reject();
                 }
             });
-            fulfill(true);
+            fulfill();
+        })
+    }
+
+    checkForOptions(options: OPTIONS) {
+        let self = this;
+        return new Promise((fulfill, reject) => {
+            let columns = options.COLUMNS;
+            let order = options.ORDER;
+            let form = options.FORM;
+            if (form && form !== "TABLE") {
+                reject({
+                    code: 400,
+                    error: "Only TABLE form is supported"
+                })
+            }
+            self.checkColumnIsValid(columns)
+                .then(() => {
+                    if (columns.indexOf(order) == -1) {
+                        reject({
+                            code: 400,
+                            error: "You can only sort on column declared in OPTIONS"
+                        })
+                    }
+                    else {
+                        fulfill();
+                    }
+                }).catch(err => {
+                    reject({
+                        code: 400,
+                        error: "Invalid key in OPTIONS"
+                    })
+                })
         })
     }
 
@@ -98,30 +130,27 @@ export default class Helpers {
                 value = (<any>filter)[key];
             }
             self.checkColumnIsValid([columnName])
-                .then(res => {
-                    if (res) {
-                        let finalObj: [Object];
-                        // console.log(self.dataSet.length);
-                        self.dataSet.get("courses").forEach(course => {
-                            if (course.length > 0) {
-                                course.forEach((record: any) => {
-                                    if (record[columnName].includes(value)) {
-                                        if (finalObj && finalObj.length > 0)
-                                            finalObj.push(record);
-                                        else {
-                                            finalObj = [record];
-                                        }
+                .then(() => {
+                    let finalObj: [Object];
+                    // console.log(self.dataSet.length);
+                    self.dataSet.get("courses").forEach(course => {
+                        if (course.length > 0) {
+                            course.forEach((record: any) => {
+                                if (record[columnName].includes(value)) {
+                                    if (finalObj && finalObj.length > 0)
+                                        finalObj.push(record);
+                                    else {
+                                        finalObj = [record];
                                     }
-                                })
-                            }
-                        });
-                        fulfill(finalObj);
-                    }
-                    else {
-                        reject(columnName);
-                    }
+                                }
+                            })
+                        }
+                    });
+                    fulfill(finalObj);
                 })
-
+                .catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -136,72 +165,66 @@ export default class Helpers {
                 value = (<any>filter)[key];
             }
             self.checkColumnIsValid([columnName])
-                .then(res => {
-                    if (res) {
-                        switch (comp) {
-                            case "GT": {
-                                // console.log(columnName, value, "In GT");
-                                self.dataSet.get("courses").forEach(course => {
-                                    if (course.length > 0) {
-                                        course.forEach((record: any) => {
-                                            if (record[columnName] > value) {
-                                                if (finalObj && finalObj.length > 0)
-                                                    finalObj.push(record);
-                                                else {
-                                                    finalObj = [record];
-                                                }
+                .then(() => {
+                    switch (comp) {
+                        case "GT": {
+                            // console.log(columnName, value, "In GT");
+                            self.dataSet.get("courses").forEach(course => {
+                                if (course.length > 0) {
+                                    course.forEach((record: any) => {
+                                        if (record[columnName] > value) {
+                                            if (finalObj && finalObj.length > 0)
+                                                finalObj.push(record);
+                                            else {
+                                                finalObj = [record];
                                             }
-                                        })
-                                    }
-                                });
-                                fulfill(finalObj)
-                                break;
-                            }
-                            case "LT": {
-                                // console.log(columnName, value, "In LT");
-                                self.dataSet.get("courses").forEach(course => {
-                                    if (course.length > 0) {
-                                        course.forEach((record: any) => {
-                                            if (record[columnName] < value) {
-                                                if (finalObj && finalObj.length > 0)
-                                                    finalObj.push(record);
-                                                else {
-                                                    finalObj = [record];
-                                                }
+                                        }
+                                    })
+                                }
+                            });
+                            fulfill(finalObj)
+                            break;
+                        }
+                        case "LT": {
+                            // console.log(columnName, value, "In LT");
+                            self.dataSet.get("courses").forEach(course => {
+                                if (course.length > 0) {
+                                    course.forEach((record: any) => {
+                                        if (record[columnName] < value) {
+                                            if (finalObj && finalObj.length > 0)
+                                                finalObj.push(record);
+                                            else {
+                                                finalObj = [record];
                                             }
-                                        })
-                                    }
-                                });
-                                fulfill(finalObj)
-                                break;
-                            }
-                            case "EQ": {
-                                // console.log(columnName, value, "In Eq");
-                                self.dataSet.get("courses").forEach(course => {
-                                    if (course.length > 0) {
-                                        course.forEach((record: any) => {
-                                            if (record[columnName] == value) {
-                                                if (finalObj && finalObj.length > 0)
-                                                    finalObj.push(record);
-                                                else {
-                                                    finalObj = [record];
-                                                }
+                                        }
+                                    })
+                                }
+                            });
+                            fulfill(finalObj)
+                            break;
+                        }
+                        case "EQ": {
+                            // console.log(columnName, value, "In Eq");
+                            self.dataSet.get("courses").forEach(course => {
+                                if (course.length > 0) {
+                                    course.forEach((record: any) => {
+                                        if (record[columnName] == value) {
+                                            if (finalObj && finalObj.length > 0)
+                                                finalObj.push(record);
+                                            else {
+                                                finalObj = [record];
                                             }
-                                        })
-                                    }
-                                });
-                                fulfill(finalObj)
-                                break;
-                            }
-                            default: {
-                                console.log("err");
-                                reject("Error")
-                            }
+                                        }
+                                    })
+                                }
+                            });
+                            fulfill(finalObj)
+                            break;
                         }
                     }
-                    else {
-                        reject(columnName);
-                    }
+                })
+                .catch(err => {
+                    reject(err);
                 })
 
         });
@@ -327,43 +350,19 @@ export default class Helpers {
             let columns = options.COLUMNS;
             let order = options.ORDER;
             let form = options.FORM;
-            if (form && form !== "TABLE") {
-                reject({
-                    code: 400,
-                    error: "Only TABLE form is supported"
-                })
-            }
             let finalRecords: any = [];
-            self.checkColumnIsValid(columns)
-                .then(res => {
-                    if (res) {
-                        if (columns.indexOf(order) == -1) {
-                            reject({
-                                code: 400,
-                                error: "You can only sort on column declared in OPTIONS"
-                            })
-                        }
-                        records.forEach((record: any) => {
-                            let recordObj: any = {};
-                            columns.forEach(columnName => {
-                                recordObj[columnName] = record[columnName];
-                            })
-                            finalRecords.push(recordObj);
-                        });
-                        finalRecords.sort((a: any, b: any) => {
-                            return a[order] > b[order] ? 1 : -1;
-                        });
-                        fulfill(finalRecords);
-                    }
-                    else {
-                        reject({
-                            code: 400,
-                            "error": "Some of the columns in OPTIONS are not valid"
-                        })
-                    }
-                });
-
-        })
+            records.forEach((record: any) => {
+                let recordObj: any = {};
+                columns.forEach(columnName => {
+                    recordObj[columnName] = record[columnName];
+                })
+                finalRecords.push(recordObj);
+            });
+            finalRecords.sort((a: any, b: any) => {
+                return a[order] > b[order] ? 1 : -1;
+            });
+            fulfill(finalRecords);
+        });
     }
 
     // convertToBase64(file: string): Promise<string> {
