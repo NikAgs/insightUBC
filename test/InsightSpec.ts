@@ -43,7 +43,7 @@ describe("InsightSpec", function () {
                                 body: {}
                             }
                         );
-                    done();
+                        done();
                     })
                     .catch(err => {
                         console.error(err);
@@ -102,7 +102,6 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 expect(res.code).to.equal(200);
-                console.log(res);
             })
             .catch(err => {
                 console.log(err);
@@ -110,7 +109,7 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Test for EQ", function () {
+    it("Should return 200 [EQ]", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "EQ": {
@@ -136,7 +135,7 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Test for two filter", function () {
+    it("Wrong number of filter", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [{
@@ -258,7 +257,7 @@ describe("InsightSpec", function () {
         // return null;
     });
 
-    it("Test for wrong filter", function () {
+    it("Wrong filter", function () {
         let query: any = {
             "WHERE": {
                 "HE": {
@@ -284,7 +283,7 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Test for StringColumnName", function () {
+    it("Wrong ColumnName", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "IS": {
@@ -335,6 +334,43 @@ describe("InsightSpec", function () {
                 expect(err.code).to.equal(400);
                 console.log(err);
             });
+    });
+
+    it("Should return code 400", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "GT": {
+                            "HELL": 90
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "adhe"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+        // return null;
     });
 
     it("Should return code 200", function () {
