@@ -52,7 +52,7 @@ describe("InsightSpec", function () {
             }
             else {
                 console.log(err);
-                done();
+                expect.fail();
             }
         });
     });
@@ -78,7 +78,7 @@ describe("InsightSpec", function () {
             }
             else {
                 console.log(err);
-                done();
+                expect.fail();
             }
         });
     });
@@ -107,7 +107,7 @@ describe("InsightSpec", function () {
             })
             .catch(err=>{
                 console.log(err);
-                done();
+                expect.fail();
             });
     });
 
@@ -130,12 +130,12 @@ describe("InsightSpec", function () {
         }
         insFac.performQuery(query)
             .then(res => {
-                expect(res.code).to.deep.equal(400);
-                console.log(res.body);
+                console.log(res);
                 done();
             })
             .catch(err=>{
                 console.log(err);
+                expect(err.code).to.equal(400);
                 done();
             });
     });
@@ -174,7 +174,7 @@ describe("InsightSpec", function () {
             })
             .catch(err=>{
                 console.log(err);
-                done();
+                expect.fail();
             });
         // return null;
     });
@@ -225,7 +225,7 @@ describe("InsightSpec", function () {
             })
             .catch(err=>{
                 console.log(err);
-                done();
+                expect.fail();
             });
         // return null;
     });
@@ -238,7 +238,7 @@ describe("InsightSpec", function () {
             })
             .catch(err=>{
                 console.log(err);
-                done();
+                expect.fail();
             });
     });
 });
