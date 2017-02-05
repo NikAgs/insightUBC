@@ -210,14 +210,6 @@ export default class Helpers {
     runForFilter(query: FILTER): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
-            if (!self.dataSet.has("courses")) {
-                reject({
-                    code: 424,
-                    body: {
-                        "missing": ["courses"]
-                    }
-                })
-            }
             let filterKeys = Object.keys(query);
             filterKeys.forEach(key => {
                 if (key === "IS") {
@@ -239,7 +231,6 @@ export default class Helpers {
                 else if (key === "GT" || key === "LT" || key === "EQ") {
                     this.filterForMath(query[key], key)
                         .then((records) => {
-                            // console.log(records);
                             fulfill(records);
                         })
                         .catch((err) => {
@@ -327,7 +318,6 @@ export default class Helpers {
                     );
                 }
             });
-
         })
     }
 
