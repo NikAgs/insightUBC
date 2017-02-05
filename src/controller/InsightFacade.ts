@@ -23,24 +23,24 @@ export default class InsightFacade implements IInsightFacade {
             this.helpers.parseData(id, content)
                 .then((response) => {
                     fs.access(id, function (err) {
-                        if (err && err.code === 'ENOENT') {
-                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                fulfill({
-                                    code: 204,
-                                    body: {}
-                                });
-                            });
-                        }
-                        else {
-                            fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                fulfill({
-                                    code: 201,
-                                    body: {}
-                                });
-                            });
-                        }
                         if (response.length > 0) {
                             self.helpers.dataSet.set(id, response);
+                            if (err && err.code === 'ENOENT') {
+                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                    fulfill({
+                                        code: 204,
+                                        body: {}
+                                    });
+                                });
+                            }
+                            else {
+                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                    fulfill({
+                                        code: 201,
+                                        body: {}
+                                    });
+                                });
+                            }
                         }
                         else {
                             reject({
