@@ -104,7 +104,7 @@ export default class InsightFacade implements IInsightFacade {
                                 code: 200,
                                 body: {
                                     render: 'TABLE',
-                                    result: JSON.stringify(response)
+                                    result: response
                                 }
                             });
                     })
