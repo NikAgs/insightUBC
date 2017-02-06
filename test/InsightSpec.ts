@@ -9,7 +9,6 @@ import InsightFacade from "../src/controller/InsightFacade";
 import { IInsightFacade, InsightResponse, QueryRequest } from "../src/controller/IInsightFacade";
 import * as fs from 'fs';
 
-
 describe("InsightSpec", function () {
     var insFac: InsightFacade = null;
 
@@ -30,7 +29,6 @@ describe("InsightSpec", function () {
     afterEach(function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
-
 
     it("performQuery 424", function () {
         let query: any = {
@@ -597,5 +595,4 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
-
 });

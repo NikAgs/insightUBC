@@ -19,7 +19,7 @@ export default class Helpers {
         "courses_pass",
         "courses_fail",
         "courses_audit",
-        "courses_uuid"]
+        "courses_uuid"];
 
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
@@ -73,7 +73,6 @@ export default class Helpers {
                     console.log(err);
                     reject(err);
                 });
-
         });
     }
 
@@ -238,7 +237,6 @@ export default class Helpers {
                 .catch(err => {
                     reject(err);
                 })
-
         });
     }
 
@@ -375,49 +373,46 @@ export default class Helpers {
                 return a[order] > b[order] ? 1 : -1;
             });
             // console.log("BEFORE OPTIONS", finalRecords.length);
-
             fulfill(finalRecords);
         });
     }
 
-    // convertToBase64(file: string): Promise<string> {
-    //     return new Promise(function (fulfill, reject) {
-    //         fs.open(file, 'r', function (err, fd) {
-    //             //console.log(fd);
-    //             if (fd) {
-    //                 fs.fstat(fd, function (err, stats) {
-    //                     var bufferSize = stats.size,
-    //                         chunkSize = 512,
-    //                         buffer = new Buffer(bufferSize),
-    //                         bytesRead = 0;
-    //                     while (bytesRead < bufferSize) {
-    //                         if ((bytesRead + chunkSize) > bufferSize) {
-    //                             chunkSize = (bufferSize - bytesRead);
-    //                         }
-    //                         fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-    //                         bytesRead += chunkSize;
-    //                     }
-    //                     let result = buffer.toString('base64', 0, bufferSize);
-    //                     fs.close(fd);
-    //                     fs.writeFile("coursesBase64", result);
-    //                     fulfill(result);
-    //                 });
-    //             }
-    //             else {
-    //                 reject(err);
-    //             }
-    //         });
+   /* convertToBase64(file: string): Promise<string> {
+        return new Promise(function (fulfill, reject) {
+            fs.open(file, 'r', function (err, fd) {
+                //console.log(fd);
+                if (fd) {
+                    fs.fstat(fd, function (err, stats) {
+                        var bufferSize = stats.size,
+                            chunkSize = 512,
+                            buffer = new Buffer(bufferSize),
+                            bytesRead = 0;
+                        while (bytesRead < bufferSize) {
+                            if ((bytesRead + chunkSize) > bufferSize) {
+                                chunkSize = (bufferSize - bytesRead);
+                            }
+                            fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+                            bytesRead += chunkSize;
+                        }
+                        let result = buffer.toString('base64', 0, bufferSize);
+                        fs.close(fd);
+                        fs.writeFile("coursesBase64", result);
+                        fulfill(result);
+                    });
+                }
+                else {
+                    reject(err);
+                }
+            });
 
-    //     });
-    // }
+        });
+    }
 
-    /*
-   loadData() {
-       fs.readFile("courses", 'utf8', (err: any, data: any) => {
-           if (!err) {
-               this.dataSet = JSON.parse(data);
-           }
-       });
-   }
-   */
+    loadData() {
+        fs.readFile("courses", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                this.dataSet = JSON.parse(data);
+            }
+        });
+    }*/
 }
