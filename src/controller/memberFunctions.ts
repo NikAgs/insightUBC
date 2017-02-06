@@ -233,7 +233,7 @@ export default class Helpers {
         });
     }
 
-    runForFilter(query: FILTER): Promise<[Object]> {
+    runForFilter(query: FILTER): Promise<[courseRecord]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             let filterKeys = Object.keys(query);
@@ -271,7 +271,7 @@ export default class Helpers {
                 }
                 else if (key === "AND" || key === "OR") {
                     let filters = query[key];
-                    let promiseArray: [Promise<[Object]>];
+                    let promiseArray: [Promise<[courseRecord]>];
                     let finalObj: any = [];
                     if (filters.length < 2) {
                         reject({
@@ -347,7 +347,7 @@ export default class Helpers {
         })
     }
 
-    runForOptions(records: [courseRecord], options: OPTIONS): Promise<[Object]> {
+    runForOptions(records: [courseRecord], options: OPTIONS): Promise<[courseRecord]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             // console.log("BEFORE OPTIONS", records.length);
