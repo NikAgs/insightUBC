@@ -9,7 +9,6 @@ import InsightFacade from "../src/controller/InsightFacade";
 import { IInsightFacade, InsightResponse, QueryRequest } from "../src/controller/IInsightFacade";
 import * as fs from 'fs';
 
-
 describe("InsightSpec", function () {
     var insFac: InsightFacade = null;
 
@@ -31,12 +30,39 @@ describe("InsightSpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
+    it("performQuery 424", function () {
+        let query: any = {
+            "WHERE": {
+                "HE": {
+                    "class_avg": 98
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "class_dept",
+                    "class_avg"
+                ],
+                "ORDER": "class_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+                expect.fail();
+            })
+            .catch(err => {
+                //console.log(err);
+                expect(err.code).to.equal(424);
+            });
+    });
+
     it("Should add new dataSet", (done) => {
         fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
                 return insFac.addDataset("courses", data)
                     .then(res => {
-                        console.log(res, "204");
+                        //console.log(res, "204");
                         expect(res).to.deep.equal(
                             {
                                 code: 204,
@@ -62,7 +88,7 @@ describe("InsightSpec", function () {
             if (!err) {
                 return insFac.addDataset("courses", data)
                     .then(res => {
-                        console.log(res, "201");
+                        //console.log(res, "201");
                         expect(res).to.deep.equal(
                             {
                                 code: 201,
@@ -127,11 +153,12 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res);
+                //console.log(res);
+                expect(res.code).to.equal(200);
             })
             .catch(err => {
                 console.log(err);
-                expect(err.code).to.equal(400);
+                expect.fail();
             });
     });
 
@@ -156,9 +183,10 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -187,9 +215,10 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -218,9 +247,10 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -249,12 +279,12 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
-        // return null;
     });
 
     it("Wrong filter", function () {
@@ -276,9 +306,10 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -287,7 +318,7 @@ describe("InsightSpec", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "IS": {
-                    "timeout": 'cpsc'
+                    "timeout": "cpsc"
                 }
             },
             "OPTIONS": {
@@ -302,9 +333,10 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -328,11 +360,11 @@ describe("InsightSpec", function () {
         return insFac.performQuery(query)
             .then(res => {
                 console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                // console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
-                console.log(err);
             });
     });
 
@@ -364,13 +396,13 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 expect(err.code).to.equal(400);
             });
-        // return null;
     });
 
     it("Should return code 200", function () {
@@ -401,14 +433,13 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
+                //console.log(res);
                 expect(res.code).to.equal(200);
-                // console.log(res.body);
             })
             .catch(err => {
                 console.log(err);
                 expect.fail();
             });
-        // return null;
     });
 
     it("Should return for partial name", function () {
@@ -445,17 +476,14 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                expect(res.code).to.equal(200);
-                console.log(res.body);
-                // console.log(res.body.result.length)
+                console.log(res);
+                expect.fail();
             })
             .catch(err => {
-                console.log(err);
-                expect.fail();
+                //console.log(err);
+                expect(err.code).to.equal(400);
             });
-        // return null;
     });
-
 
     it("Should return code 200", function () {
         let query: QueryRequest = {
@@ -497,14 +525,64 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
+                //console.log(res);
                 expect(res.code).to.equal(200);
-                // console.log(res.body);
             })
             .catch(err => {
                 console.log(err);
                 expect.fail();
             });
-        // return null;
+    });
+
+    it("Should return code 200", function () {
+        let query: QueryRequest =
+            {
+                "WHERE": {
+                    "OR": [
+                        {
+                            "AND": [
+                                {
+                                    "GT": {
+                                        "courses_avg": 90
+                                    }
+                                },
+                                {
+                                    "IS": {
+                                        "courses_dept": "adhe"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "EQ": {
+                                "courses_avg": 95
+                            }
+                        }
+                    ]
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "courses_dept",
+                        "courses_audit",
+                        "courses_fail",
+                        "courses_pass",
+                        "courses_title",
+                        "courses_instructor",
+                        "courses_uuid"
+                    ],
+                    "ORDER": "courses_dept",
+                    "FORM": "TABLE"
+                }
+            }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(res);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
     });
 
     it("Should removeDataSet", () => {
@@ -517,5 +595,4 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
-
 });

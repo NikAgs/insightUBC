@@ -19,7 +19,7 @@ export default class Helpers {
         "courses_pass",
         "courses_fail",
         "courses_audit",
-        "courses_uuid"]
+        "courses_uuid"];
 
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
@@ -31,13 +31,13 @@ export default class Helpers {
                         var course: courseRecord = {};
                         var entry = jsonArr.result[i];
                         course.courses_dept = entry.Subject;
-                        course.courses_id = entry.Section;
+                        course.courses_id = entry.Course;
                         course.courses_audit = entry.Audit;
                         course.courses_avg = entry.Avg;
                         course.courses_fail = entry.Fail;
                         course.courses_pass = entry.Pass;
                         course.courses_title = entry.Title;
-                        course.courses_instructor = entry.Professors;
+                        course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
                         arr.push(course);
                     }
@@ -73,7 +73,6 @@ export default class Helpers {
                     console.log(err);
                     reject(err);
                 });
-
         });
     }
 
@@ -96,27 +95,36 @@ export default class Helpers {
             let order = options.ORDER;
             let form = options.FORM;
             if (form !== "TABLE") {
-                reject({
-                    code: 400,
-                    error: "Only TABLE form is supported"
-                })
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": "Only TABLE form is supported"
+                        }
+                    });
             }
             self.checkColumnIsValid(columns)
                 .then(() => {
                     if (columns.indexOf(order) == -1) {
-                        reject({
-                            code: 400,
-                            error: "You can only sort on column declared in OPTIONS"
-                        })
+                        reject(
+                            {
+                                code: 400,
+                                body: {
+                                    "error": "You can only sort on column declared in options"
+                                }
+                            });
                     }
                     else {
                         fulfill();
                     }
                 }).catch(err => {
-                    reject({
-                        code: 400,
-                        error: "Invalid key in OPTIONS"
-                    })
+                    reject(
+                        {
+                            code: 400,
+                            body: {
+                                "error": "Invalid key in options"
+                            }
+                        });
                 })
         })
     }
@@ -229,7 +237,6 @@ export default class Helpers {
                 .catch(err => {
                     reject(err);
                 })
-
         });
     }
 
@@ -249,7 +256,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Invalid IS Filter"
                                     }
                                 });
                         });
@@ -264,7 +271,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Invalid " + key + " Filter"
                                     }
                                 });
                         });
@@ -304,7 +311,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Unexpected"
                                     }
                                 });
                         });
@@ -328,7 +335,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Invalid NOT Filter"
                                     }
                                 });
                         })
@@ -366,49 +373,46 @@ export default class Helpers {
                 return a[order] > b[order] ? 1 : -1;
             });
             // console.log("BEFORE OPTIONS", finalRecords.length);
-
             fulfill(finalRecords);
         });
     }
 
-    // convertToBase64(file: string): Promise<string> {
-    //     return new Promise(function (fulfill, reject) {
-    //         fs.open(file, 'r', function (err, fd) {
-    //             //console.log(fd);
-    //             if (fd) {
-    //                 fs.fstat(fd, function (err, stats) {
-    //                     var bufferSize = stats.size,
-    //                         chunkSize = 512,
-    //                         buffer = new Buffer(bufferSize),
-    //                         bytesRead = 0;
-    //                     while (bytesRead < bufferSize) {
-    //                         if ((bytesRead + chunkSize) > bufferSize) {
-    //                             chunkSize = (bufferSize - bytesRead);
-    //                         }
-    //                         fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-    //                         bytesRead += chunkSize;
-    //                     }
-    //                     let result = buffer.toString('base64', 0, bufferSize);
-    //                     fs.close(fd);
-    //                     fs.writeFile("coursesBase64", result);
-    //                     fulfill(result);
-    //                 });
-    //             }
-    //             else {
-    //                 reject(err);
-    //             }
-    //         });
+   /* convertToBase64(file: string): Promise<string> {
+        return new Promise(function (fulfill, reject) {
+            fs.open(file, 'r', function (err, fd) {
+                //console.log(fd);
+                if (fd) {
+                    fs.fstat(fd, function (err, stats) {
+                        var bufferSize = stats.size,
+                            chunkSize = 512,
+                            buffer = new Buffer(bufferSize),
+                            bytesRead = 0;
+                        while (bytesRead < bufferSize) {
+                            if ((bytesRead + chunkSize) > bufferSize) {
+                                chunkSize = (bufferSize - bytesRead);
+                            }
+                            fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+                            bytesRead += chunkSize;
+                        }
+                        let result = buffer.toString('base64', 0, bufferSize);
+                        fs.close(fd);
+                        fs.writeFile("coursesBase64", result);
+                        fulfill(result);
+                    });
+                }
+                else {
+                    reject(err);
+                }
+            });
 
-    //     });
-    // }
+        });
+    }
 
-    /*
-   loadData() {
-       fs.readFile("courses", 'utf8', (err: any, data: any) => {
-           if (!err) {
-               this.dataSet = JSON.parse(data);
-           }
-       });
-   }
-   */
+    loadData() {
+        fs.readFile("courses", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                this.dataSet = JSON.parse(data);
+            }
+        });
+    }*/
 }
