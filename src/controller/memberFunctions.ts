@@ -31,13 +31,13 @@ export default class Helpers {
                         var course: courseRecord = {};
                         var entry = jsonArr.result[i];
                         course.courses_dept = entry.Subject;
-                        course.courses_id = entry.Section;
+                        course.courses_id = entry.Course;
                         course.courses_audit = entry.Audit;
                         course.courses_avg = entry.Avg;
                         course.courses_fail = entry.Fail;
                         course.courses_pass = entry.Pass;
                         course.courses_title = entry.Title;
-                        course.courses_instructor = entry.Professors;
+                        course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
                         arr.push(course);
                     }
@@ -96,27 +96,36 @@ export default class Helpers {
             let order = options.ORDER;
             let form = options.FORM;
             if (form !== "TABLE") {
-                reject({
-                    code: 400,
-                    error: "Only TABLE form is supported"
-                })
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": "Only TABLE form is supported"
+                        }
+                    });
             }
             self.checkColumnIsValid(columns)
                 .then(() => {
                     if (columns.indexOf(order) == -1) {
-                        reject({
-                            code: 400,
-                            error: "You can only sort on column declared in OPTIONS"
-                        })
+                        reject(
+                            {
+                                code: 400,
+                                body: {
+                                    "error": "You can only sort on column declared in options"
+                                }
+                            });
                     }
                     else {
                         fulfill();
                     }
                 }).catch(err => {
-                    reject({
-                        code: 400,
-                        error: "Invalid key in OPTIONS"
-                    })
+                    reject(
+                        {
+                            code: 400,
+                            body: {
+                                "error": "Invalid key in options"
+                            }
+                        });
                 })
         })
     }
@@ -249,7 +258,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Invalid IS Filter"
                                     }
                                 });
                         });
@@ -264,7 +273,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Invalid " + key + " Filter"
                                     }
                                 });
                         });
@@ -304,7 +313,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Unexpected"
                                     }
                                 });
                         });
@@ -328,7 +337,7 @@ export default class Helpers {
                                 {
                                     code: 400,
                                     body: {
-                                        "error": "Missing key: " + err
+                                        "error": "Invalid NOT Filter"
                                     }
                                 });
                         })
