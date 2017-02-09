@@ -76,12 +76,47 @@ export default class Helpers {
         });
     }
 
-    checkColumnIsValid(columnNames: [string]): Promise<{}> {
+    checkColumnIsValid(columnNames: [string], type: string): Promise<{}> {
         let self = this;
         return new Promise((fulfill, reject) => {
             columnNames.forEach(column => {
                 if (self.columnNames.indexOf(column) == -1) {
-                    reject();
+                    reject({
+                        code: 400,
+                        body: {
+                            "error": "Column " + column + " is invalid"
+                        }
+                    });
+                }
+                else {
+                    switch (type) {
+                        case 'string':
+                            {
+                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title'].indexOf(column) == -1) {
+                                    reject({
+                                        code: 400,
+                                        body: {
+                                            "error": "Column " + column + " is invalid"
+                                        }
+                                    });
+                                }
+                                break;
+                            }
+                        case 'integer': {
+                            if (['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id'].indexOf(column) == -1) {
+                                reject({
+                                    code: 400,
+                                    body: {
+                                        "error": "Column " + column + " is invalid"
+                                    }
+                                });
+                            }
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
                 }
             });
             fulfill();
@@ -103,7 +138,7 @@ export default class Helpers {
                         }
                     });
             }
-            self.checkColumnIsValid(columns)
+            self.checkColumnIsValid(columns, '')
                 .then(() => {
                     if (columns.indexOf(order) == -1) {
                         reject(
@@ -138,14 +173,14 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            self.checkColumnIsValid([columnName])
+            self.checkColumnIsValid([columnName], 'string')
                 .then(() => {
                     let finalObj: [Object];
                     // console.log(self.dataSet.length);
                     self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
-                                let recordValue: string = "" + record[columnName];
+                                let recordValue: string = record[columnName];
                                 if (recordValue.includes(value)) {
                                     if (finalObj && finalObj.length > 0)
                                         finalObj.push(record);
@@ -174,7 +209,7 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            self.checkColumnIsValid([columnName])
+            self.checkColumnIsValid([columnName], 'integer')
                 .then(() => {
                     switch (comp) {
                         case "GT": {
