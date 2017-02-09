@@ -5,6 +5,13 @@ let JSZip = require("jszip");
 
 export default class Helpers {
 
+    public union(a: any, b: any): Promise<any> {
+        return a.concat(b.filter(function (r: any) {
+            return a.indexOf(r) < 0;
+        }));
+    };
+
+
     public dataSet: Map<string, any[]> = new Map<any, any>();
     constructor() {
         Log.trace('HelpersImpl::init()');
@@ -21,6 +28,8 @@ export default class Helpers {
         "courses_audit",
         "courses_uuid"];
 
+   
+   
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
             let arr: courseRecord[] = [];
@@ -337,7 +346,7 @@ export default class Helpers {
                                         finalObj = recordArray;
                                     }
                                     else {
-                                        finalObj = finalObj.concat(recordArray);
+                                        finalObj = this.union(finalObj, recordArray);
                                     }
                                 })
                             }
@@ -356,6 +365,7 @@ export default class Helpers {
                             fulfill(finalObj);
                         })
                         .catch(err => {
+                            // console.log(err);
                             reject(
                                 {
                                     code: 400,
