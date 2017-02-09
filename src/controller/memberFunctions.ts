@@ -58,10 +58,20 @@ export default class Helpers {
         return new Promise((fulfill, reject) => {
             JSZip.loadAsync(fileString, { base64: true })
                 .then(function (zip: any) {
-                    zip.folder(id)
-                        .forEach(function (relativePath: any, file: any) {
-                            promiseArray.push(self.loadFromFile(file));
-                        });
+                    if (id === "courses") {
+                        zip.folder(id)
+                            .forEach(function (relativePath: any, file: any) {
+                                promiseArray.push(self.loadFromFile(file));
+                            });
+                    }
+                    else if (id === "rooms") {
+                        zip.file('index.htm')
+                            .async("string")
+                            .then((str: string) => {
+                                console.log(str);
+                            });
+                    }
+
                     return promiseArray;
                 })
                 .then((response: any) => {
@@ -378,42 +388,42 @@ export default class Helpers {
         });
     }
 
-    /* convertToBase64(file: string): Promise<string> {
-         return new Promise(function (fulfill, reject) {
-             fs.open(file, 'r', function (err, fd) {
-                 //console.log(fd);
-                 if (fd) {
-                     fs.fstat(fd, function (err, stats) {
-                         var bufferSize = stats.size,
-                             chunkSize = 512,
-                             buffer = new Buffer(bufferSize),
-                             bytesRead = 0;
-                         while (bytesRead < bufferSize) {
-                             if ((bytesRead + chunkSize) > bufferSize) {
-                                 chunkSize = (bufferSize - bytesRead);
-                             }
-                             fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-                             bytesRead += chunkSize;
-                         }
-                         let result = buffer.toString('base64', 0, bufferSize);
-                         fs.close(fd);
-                         fs.writeFile("coursesBase64", result);
-                         fulfill(result);
-                     });
-                 }
-                 else {
-                     reject(err);
-                 }
-             });
- 
-         });
-     }
- 
-     loadData() {
-         fs.readFile("courses", 'utf8', (err: any, data: any) => {
-             if (!err) {
-                 this.dataSet = JSON.parse(data);
-             }
-         });
-     }*/
+    // convertToBase64(file: string): Promise<string> {
+    //     return new Promise(function (fulfill, reject) {
+    //         fs.open(file, 'r', function (err, fd) {
+    //             //console.log(fd);
+    //             if (fd) {
+    //                 fs.fstat(fd, function (err, stats) {
+    //                     var bufferSize = stats.size,
+    //                         chunkSize = 512,
+    //                         buffer = new Buffer(bufferSize),
+    //                         bytesRead = 0;
+    //                     while (bytesRead < bufferSize) {
+    //                         if ((bytesRead + chunkSize) > bufferSize) {
+    //                             chunkSize = (bufferSize - bytesRead);
+    //                         }
+    //                         fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+    //                         bytesRead += chunkSize;
+    //                     }
+    //                     let result = buffer.toString('base64', 0, bufferSize);
+    //                     fs.close(fd);
+    //                     fs.writeFile("roomsBase64", result);
+    //                     fulfill(result);
+    //                 });
+    //             }
+    //             else {
+    //                 reject(err);
+    //             }
+    //         });
+
+    //     });
+    // }
+    /*
+        loadData() {
+            fs.readFile("courses", 'utf8', (err: any, data: any) => {
+                if (!err) {
+                    this.dataSet = JSON.parse(data);
+                }
+            });
+        }*/
 }
