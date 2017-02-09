@@ -39,6 +39,7 @@ export default class Helpers {
                         course.courses_title = entry.Title;
                         course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
+                        course.courses_year = (entry.Section == 'overall') ? 1990 : entry.Year;
                         arr.push(course);
                     }
                     // console.log("In file function", arr.length);
@@ -377,42 +378,42 @@ export default class Helpers {
         });
     }
 
-   /* convertToBase64(file: string): Promise<string> {
-        return new Promise(function (fulfill, reject) {
-            fs.open(file, 'r', function (err, fd) {
-                //console.log(fd);
-                if (fd) {
-                    fs.fstat(fd, function (err, stats) {
-                        var bufferSize = stats.size,
-                            chunkSize = 512,
-                            buffer = new Buffer(bufferSize),
-                            bytesRead = 0;
-                        while (bytesRead < bufferSize) {
-                            if ((bytesRead + chunkSize) > bufferSize) {
-                                chunkSize = (bufferSize - bytesRead);
-                            }
-                            fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-                            bytesRead += chunkSize;
-                        }
-                        let result = buffer.toString('base64', 0, bufferSize);
-                        fs.close(fd);
-                        fs.writeFile("coursesBase64", result);
-                        fulfill(result);
-                    });
-                }
-                else {
-                    reject(err);
-                }
-            });
-
-        });
-    }
-
-    loadData() {
-        fs.readFile("courses", 'utf8', (err: any, data: any) => {
-            if (!err) {
-                this.dataSet = JSON.parse(data);
-            }
-        });
-    }*/
+    /* convertToBase64(file: string): Promise<string> {
+         return new Promise(function (fulfill, reject) {
+             fs.open(file, 'r', function (err, fd) {
+                 //console.log(fd);
+                 if (fd) {
+                     fs.fstat(fd, function (err, stats) {
+                         var bufferSize = stats.size,
+                             chunkSize = 512,
+                             buffer = new Buffer(bufferSize),
+                             bytesRead = 0;
+                         while (bytesRead < bufferSize) {
+                             if ((bytesRead + chunkSize) > bufferSize) {
+                                 chunkSize = (bufferSize - bytesRead);
+                             }
+                             fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+                             bytesRead += chunkSize;
+                         }
+                         let result = buffer.toString('base64', 0, bufferSize);
+                         fs.close(fd);
+                         fs.writeFile("coursesBase64", result);
+                         fulfill(result);
+                     });
+                 }
+                 else {
+                     reject(err);
+                 }
+             });
+ 
+         });
+     }
+ 
+     loadData() {
+         fs.readFile("courses", 'utf8', (err: any, data: any) => {
+             if (!err) {
+                 this.dataSet = JSON.parse(data);
+             }
+         });
+     }*/
 }
