@@ -173,6 +173,16 @@ export default class Helpers {
         })
     }
 
+    comparePartial(str: string, partial: string): Boolean {
+        let arr = partial.split('*');
+        for (let i = 0; i < arr.length; i++) {
+            if (str.indexOf(arr[i]) <= -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     filterForString(filter: Object): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
@@ -189,8 +199,7 @@ export default class Helpers {
                     self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
-                                let recordValue: string = record[columnName];
-                                if (recordValue.includes(value)) {
+                                if (self.comparePartial(record[columnName], value)) {
                                     if (finalObj && finalObj.length > 0)
                                         finalObj.push(record);
                                     else {

@@ -445,43 +445,63 @@ describe("InsightSpec", function () {
     it("Should return for partial name", function () {
         let query: QueryRequest = {
             "WHERE": {
+                "IS": {
+                    "courses_dept": "*dhe"
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should return for partial name #2", function () {
+        let query: QueryRequest = {
+            "WHERE": {
                 "AND": [
                     {
-                        "IS": {
-                            "courses_title": "intro"
+                        "GT": {
+                            "courses_avg": 90
                         }
                     },
                     {
-                        "OR": [{
-                            "IS": {
-                                "courses_id": 110
-                            }
-                        },
-                        {
-                            "GT": {
-                                "courses_pass": 94.75
-                            }
-                        }]
+                        "IS": {
+                            "courses_dept": "*dh*"
+                        }
                     }
                 ]
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "courses_title",
-                    "courses_id",
-                    "courses_pass"
+                    "courses_dept",
+                    "courses_avg"
                 ],
-                "ORDER": "courses_id"
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
             }
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res);
-                expect.fail();
+                console.log(res.body);
+                expect(res.code).to.equal(200);
             })
             .catch(err => {
-                //console.log(err);
-                expect(err.code).to.equal(400);
+                console.log(err);
+                expect.fail();
             });
     });
 
@@ -530,7 +550,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -600,4 +620,6 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
+
 });
+
