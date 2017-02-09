@@ -297,12 +297,26 @@ export default class Helpers {
                     Promise.all(promiseArray)
                         .then(records => {
                             if (key === "OR") {
-                                finalObj = records[0].concat(records[1]);
+                                records.forEach((recordArray) => {
+                                    if (finalObj.length < 1) {
+                                        finalObj = recordArray;
+                                    }
+                                    else {
+                                        finalObj = finalObj.concat(recordArray);
+                                    }
+                                })
                             }
                             else if (key === "AND") {
-                                finalObj = records[0].filter(function (n) {
-                                    return records[1].indexOf(n) != -1;
-                                });
+                                for (let i = 0; i < records.length; i++) {
+                                    if (finalObj.length < 1) {
+                                        finalObj = records[i];
+                                    }
+                                    else {
+                                        finalObj = finalObj.filter(function (n: any) {
+                                            return records[i].indexOf(n) != -1;
+                                        });
+                                    }
+                                }
                             }
                             fulfill(finalObj);
                         })
@@ -377,42 +391,42 @@ export default class Helpers {
         });
     }
 
-   /* convertToBase64(file: string): Promise<string> {
-        return new Promise(function (fulfill, reject) {
-            fs.open(file, 'r', function (err, fd) {
-                //console.log(fd);
-                if (fd) {
-                    fs.fstat(fd, function (err, stats) {
-                        var bufferSize = stats.size,
-                            chunkSize = 512,
-                            buffer = new Buffer(bufferSize),
-                            bytesRead = 0;
-                        while (bytesRead < bufferSize) {
-                            if ((bytesRead + chunkSize) > bufferSize) {
-                                chunkSize = (bufferSize - bytesRead);
-                            }
-                            fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-                            bytesRead += chunkSize;
-                        }
-                        let result = buffer.toString('base64', 0, bufferSize);
-                        fs.close(fd);
-                        fs.writeFile("coursesBase64", result);
-                        fulfill(result);
-                    });
-                }
-                else {
-                    reject(err);
-                }
-            });
-
-        });
-    }
-
-    loadData() {
-        fs.readFile("courses", 'utf8', (err: any, data: any) => {
-            if (!err) {
-                this.dataSet = JSON.parse(data);
-            }
-        });
-    }*/
+    /* convertToBase64(file: string): Promise<string> {
+         return new Promise(function (fulfill, reject) {
+             fs.open(file, 'r', function (err, fd) {
+                 //console.log(fd);
+                 if (fd) {
+                     fs.fstat(fd, function (err, stats) {
+                         var bufferSize = stats.size,
+                             chunkSize = 512,
+                             buffer = new Buffer(bufferSize),
+                             bytesRead = 0;
+                         while (bytesRead < bufferSize) {
+                             if ((bytesRead + chunkSize) > bufferSize) {
+                                 chunkSize = (bufferSize - bytesRead);
+                             }
+                             fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+                             bytesRead += chunkSize;
+                         }
+                         let result = buffer.toString('base64', 0, bufferSize);
+                         fs.close(fd);
+                         fs.writeFile("coursesBase64", result);
+                         fulfill(result);
+                     });
+                 }
+                 else {
+                     reject(err);
+                 }
+             });
+ 
+         });
+     }
+ 
+     loadData() {
+         fs.readFile("courses", 'utf8', (err: any, data: any) => {
+             if (!err) {
+                 this.dataSet = JSON.parse(data);
+             }
+         });
+     }*/
 }

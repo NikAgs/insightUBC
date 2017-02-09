@@ -493,6 +493,11 @@ describe("InsightSpec", function () {
                         "AND": [
                             {
                                 "GT": {
+                                    "courses_avg": 80
+                                }
+                            },
+                            {
+                                "LT": {
                                     "courses_avg": 90
                                 }
                             },
@@ -507,7 +512,7 @@ describe("InsightSpec", function () {
                         "NOT":
                         {
                             "LT": {
-                                "courses_avg": 95
+                                "courses_avg": 99
                             }
                         }
                     }
@@ -525,7 +530,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res);
+                console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
