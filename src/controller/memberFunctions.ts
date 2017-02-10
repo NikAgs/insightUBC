@@ -48,7 +48,9 @@ export default class Helpers {
                         course.courses_title = entry.Title;
                         course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
-                        arr.push(course);
+                        if (course != {}) {
+                            arr.push(course);
+                        }
                     }
                     // console.log("In file function", arr.length);
                     fulfill(arr);
@@ -174,9 +176,9 @@ export default class Helpers {
     }
 
     comparePartial(str: string, partial: string): Boolean {
-        let clean = partial.replace(/\*/g,'');
-        let first = partial.indexOf('*'); 
-        let last = partial.lastIndexOf('*'); 
+        let clean = partial.replace(/\*/g, '');
+        let first = partial.indexOf('*');
+        let last = partial.lastIndexOf('*');
         if (first == -1) {
             return str == partial;
         } else if (first == (partial.length - 1)) {
