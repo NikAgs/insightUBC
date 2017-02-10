@@ -28,8 +28,8 @@ export default class Helpers {
         "courses_audit",
         "courses_uuid"];
 
-   
-   
+
+
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
             let arr: courseRecord[] = [];
@@ -174,13 +174,18 @@ export default class Helpers {
     }
 
     comparePartial(str: string, partial: string): Boolean {
-        let arr = partial.split('*');
-        for (let i = 0; i < arr.length; i++) {
-            if (str.indexOf(arr[i]) <= -1) {
-                return false;
-            }
+        let clean = partial.replace(/\*/g,'');
+        let first = partial.indexOf('*'); 
+        let last = partial.lastIndexOf('*'); 
+        if (first == -1) {
+            return str == partial;
+        } else if (first == (partial.length - 1)) {
+            return str.startsWith(clean);
+        } else if (last == (partial.length - 1)) {
+            return str.includes(clean);
+        } else {
+            return str.endsWith(clean);
         }
-        return true;
     }
 
     filterForString(filter: Object): Promise<[Object]> {

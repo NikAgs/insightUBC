@@ -433,7 +433,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -445,9 +445,18 @@ describe("InsightSpec", function () {
     it("Should return for partial name", function () {
         let query: QueryRequest = {
             "WHERE": {
-                "IS": {
-                    "courses_dept": "*dhe"
-                }
+                "AND": [
+                    {
+                        "GT": {
+                            "courses_avg": 95
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "*sc"
+                        }
+                    }
+                ]
             },
             "OPTIONS": {
                 "COLUMNS": [
@@ -460,7 +469,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -470,6 +479,42 @@ describe("InsightSpec", function () {
     });
 
     it("Should return for partial name #2", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "GT": {
+                            "courses_avg": 90
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "an*"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should return for partial name #3", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [
@@ -496,7 +541,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
