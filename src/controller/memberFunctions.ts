@@ -199,6 +199,15 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
+            if (typeof value != 'string') {
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": value + " is not a valid string"
+                        }
+                    });
+            }
             self.checkColumnIsValid([columnName], 'string')
                 .then(() => {
                     let finalObj: [Object];
@@ -228,11 +237,20 @@ export default class Helpers {
         let self = this;
         return new Promise((fulfill, reject) => {
             let columnName: string;
-            let value: string;
+            let value: number;
             let finalObj: [Object];
             for (let key in filter) {
                 columnName = key;
                 value = (<any>filter)[key];
+            }
+            if (typeof value != 'number') {
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": value + " is not a number"
+                        }
+                    });
             }
             self.checkColumnIsValid([columnName], 'integer')
                 .then(() => {
@@ -312,13 +330,17 @@ export default class Helpers {
                             fulfill(records);
                         })
                         .catch((err) => {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "Invalid IS Filter"
-                                    }
-                                });
+                            if (err.code != 400)
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "Invalid IS Filter"
+                                        }
+                                    });
+                            else {
+                                reject(err);
+                            }
                         });
                 }
                 else if (key === "GT" || key === "LT" || key === "EQ") {
@@ -327,13 +349,17 @@ export default class Helpers {
                             fulfill(recordsFromMath);
                         })
                         .catch((err) => {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "Invalid " + key + " Filter"
-                                    }
-                                });
+                            if (err.code != 400)
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "Invalid " + key + " Filter"
+                                        }
+                                    });
+                            else {
+                                reject(err);
+                            }
                         });
                 }
                 else if (key === "AND" || key === "OR") {
@@ -382,13 +408,17 @@ export default class Helpers {
                         })
                         .catch(err => {
                             // console.log(err);
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "Unexpected"
-                                    }
-                                });
+                            if (err.code != 400)
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "Unexpected"
+                                        }
+                                    });
+                            else {
+                                reject(err);
+                            }
                         });
                 }
                 else if (key === "NOT") {

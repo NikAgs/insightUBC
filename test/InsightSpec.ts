@@ -162,7 +162,7 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Wrong number of filter", function () {
+    it("Wrong number of filters", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [{
@@ -341,11 +341,11 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Should return code 400", function () {
+    it("GT with string", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "GT": {
-                    "test": 98
+                    "courses_avg": "98"
                 }
             },
             "OPTIONS": {
@@ -363,7 +363,7 @@ describe("InsightSpec", function () {
                 expect.fail();
             })
             .catch(err => {
-                //console.log(err);
+                // console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -469,7 +469,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -505,7 +505,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -541,7 +541,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -549,6 +549,81 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
+
+    it("Should be able to find all instructurs in a dept with a partial name.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "IS": {
+                            "courses_instructor": "*holmes*"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "cpsc"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_instructor",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_instructor",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should be able to find all sections in a dept not taught by a specific person.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "NOT": {
+                            "IS": {
+                                "courses_instructor": "*holmes*"
+                            }
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "cpsc"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_id",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then((res : any) => {
+                // console.log(res.body.result.length);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
 
     it("Should return code 200", function () {
         let query: QueryRequest = {
@@ -563,7 +638,7 @@ describe("InsightSpec", function () {
                             },
                             {
                                 "LT": {
-                                    "courses_avg": 90
+                                    "courses_avg": 90.6
                                 }
                             },
                             {
