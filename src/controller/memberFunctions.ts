@@ -1,6 +1,7 @@
 import Log from "../Util";
 import * as fs from 'fs';
 import { IInsightFacade, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
+import * as parse5 from 'parse5';
 let JSZip = require("jszip");
 
 export default class Helpers {
@@ -80,7 +81,19 @@ export default class Helpers {
                         zip.file('index.htm')
                             .async("string")
                             .then((str: string) => {
-                                console.log(str);
+                                let Document = parse5.parse(str) as parse5.AST.Default.Document;
+                                for (let node of Document.childNodes) {
+                                    if (node.nodeName === 'html') {
+                                        console.log(node);
+                                        let nodeParse: any = node;
+                                        for (let bodyNode of nodeParse.childNodes) {
+                                            if(bodyNode.nodeName == 'body'){
+                                                let serial = parse5.serialize(bodyNode);
+                                                console.log(serial)
+                                            }
+                                        }
+                                    }
+                                }
                             });
                     }
 
