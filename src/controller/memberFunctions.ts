@@ -5,6 +5,13 @@ let JSZip = require("jszip");
 
 export default class Helpers {
 
+    public union(a: any, b: any): Promise<any> {
+        return a.concat(b.filter(function (r: any) {
+            return a.indexOf(r) < 0;
+        }));
+    };
+
+
     public dataSet: Map<string, any[]> = new Map<any, any>();
     constructor() {
         Log.trace('HelpersImpl::init()');
@@ -20,6 +27,8 @@ export default class Helpers {
         "courses_fail",
         "courses_audit",
         "courses_uuid"];
+
+
 
     loadFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
@@ -40,7 +49,10 @@ export default class Helpers {
                         course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
                         course.courses_year = (entry.Section == 'overall') ? 1990 : entry.Year;
-                        arr.push(course);
+
+                        if (course != {}) {
+                            arr.push(course);
+                        }
                     }
                     // console.log("In file function", arr.length);
                     fulfill(arr);
@@ -87,12 +99,47 @@ export default class Helpers {
         });
     }
 
-    checkColumnIsValid(columnNames: [string]): Promise<{}> {
+    checkColumnIsValid(columnNames: [string], type: string): Promise<{}> {
         let self = this;
         return new Promise((fulfill, reject) => {
             columnNames.forEach(column => {
                 if (self.columnNames.indexOf(column) == -1) {
-                    reject();
+                    reject({
+                        code: 400,
+                        body: {
+                            "error": "Column " + column + " is invalid"
+                        }
+                    });
+                }
+                else {
+                    switch (type) {
+                        case 'string':
+                            {
+                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title'].indexOf(column) == -1) {
+                                    reject({
+                                        code: 400,
+                                        body: {
+                                            "error": "Column " + column + " is invalid"
+                                        }
+                                    });
+                                }
+                                break;
+                            }
+                        case 'integer': {
+                            if (['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id'].indexOf(column) == -1) {
+                                reject({
+                                    code: 400,
+                                    body: {
+                                        "error": "Column " + column + " is invalid"
+                                    }
+                                });
+                            }
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
                 }
             });
             fulfill();
@@ -114,7 +161,7 @@ export default class Helpers {
                         }
                     });
             }
-            self.checkColumnIsValid(columns)
+            self.checkColumnIsValid(columns, '')
                 .then(() => {
                     if (columns.indexOf(order) == -1) {
                         reject(
@@ -140,6 +187,21 @@ export default class Helpers {
         })
     }
 
+    comparePartial(str: string, partial: string): Boolean {
+        let clean = partial.replace(/\*/g, '');
+        let first = partial.indexOf('*');
+        let last = partial.lastIndexOf('*');
+        if (first == -1) {
+            return str == partial;
+        } else if (first == (partial.length - 1)) {
+            return str.startsWith(clean);
+        } else if (last == (partial.length - 1)) {
+            return str.includes(clean);
+        } else {
+            return str.endsWith(clean);
+        }
+    }
+
     filterForString(filter: Object): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
@@ -149,15 +211,23 @@ export default class Helpers {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            self.checkColumnIsValid([columnName])
+            if (typeof value != 'string') {
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": value + " is not a valid string"
+                        }
+                    });
+            }
+            self.checkColumnIsValid([columnName], 'string')
                 .then(() => {
                     let finalObj: [Object];
                     // console.log(self.dataSet.length);
                     self.dataSet.get("courses").forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
-                                let recordValue: string = "" + record[columnName];
-                                if (recordValue.includes(value)) {
+                                if (self.comparePartial(record[columnName], value)) {
                                     if (finalObj && finalObj.length > 0)
                                         finalObj.push(record);
                                     else {
@@ -179,13 +249,22 @@ export default class Helpers {
         let self = this;
         return new Promise((fulfill, reject) => {
             let columnName: string;
-            let value: string;
+            let value: number;
             let finalObj: [Object];
             for (let key in filter) {
                 columnName = key;
                 value = (<any>filter)[key];
             }
-            self.checkColumnIsValid([columnName])
+            if (typeof value != 'number') {
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": value + " is not a number"
+                        }
+                    });
+            }
+            self.checkColumnIsValid([columnName], 'integer')
                 .then(() => {
                     switch (comp) {
                         case "GT": {
@@ -263,13 +342,17 @@ export default class Helpers {
                             fulfill(records);
                         })
                         .catch((err) => {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "Invalid IS Filter"
-                                    }
-                                });
+                            if (err.code != 400)
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "Invalid IS Filter"
+                                        }
+                                    });
+                            else {
+                                reject(err);
+                            }
                         });
                 }
                 else if (key === "GT" || key === "LT" || key === "EQ") {
@@ -278,13 +361,17 @@ export default class Helpers {
                             fulfill(recordsFromMath);
                         })
                         .catch((err) => {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "Invalid " + key + " Filter"
-                                    }
-                                });
+                            if (err.code != 400)
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "Invalid " + key + " Filter"
+                                        }
+                                    });
+                            else {
+                                reject(err);
+                            }
                         });
                 }
                 else if (key === "AND" || key === "OR") {
@@ -308,23 +395,42 @@ export default class Helpers {
                     Promise.all(promiseArray)
                         .then(records => {
                             if (key === "OR") {
-                                finalObj = records[0].concat(records[1]);
+                                records.forEach((recordArray) => {
+                                    if (finalObj.length < 1) {
+                                        finalObj = recordArray;
+                                    }
+                                    else {
+                                        finalObj = this.union(finalObj, recordArray);
+                                    }
+                                })
                             }
                             else if (key === "AND") {
-                                finalObj = records[0].filter(function (n) {
-                                    return records[1].indexOf(n) != -1;
-                                });
+                                for (let i = 0; i < records.length; i++) {
+                                    if (finalObj.length < 1) {
+                                        finalObj = records[i];
+                                    }
+                                    else {
+                                        finalObj = finalObj.filter(function (n: any) {
+                                            return records[i].indexOf(n) != -1;
+                                        });
+                                    }
+                                }
                             }
                             fulfill(finalObj);
                         })
                         .catch(err => {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "Unexpected"
-                                    }
-                                });
+                            // console.log(err);
+                            if (err.code != 400)
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "Unexpected"
+                                        }
+                                    });
+                            else {
+                                reject(err);
+                            }
                         });
                 }
                 else if (key === "NOT") {
@@ -388,42 +494,42 @@ export default class Helpers {
         });
     }
 
-    // convertToBase64(file: string): Promise<string> {
-    //     return new Promise(function (fulfill, reject) {
-    //         fs.open(file, 'r', function (err, fd) {
-    //             //console.log(fd);
-    //             if (fd) {
-    //                 fs.fstat(fd, function (err, stats) {
-    //                     var bufferSize = stats.size,
-    //                         chunkSize = 512,
-    //                         buffer = new Buffer(bufferSize),
-    //                         bytesRead = 0;
-    //                     while (bytesRead < bufferSize) {
-    //                         if ((bytesRead + chunkSize) > bufferSize) {
-    //                             chunkSize = (bufferSize - bytesRead);
-    //                         }
-    //                         fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
-    //                         bytesRead += chunkSize;
-    //                     }
-    //                     let result = buffer.toString('base64', 0, bufferSize);
-    //                     fs.close(fd);
-    //                     fs.writeFile("roomsBase64", result);
-    //                     fulfill(result);
-    //                 });
-    //             }
-    //             else {
-    //                 reject(err);
-    //             }
-    //         });
-
-    //     });
-    // }
-    /*
-        loadData() {
-            fs.readFile("courses", 'utf8', (err: any, data: any) => {
-                if (!err) {
-                    this.dataSet = JSON.parse(data);
-                }
-            });
-        }*/
+    /* convertToBase64(file: string): Promise<string> {
+         return new Promise(function (fulfill, reject) {
+             fs.open(file, 'r', function (err, fd) {
+                 //console.log(fd);
+                 if (fd) {
+                     fs.fstat(fd, function (err, stats) {
+                         var bufferSize = stats.size,
+                             chunkSize = 512,
+                             buffer = new Buffer(bufferSize),
+                             bytesRead = 0;
+                         while (bytesRead < bufferSize) {
+                             if ((bytesRead + chunkSize) > bufferSize) {
+                                 chunkSize = (bufferSize - bytesRead);
+                             }
+                             fs.read(fd, buffer, bytesRead, chunkSize, bytesRead);
+                             bytesRead += chunkSize;
+                         }
+                         let result = buffer.toString('base64', 0, bufferSize);
+                         fs.close(fd);
+                         fs.writeFile("coursesBase64", result);
+                         fulfill(result);
+                     });
+                 }
+                 else {
+                     reject(err);
+                 }
+             });
+ 
+         });
+     }
+ 
+     loadData() {
+         fs.readFile("courses", 'utf8', (err: any, data: any) => {
+             if (!err) {
+                 this.dataSet = JSON.parse(data);
+             }
+         });
+     }*/
 }

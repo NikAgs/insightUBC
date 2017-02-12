@@ -162,7 +162,7 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Wrong number of filter", function () {
+    it("Wrong number of filters", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [{
@@ -341,11 +341,11 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Should return code 400", function () {
+    it("GT with string", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "GT": {
-                    "test": 98
+                    "courses_avg": "98"
                 }
             },
             "OPTIONS": {
@@ -363,7 +363,7 @@ describe("InsightSpec", function () {
                 expect.fail();
             })
             .catch(err => {
-                //console.log(err);
+                // console.log(err);
                 expect(err.code).to.equal(400);
             });
     });
@@ -433,7 +433,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -447,43 +447,183 @@ describe("InsightSpec", function () {
             "WHERE": {
                 "AND": [
                     {
-                        "IS": {
-                            "courses_title": "intro"
+                        "GT": {
+                            "courses_avg": 95
                         }
                     },
                     {
-                        "OR": [{
-                            "IS": {
-                                "courses_id": 110
-                            }
-                        },
-                        {
-                            "GT": {
-                                "courses_pass": 94.75
-                            }
-                        }]
+                        "IS": {
+                            "courses_dept": "*sc"
+                        }
                     }
                 ]
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "courses_title",
-                    "courses_id",
-                    "courses_pass"
+                    "courses_dept",
+                    "courses_avg"
                 ],
-                "ORDER": "courses_id"
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
             }
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res);
-                expect.fail();
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
             })
             .catch(err => {
-                //console.log(err);
-                expect(err.code).to.equal(400);
+                console.log(err);
+                expect.fail();
             });
     });
+
+    it("Should return for partial name #2", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "GT": {
+                            "courses_avg": 90
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "an*"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should return for partial name #3", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "GT": {
+                            "courses_avg": 90
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "*dh*"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should be able to find all instructurs in a dept with a partial name.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "IS": {
+                            "courses_instructor": "*holmes*"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "cpsc"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_instructor",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_instructor",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should be able to find all sections in a dept not taught by a specific person.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "NOT": {
+                            "IS": {
+                                "courses_instructor": "*holmes*"
+                            }
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "cpsc"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_id",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then((res : any) => {
+                // console.log(res.body.result.length);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
 
     it("Should return code 200", function () {
         let query: QueryRequest = {
@@ -493,7 +633,12 @@ describe("InsightSpec", function () {
                         "AND": [
                             {
                                 "GT": {
-                                    "courses_avg": 90
+                                    "courses_avg": 80
+                                }
+                            },
+                            {
+                                "LT": {
+                                    "courses_avg": 90.6
                                 }
                             },
                             {
@@ -507,7 +652,7 @@ describe("InsightSpec", function () {
                         "NOT":
                         {
                             "LT": {
-                                "courses_avg": 95
+                                "courses_avg": 99
                             }
                         }
                     }
@@ -525,7 +670,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -595,4 +740,6 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
+
 });
+

@@ -25,7 +25,7 @@ export default class InsightFacade implements IInsightFacade {
                     fs.access(id, function (err) {
                         if (response.length > 0) {
                             self.helpers.dataSet.set(id, response);
-                            if (err && err.code === 'ENOENT') {
+                            if (err) {
                                 fs.writeFile(id, JSON.stringify(response), function (err: any) {
                                     fulfill({
                                         code: 204,
@@ -104,7 +104,7 @@ export default class InsightFacade implements IInsightFacade {
                                 code: 200,
                                 body: {
                                     render: 'TABLE',
-                                    result: JSON.stringify(response)
+                                    result: response
                                 }
                             });
                     })
