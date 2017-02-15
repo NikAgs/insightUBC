@@ -100,6 +100,37 @@ export default class Helpers {
         })
     }
 
+    parseDataForRooms(zip: any): Promise<any> {
+        return new Promise((fulfill, reject) => {
+            zip.file('index.htm')
+                .async("string")
+                .then((str: string) => {
+                    let Document = parse5.parse(str) as parse5.AST.Default.Document;
+                    let serial = "";
+                    for (let node of Document.childNodes) {
+                        if (node.nodeName === 'html') {
+                            // console.log(node);
+                            let nodeParse: any = node;
+                            for (let bodyNode of nodeParse.childNodes) {
+                                if (bodyNode.nodeName == 'body') {
+                                    serial = parse5.serialize(bodyNode);
+                                    serial = serial.substring(serial.indexOf("<table"), serial.indexOf("</table>"));
+                                    // console.log(serial);
+                                }
+                            }
+                        }
+                    }
+                    let Table: any = parse5.parseFragment(serial) as parse5.AST.HtmlParser2.DocumentFragment;
+                    for (let node of Table.childNodes[0].childNodes) {
+                        if (node.tagName == 'tbody') {
+                            //THESE CHILD NODES ARE THE TABLE ROWS
+                            console.log(node.childNodes);
+                            fulfill();
+                        }
+                    };
+                });
+        })
+    }
     // Parses the base64 fileString into an array of courseRecords 
     parseData(id: string, fileString: string): Promise<[courseRecord]> {
         let promiseArray: any = [];
@@ -112,28 +143,12 @@ export default class Helpers {
                             .forEach(function (relativePath: any, file: any) {
                                 promiseArray.push(self.loadCoursesFromFile(file));
                             });
+                        return promiseArray;
                     }
                     else if (id === "rooms") {
-                        zip.file('index.htm')
-                            .async("string")
-                            .then((str: string) => {
-                                let Document = parse5.parse(str) as parse5.AST.Default.Document;
-                                for (let node of Document.childNodes) {
-                                    if (node.nodeName === 'html') {
-                                        console.log(node);
-                                        let nodeParse: any = node;
-                                        for (let bodyNode of nodeParse.childNodes) {
-                                            if (bodyNode.nodeName == 'body') {
-                                                let serial = parse5.serialize(bodyNode);
-                                                console.log(serial)
-                                            }
-                                        }
-                                    }
-                                }
-                            });
+                        return self.parseDataForRooms(zip);
                     }
 
-                    return promiseArray;
                 })
                 .then((response: any) => {
                     Promise.all(response)

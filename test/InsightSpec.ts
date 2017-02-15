@@ -623,7 +623,7 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then((res: any) => {
-                console.log(res.body);
+                // console.log(res.body);
                 let answer = {
                     "render": "TABLE",
                     "result": [
