@@ -1,7 +1,14 @@
 import Log from "../Util";
 import * as fs from 'fs';
-import { IInsightFacade, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
+import {
+    IInsightFacade, InsightResponse, GeoResponse,
+    QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION,
+    courseRecord, roomRecord
+} from "./IInsightFacade";
+
 import * as parse5 from 'parse5';
+
+let rp = require('request-promise-native');
 let JSZip = require("jszip");
 
 export default class Helpers {
@@ -27,11 +34,40 @@ export default class Helpers {
         "courses_pass",
         "courses_fail",
         "courses_audit",
-        "courses_uuid"];
+        "courses_uuid",
+        "rooms_fullname",
+        "rooms_shortname",
+        "rooms_number",
+        "rooms_name",
+        "rooms_address",
+        "rooms_lat",
+        "rooms_lon",
+        "rooms_seats",
+        "rooms_type",
+        "rooms_furniture",
+        "rooms_href",];
 
+    getGeoCode(address: string): Promise<GeoResponse> {
+        let parsedAddress = encodeURI(address);
+        let options = {
+            uri: 'http://skaha.cs.ubc.ca:11316/api/v1/team114/' + parsedAddress,
+            json: true
+        };
+        return new Promise((fulfill, reject) => {
+            rp(options).
+                then((res: GeoResponse) => {
+                    console.log(res);
+                    if (res.error) {
+                        reject(res.error);
+                    }
+                    else {
+                        fulfill(res);
+                    }
+                })
+        });
+    }
 
-
-    loadFromFile(file: any): Promise<[Object]> {
+    loadCoursesFromFile(file: any): Promise<[Object]> {
         return new Promise((fulfill, reject) => {
             let arr: courseRecord[] = [];
             file.async("string")
@@ -74,7 +110,7 @@ export default class Helpers {
                     if (id === "courses") {
                         zip.folder(id)
                             .forEach(function (relativePath: any, file: any) {
-                                promiseArray.push(self.loadFromFile(file));
+                                promiseArray.push(self.loadCoursesFromFile(file));
                             });
                     }
                     else if (id === "rooms") {
@@ -87,7 +123,7 @@ export default class Helpers {
                                         console.log(node);
                                         let nodeParse: any = node;
                                         for (let bodyNode of nodeParse.childNodes) {
-                                            if(bodyNode.nodeName == 'body'){
+                                            if (bodyNode.nodeName == 'body') {
                                                 let serial = parse5.serialize(bodyNode);
                                                 console.log(serial)
                                             }
@@ -128,7 +164,10 @@ export default class Helpers {
                     switch (type) {
                         case 'string':
                             {
-                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title'].indexOf(column) == -1) {
+                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title',
+                                    "rooms_fullname", "rooms_shortname", "rooms_number", "rooms_name", "rooms_address",
+                                    "rooms_type", "rooms_furniture", "rooms_href"
+                                ].indexOf(column) == -1) {
                                     reject({
                                         code: 400,
                                         body: {
@@ -139,7 +178,9 @@ export default class Helpers {
                                 break;
                             }
                         case 'integer': {
-                            if (['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id'].indexOf(column) == -1) {
+                            if (['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id',
+                                "rooms_lat", "rooms_lon", "rooms_seats",
+                            ].indexOf(column) == -1) {
                                 reject({
                                     code: 400,
                                     body: {
