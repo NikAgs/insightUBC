@@ -102,6 +102,12 @@ export default class Helpers {
                     else if (id === "rooms") {
                         return self.parseDataForRooms(zip);
                     }
+                    else {
+                        reject({
+                            code: 400,
+                            body: { "error": "Invalid id" }
+                        });
+                    }
 
                 })
                 .then((response: any) => {
@@ -111,8 +117,10 @@ export default class Helpers {
                         })
                 })
                 .catch(function (err: any) {
-                    console.log(err);
-                    reject(err);
+                    reject({
+                        code: 400,
+                        body: { "error": err }
+                    });
                 });
         });
     }
