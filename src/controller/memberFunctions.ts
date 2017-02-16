@@ -151,18 +151,22 @@ export default class Helpers {
             }
             self.checkColumnIsValid(columns, '')
                 .then(() => {
-                    if (columns.indexOf(order) == -1) {
-                        reject(
-                            {
-                                code: 400,
-                                body: {
-                                    "error": "You can only sort on column declared in options"
-                                }
-                            });
+                    if (order) {
+                        if (columns.indexOf(order) == -1) {
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "You can only sort on column declared in options"
+                                    }
+                                });
+                        }
+                        else {
+                            fulfill();
+                        }
                     }
-                    else {
+                    else
                         fulfill();
-                    }
                 }).catch(err => {
                     reject(
                         {
@@ -474,9 +478,11 @@ export default class Helpers {
                 })
                 finalRecords.push(recordObj);
             });
-            finalRecords.sort((a: any, b: any) => {
-                return a[order] > b[order] ? 1 : -1;
-            });
+            if (order) {
+                finalRecords.sort((a: any, b: any) => {
+                    return a[order] > b[order] ? 1 : -1;
+                });
+            }
             // console.log("BEFORE OPTIONS", finalRecords.length);
             fulfill(finalRecords);
         });

@@ -258,7 +258,6 @@ describe("InsightSpec", function () {
     it("Wrong Sort", function () {
         let query: QueryRequest = {
             "WHERE": {
-
                 "NOT":
                 {
                     "LT": {
@@ -624,7 +623,6 @@ describe("InsightSpec", function () {
             });
     });
 
-
     it("Should return code 200", function () {
         let query: QueryRequest = {
             "WHERE": {
@@ -716,6 +714,52 @@ describe("InsightSpec", function () {
                         "courses_uuid"
                     ],
                     "ORDER": "courses_dept",
+                    "FORM": "TABLE"
+                }
+            }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(res);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+it("Should return code 200 without ORDER", function () {
+        let query: QueryRequest =
+            {
+                "WHERE": {
+                    "OR": [
+                        {
+                            "AND": [
+                                {
+                                    "GT": {
+                                        "courses_avg": 90
+                                    }
+                                },
+                                {
+                                    "IS": {
+                                        "courses_dept": "adhe"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "EQ": {
+                                "courses_avg": 95
+                            }
+                        }
+                    ]
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "courses_dept",
+                        "courses_audit",
+                        "courses_fail",
+                    ],
                     "FORM": "TABLE"
                 }
             }
