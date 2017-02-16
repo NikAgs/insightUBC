@@ -94,7 +94,7 @@ export default class InsightFacade implements IInsightFacade {
                 });
             }
             else {
-                this.helpers.checkForOptions(optionsRequest)
+                this.helpers.validate.checkForOptions(optionsRequest)
                     .then(() => this.helpers.runForFilter(filter))
                     .then((response) => this.helpers.runForOptions(response, optionsRequest))
                     .then((response) => {
