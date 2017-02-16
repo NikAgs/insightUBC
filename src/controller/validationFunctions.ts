@@ -37,6 +37,7 @@ export default class Validate {
             let optionsRequest = query.OPTIONS;
             if (filter && optionsRequest) {
                 this.checkForOptions(optionsRequest)
+                    .then(() => this.checkForWhere(filter))
                     .then(() => {
                         fulfill();
                     })
@@ -55,7 +56,25 @@ export default class Validate {
 
         })
     }
-    
+
+    checkForWhere(filter: FILTER) {
+        return new Promise((fulfill, reject) => {
+            let addedFilters = Object.keys(filter);
+            let acceptedFilters = ['AND', 'OR', "NOT", 'EQ', 'GT', 'LT', 'IS']
+            addedFilters.forEach((fil) => {
+                if (acceptedFilters.indexOf(fil) == -1) {
+                    reject({
+                        code: 400,
+                        body: {
+                            "error": "Invalid QueryRequest"
+                        }
+                    });
+                }
+            });
+            fulfill();
+        });
+    }
+
     checkForOptions(options: OPTIONS) {
         let self = this;
         return new Promise((fulfill, reject) => {
