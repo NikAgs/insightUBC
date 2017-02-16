@@ -1,73 +1,24 @@
 import Log from "../Util";
 import * as fs from 'fs';
 import {
-    IInsightFacade, InsightResponse, GeoResponse,
+    IInsightFacade, InsightResponse,
     QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION,
     courseRecord, roomRecord
 } from "./IInsightFacade";
 
 import * as parse5 from 'parse5';
 
-let rp = require('request-promise-native');
 let JSZip = require("jszip");
 import Validate from './validationFunctions'
 
 
 export default class Helpers {
 
-    public union(a: any, b: any): Promise<any> {
-        return a.concat(b.filter(function (r: any) {
-            return a.indexOf(r) < 0;
-        }));
-    };
-
     public validate: Validate = null;
     public dataSet: Map<string, any[]> = new Map<any, any>();
     constructor() {
         this.validate = new Validate();
         // Log.trace('HelpersImpl::init()');
-    }
-
-    public columnNames: [String] =
-    ["courses_dept",
-        "courses_id",
-        "courses_avg",
-        "courses_instructor",
-        "courses_title",
-        "courses_pass",
-        "courses_fail",
-        "courses_audit",
-        "courses_uuid",
-        "rooms_fullname",
-        "rooms_shortname",
-        "rooms_number",
-        "rooms_name",
-        "rooms_address",
-        "rooms_lat",
-        "rooms_lon",
-        "rooms_seats",
-        "rooms_type",
-        "rooms_furniture",
-        "rooms_href",];
-
-    getGeoCode(address: string): Promise<GeoResponse> {
-        let parsedAddress = encodeURI(address);
-        let options = {
-            uri: 'http://skaha.cs.ubc.ca:11316/api/v1/team114/' + parsedAddress,
-            json: true
-        };
-        return new Promise((fulfill, reject) => {
-            rp(options).
-                then((res: GeoResponse) => {
-                    console.log(res);
-                    if (res.error) {
-                        reject(res.error);
-                    }
-                    else {
-                        fulfill(res);
-                    }
-                })
-        });
     }
 
     loadCoursesFromFile(file: any): Promise<[Object]> {
@@ -364,7 +315,7 @@ export default class Helpers {
                                         finalObj = recordArray;
                                     }
                                     else {
-                                        finalObj = this.union(finalObj, recordArray);
+                                        finalObj = this.validate.union(finalObj, recordArray);
                                     }
                                 })
                             }

@@ -55,7 +55,6 @@ describe("RoomsSpec", function () {
             }
         });
     });
-
   
     it("Should removeDataSet", () => {
         return insFac.removeDataset("rooms")

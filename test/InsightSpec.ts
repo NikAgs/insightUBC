@@ -162,6 +162,28 @@ describe("InsightSpec", function () {
             });
     });
 
+    it("Missing WHERE", function () {
+        let query: any = {
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log("Here", res);
+                expect.fail();
+            })
+            .catch(err => {
+                console.log("Here", err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
     it("Wrong number of filters", function () {
         let query: QueryRequest = {
             "WHERE": {
@@ -1671,7 +1693,7 @@ describe("InsightSpec", function () {
             });
     });
 
-it("Should return code 200 without ORDER", function () {
+    it("Should return code 200 without ORDER", function () {
         let query: QueryRequest =
             {
                 "WHERE": {

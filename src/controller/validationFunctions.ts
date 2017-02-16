@@ -1,4 +1,5 @@
-import { IInsightFacade, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
+import { GeoResponse, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
+let rp = require('request-promise-native');
 
 export default class Validate {
     public columnNames: [String] =
@@ -10,7 +11,95 @@ export default class Validate {
         "courses_pass",
         "courses_fail",
         "courses_audit",
-        "courses_uuid"];
+        "courses_uuid",
+        "rooms_fullname",
+        "rooms_shortname",
+        "rooms_number",
+        "rooms_name",
+        "rooms_address",
+        "rooms_lat",
+        "rooms_lon",
+        "rooms_seats",
+        "rooms_type",
+        "rooms_furniture",
+        "rooms_href",];
+
+
+    union(a: any, b: any): Promise<any> {
+        return a.concat(b.filter(function (r: any) {
+            return a.indexOf(r) < 0;
+        }));
+    };
+
+    checkForQuery(query: QueryRequest) {
+        return new Promise((fulfill, reject) => {
+            let filter = query.WHERE;
+            let optionsRequest = query.OPTIONS;
+            if (filter && optionsRequest) {
+                this.checkForOptions(optionsRequest)
+                    .then(() => {
+                        fulfill();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    })
+            }
+            else {
+                reject({
+                    code: 400,
+                    body: {
+                        "error": "Invalid QueryRequest"
+                    }
+                });
+            }
+
+        })
+    }
+    
+    checkForOptions(options: OPTIONS) {
+        let self = this;
+        return new Promise((fulfill, reject) => {
+            let columns = options.COLUMNS;
+            let order = options.ORDER;
+            let form = options.FORM;
+            if (form !== "TABLE") {
+                reject(
+                    {
+                        code: 400,
+                        body: {
+                            "error": "Only TABLE form is supported"
+                        }
+                    });
+            }
+            self.checkColumnIsValid(columns, '')
+                .then(() => {
+                    if (order) {
+                        if (columns.indexOf(order) == -1) {
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "You can only sort on column declared in options"
+                                    }
+                                });
+                        }
+                        else {
+                            fulfill();
+                        }
+                    }
+                    else
+                        fulfill();
+                }).catch(err => {
+                    reject(
+                        {
+                            code: 400,
+                            body: {
+                                "error": "Invalid key in options"
+                            }
+                        });
+                })
+        })
+    }
 
     checkColumnIsValid(columnNames: [string], type: string): Promise<{}> {
         let self = this;
@@ -59,51 +148,6 @@ export default class Validate {
         });
     }
 
-    checkForOptions(options: OPTIONS) {
-        let self = this;
-        return new Promise((fulfill, reject) => {
-            let columns = options.COLUMNS;
-            let order = options.ORDER;
-            let form = options.FORM;
-            if (form !== "TABLE") {
-                reject(
-                    {
-                        code: 400,
-                        body: {
-                            "error": "Only TABLE form is supported"
-                        }
-                    });
-            }
-            self.checkColumnIsValid(columns, '')
-                .then(() => {
-                    if (order) {
-                        if (columns.indexOf(order) == -1) {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "You can only sort on column declared in options"
-                                    }
-                                });
-                        }
-                        else {
-                            fulfill();
-                        }
-                    }
-                    else
-                        fulfill();
-                }).catch(err => {
-                    reject(
-                        {
-                            code: 400,
-                            body: {
-                                "error": "Invalid key in options"
-                            }
-                        });
-                })
-        })
-    }
-
     comparePartial(str: string, partial: string): Boolean {
         let clean = partial.replace(/\*/g, '');
         let first = partial.indexOf('*');
@@ -117,6 +161,26 @@ export default class Validate {
         } else {
             return str.endsWith(clean);
         }
+    }
+
+    getGeoCode(address: string): Promise<GeoResponse> {
+        let parsedAddress = encodeURI(address);
+        let options = {
+            uri: 'http://skaha.cs.ubc.ca:11316/api/v1/team114/' + parsedAddress,
+            json: true
+        };
+        return new Promise((fulfill, reject) => {
+            rp(options).
+                then((res: GeoResponse) => {
+                    console.log(res);
+                    if (res.error) {
+                        reject(res.error);
+                    }
+                    else {
+                        fulfill(res);
+                    }
+                })
+        });
     }
 
 }
