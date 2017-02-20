@@ -79,7 +79,6 @@ describe("InsightSpec", function () {
         });
     });
 
-
     it("Should add new dataSet", (done) => {
         fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {

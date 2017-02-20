@@ -111,10 +111,12 @@ export default class Helpers {
 
                 })
                 .then((response: any) => {
-                    Promise.all(response)
-                        .then(val => {
-                            fulfill(val);
-                        })
+                    if (response !== undefined) {
+                        Promise.all(response)
+                            .then(val => {
+                                fulfill(val);
+                            });
+                    }
                 })
                 .catch(function (err: any) {
                     reject({
