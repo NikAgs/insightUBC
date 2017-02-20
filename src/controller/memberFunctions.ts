@@ -124,7 +124,7 @@ export default class Helpers {
                                 let filter = val.filter(function isEmpty(value) {
                                     return value !== null;
                                 })
-                                console.log(JSON.stringify(filter));
+                                //console.log(JSON.stringify(filter));
                                 fulfill(filter);
                             });
                     }
