@@ -67,7 +67,7 @@ describe("InsightSpec", function () {
                         done();
                     })
                     .catch(err => {
-                        console.error(err);
+                        //console.error(err);
                         expect(err.code).to.equal(400);
                         done();
                     });
@@ -121,6 +121,40 @@ describe("InsightSpec", function () {
                     })
                     .catch(err => {
                         console.error(err);
+                        done();
+                    });
+            }
+            else {
+                console.log(err);
+                expect.fail();
+            }
+        });
+    });
+
+    it("Should not set empty dataSet", () => {
+
+        return insFac.addDataset("courses", "")
+            .then(res => {
+                expect.fail();
+            })
+            .catch(err => {
+                //console.error(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Should not set invalid dataSet", (done) => {
+        fs.readFile("coursesInvalidBase64", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                return insFac.addDataset("courses", data)
+                    .then(res => {
+                        //console.log(res, "204");
+                        expect.fail();
+                        done();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        expect(err.code).to.equal(400);
                         done();
                     });
             }

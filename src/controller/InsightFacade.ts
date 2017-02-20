@@ -45,7 +45,7 @@ export default class InsightFacade implements IInsightFacade {
                         else {
                             reject({
                                 code: 400,
-                                body: {}
+                                body: {"error": "no real data"}
                             });
                         }
                     });

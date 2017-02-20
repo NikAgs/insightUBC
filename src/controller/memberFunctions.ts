@@ -21,39 +21,6 @@ export default class Helpers {
         // Log.trace('HelpersImpl::init()');
     }
 
-    loadCoursesFromFile(file: any): Promise<[Object]> {
-        return new Promise((fulfill, reject) => {
-            let arr: courseRecord[] = [];
-            file.async("string")
-                .then(function (str: any) {
-                    var jsonArr = JSON.parse(str);
-                    for (let i in jsonArr.result) {
-                        var course: courseRecord = {};
-                        var entry = jsonArr.result[i];
-                        course.courses_dept = entry.Subject;
-                        course.courses_id = entry.Course;
-                        course.courses_audit = entry.Audit;
-                        course.courses_avg = entry.Avg;
-                        course.courses_fail = entry.Fail;
-                        course.courses_pass = entry.Pass;
-                        course.courses_title = entry.Title;
-                        course.courses_instructor = entry.Professor;
-                        course.courses_uuid = entry.id;
-                        course.courses_year = (entry.Section == 'overall') ? 1990 : entry.Year;
-
-                        if (course != {}) {
-                            arr.push(course);
-                        }
-                    }
-                    // console.log("In file function", arr.length);
-                    fulfill(arr);
-                }).catch((err: any) => {
-                    console.log("Error", err);
-                    reject(err);
-                });
-        })
-    }
-
     parseDataForRooms(zip: any): Promise<any> {
         return new Promise((fulfill, reject) => {
             zip.file('index.htm')
@@ -85,8 +52,48 @@ export default class Helpers {
                 });
         })
     }
+
+    loadCoursesFromFile(file: any): Promise<[Object]> {
+        return new Promise((fulfill, reject) => {
+            let arr: courseRecord[] = [];
+            file.async("string")
+                .then(function (str: any) {
+                    var jsonArr = JSON.parse(str);
+                    for (let i in jsonArr.result) {
+                        var course: courseRecord = {};
+                        var entry = jsonArr.result[i];
+                        course.courses_dept = entry.Subject;
+                        course.courses_id = entry.Course;
+                        course.courses_audit = entry.Audit;
+                        course.courses_avg = entry.Avg;
+                        course.courses_fail = entry.Fail;
+                        course.courses_pass = entry.Pass;
+                        course.courses_title = entry.Title;
+                        course.courses_instructor = entry.Professor;
+                        course.courses_uuid = entry.id;
+                        course.courses_year = (entry.Section == 'overall') ? 1990 : entry.Year;
+
+                        if (course != {}) {
+                            arr.push(course);
+                        }
+                    }
+                    // console.log("In file function", arr.length);
+                    if (arr.length == 0) {
+                        fulfill(null);
+                    } else {
+                        fulfill(arr);
+                    }
+
+                }).catch((err: any) => {
+                    console.log("Error", err);
+                    reject(err);
+                });
+        })
+    }
+
+
     // Parses the base64 fileString into an array of courseRecords 
-    parseData(id: string, fileString: string): Promise<[courseRecord]> {
+    parseData(id: string, fileString: string): Promise<[[courseRecord]]> {
         let promiseArray: any = [];
         let self = this;
         return new Promise((fulfill, reject) => {
@@ -114,7 +121,11 @@ export default class Helpers {
                     if (response !== undefined) {
                         Promise.all(response)
                             .then(val => {
-                                fulfill(val);
+                                let filter = val.filter(function isEmpty(value) {
+                                    return value !== null;
+                                })
+                                console.log(JSON.stringify(filter));
+                                fulfill(filter);
                             });
                     }
                 })
