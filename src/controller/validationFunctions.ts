@@ -1,5 +1,4 @@
 import { GeoResponse, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
-let rp = require('request-promise-native');
 
 export default class Validate {
     public columnNames: [String] =
@@ -181,7 +180,7 @@ export default class Validate {
             return str.endsWith(clean);
         }
     }
-
+/*
     getGeoCode(address: string): Promise<GeoResponse> {
         let parsedAddress = encodeURI(address);
         let options = {
@@ -201,5 +200,6 @@ export default class Validate {
                 })
         });
     }
+    */
 
 }
