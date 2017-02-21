@@ -99,23 +99,22 @@ export default class Helpers {
         return new Promise((fulfill, reject) => {
             JSZip.loadAsync(fileString, { base64: true })
                 .then(function (zip: any) {
-                    if (id === "courses") {
+                    // if (id === "courses") {
                         zip.folder(id)
                             .forEach(function (relativePath: any, file: any) {
                                 promiseArray.push(self.loadCoursesFromFile(file));
                             });
                         return promiseArray;
-                    }
-                    else if (id === "rooms") {
-                        return self.parseDataForRooms(zip);
-                    }
-                    else {
-                        reject({
-                            code: 400,
-                            body: { "error": "Invalid id" }
-                        });
-                    }
-
+                    // }
+                    // else if (id === "rooms") {
+                    //     return self.parseDataForRooms(zip);
+                    // }
+                    // else {
+                    //     reject({
+                    //         code: 400,
+                    //         body: { "error": "Invalid id" }
+                    //     });
+                    // }
                 })
                 .then((response: any) => {
                     if (response !== undefined) {
