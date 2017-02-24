@@ -56,7 +56,40 @@ export default class InsightFacade implements IInsightFacade {
                         reject(err);
                     });
             } else if (id === "rooms") {
-                self.helpers.parseDataForRooms(content);
+                self.helpers.parseDataForRooms(content)
+                .then((response) => {
+                    fs.access(id, function (err) {
+                        if (response.length > 0) {
+                            self.helpers.dataSet.set(id, response);
+                            if (err) {
+                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                    fulfill({
+                                        code: 204,
+                                        body: {}
+                                    });
+                                });
+                            }
+                            else {
+                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                    fulfill({
+                                        code: 201,
+                                        body: {}
+                                    });
+                                });
+                            }
+                        }
+                        else {
+                            reject({
+                                code: 400,
+                                body: { "error": "No real data" }
+                            });
+                        }
+                    });
+                })
+                    .catch((err) => {
+                        // console.log(err);
+                        reject(err);
+                    });
             }
             else {
                 reject({

@@ -3,14 +3,13 @@ import * as fs from 'fs';
 import {
     IInsightFacade, InsightResponse,
     QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION,
-    courseRecord, roomRecord
+    courseRecord, roomRecord, GeoResponse
 } from "./IInsightFacade";
 
 import * as parse5 from 'parse5';
-
-let JSZip = require("jszip");
 import Validate from './validationFunctions'
-
+let JSZip = require("jszip");
+let http = require('http');
 
 export default class Helpers {
 
@@ -19,6 +18,23 @@ export default class Helpers {
     constructor() {
         this.validate = new Validate();
         // Log.trace('HelpersImpl::init()');
+    }
+
+    parseTable(str: string): any {
+        let Document = parse5.parse(str) as parse5.AST.Default.Document;
+        let serial = "";
+        for (let node of Document.childNodes) {
+            if (node.nodeName === 'html') {
+                let nodeParse: any = node;
+                for (let bodyNode of nodeParse.childNodes) {
+                    if (bodyNode.nodeName == 'body') {
+                        serial = parse5.serialize(bodyNode);
+                        serial = serial.substring(serial.indexOf("<table"), serial.indexOf("</table>"));
+                    }
+                }
+            }
+        }
+        return parse5.parseFragment(serial) as parse5.AST.HtmlParser2.DocumentFragment;
     }
 
     parseDataForRooms(fileString: any): Promise<[[Object]]> {
@@ -30,20 +46,7 @@ export default class Helpers {
                     zip.file('index.htm')
                         .async("string")
                         .then((str: string) => {
-                            let Document = parse5.parse(str) as parse5.AST.Default.Document;
-                            let serial = "";
-                            for (let node of Document.childNodes) {
-                                if (node.nodeName === 'html') {
-                                    let nodeParse: any = node;
-                                    for (let bodyNode of nodeParse.childNodes) {
-                                        if (bodyNode.nodeName == 'body') {
-                                            serial = parse5.serialize(bodyNode);
-                                            serial = serial.substring(serial.indexOf("<table"), serial.indexOf("</table>"));
-                                        }
-                                    }
-                                }
-                            }
-                            let Table: any = parse5.parseFragment(serial) as parse5.AST.HtmlParser2.DocumentFragment;
+                            let Table = self.parseTable(str);
                             for (let node of Table.childNodes[0].childNodes) {
                                 if (node.tagName == 'tbody') {
                                     //THESE CHILD NODES ARE THE TABLE ROWS
@@ -55,7 +58,7 @@ export default class Helpers {
                                                 if (data.nodeName == 'td') {
                                                     switch (data.attrs[0].value) {
                                                         case 'views-field views-field-field-building-code':
-                                                            room.rooms_shortname = data.childNodes[0].value.replace(/\s|\n/g, "");
+                                                            room.rooms_shortname = data.childNodes[0].value.trim();
                                                             break;
 
                                                         case 'views-field views-field-title':
@@ -69,30 +72,117 @@ export default class Helpers {
                                                     }
                                                 }
                                             }
-                                            promiseArray.push(self.loadRoomInfo(room));
+                                            promiseArray.push(self.loadRoomInfo(room, zip));
                                         }
-
                                     }
-                                    fulfill(promiseArray);
+                                    Promise.all(promiseArray)
+                                        .then(val => {
+                                            let filter = val.filter(function isEmpty(value) {
+                                                return value !== null;
+                                            })
+                                            //console.log(filter);
+                                            fulfill(filter);
+                                        });
                                 }
                             };
                         });
                 })
-                .catch(function (err: any) {
+                .catch(function () {
                     reject({
                         code: 400,
-                        body: { "error": err }
+                        body: { "error": "There was a problem while opening index.htm" }
                     });
                 });
         });
     }
 
-    loadRoomInfo(room: roomRecord): [roomRecord] {
-        let relPath = room.rooms_href;
-        room.rooms_href = 'http://students.ubc.ca' + room.rooms_href.substr(1);
+    loadRoomInfo(room: roomRecord, zip: any): Promise<[roomRecord]> {
+        let roomRec = JSON.parse(JSON.stringify(room));
+        let self = this;
+        let relPath = roomRec.rooms_href.substr(2);
+        roomRec.rooms_href = 'http://students.ubc.ca' + roomRec.rooms_href.substr(1);
+        self.loadGeoInfo(roomRec, roomRec.rooms_address)
+            .then(val => {
+                roomRec = val;
+            });
+        let arr: roomRecord[] = [];
+        return new Promise((fulfill, reject) => {
+            zip.file(relPath)
+                .async("string")
+                .then((str: string) => {
+                    let table = self.parseTable(str);
+                    if (table.childNodes.length != 0) {
+                        for (let node of table.childNodes[0].childNodes) {
+                            if (node.tagName == 'tbody') {
+                                for (let room of node.childNodes) {
+                                    let retRoom = JSON.parse(JSON.stringify(roomRec));
+                                    if (room.nodeName == 'tr') {
+                                        for (let data of room.childNodes) {
+                                            if (data.nodeName == 'td') {
+                                                switch (data.attrs[0].value) {
+                                                    case "views-field views-field-field-room-number":
+                                                        retRoom.rooms_number = data.childNodes[1].childNodes[0].value;
+                                                        break;
 
+                                                    case "views-field views-field-field-room-capacity":
+                                                        retRoom.rooms_seats = data.childNodes[0].value.trim();
+                                                        break;
 
-        return null;
+                                                    case "views-field views-field-field-room-furniture":
+                                                        retRoom.rooms_furniture = data.childNodes[0].value.trim();
+                                                        break;
+
+                                                    case "views-field views-field-field-room-type":
+                                                        retRoom.rooms_type = data.childNodes[0].value.trim();
+                                                        break;
+                                                }
+                                            }
+                                        }
+                                        retRoom.rooms_name = retRoom.rooms_shortname + "_" + retRoom.rooms_number;
+                                        arr.push(retRoom);
+                                    }
+                                }
+                            }
+                        }
+                        fulfill(arr);
+                    } else {
+                        fulfill(null);
+                    }
+                })
+                .catch(function () {
+                    reject({
+                        code: 400,
+                        body: { "error": "There was a problem while opening " + relPath }
+                    });
+                });
+        });
+    }
+
+    loadGeoInfo(room: roomRecord, address: string): Promise<roomRecord> {
+        return new Promise((fulfill, reject) => {
+            let parsedAddress = encodeURI(address);
+            let uri = 'http://skaha.cs.ubc.ca:11316/api/v1/team114/' + parsedAddress;
+            http.get(uri, (res: any) => {
+                res.setEncoding('utf8');
+                let rawData = '';
+                res.on('data', (chunk: any) => rawData += chunk);
+                res.on('end', () => {
+                    try {
+                        let geoRes = JSON.parse(rawData);
+                        let roomRec = JSON.parse(JSON.stringify(room));
+                        if (!geoRes.error) {
+                            roomRec.rooms_lat = geoRes.lat;
+                            roomRec.rooms_lon = geoRes.lon;
+                        }
+                        fulfill(roomRec);
+                    } catch (e) {
+                        reject(null);
+                    }
+                });
+
+            });
+
+        });
     }
 
     loadCoursesFromFile(file: any): Promise<[Object]> {

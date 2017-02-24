@@ -1880,7 +1880,7 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Should removeDataSet", () => {
+    it("Should remove courses dataSet", () => {
         return insFac.removeDataset("courses")
             .then(res => {
                 expect(res.code).to.equal(204);
@@ -1891,5 +1891,15 @@ describe("InsightSpec", function () {
             });
     });
 
+    it("Should remove rooms dataSet", () => {
+        return insFac.removeDataset("rooms")
+            .then(res => {
+                expect(res.code).to.equal(204);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
 });
 
