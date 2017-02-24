@@ -21,36 +21,78 @@ export default class Helpers {
         // Log.trace('HelpersImpl::init()');
     }
 
-    parseDataForRooms(zip: any): Promise<any> {
+    parseDataForRooms(fileString: any): Promise<[[Object]]> {
+        let promiseArray: any = [];
+        let self = this;
         return new Promise((fulfill, reject) => {
-            zip.file('index.htm')
-                .async("string")
-                .then((str: string) => {
-                    let Document = parse5.parse(str) as parse5.AST.Default.Document;
-                    let serial = "";
-                    for (let node of Document.childNodes) {
-                        if (node.nodeName === 'html') {
-                            // console.log(node);
-                            let nodeParse: any = node;
-                            for (let bodyNode of nodeParse.childNodes) {
-                                if (bodyNode.nodeName == 'body') {
-                                    serial = parse5.serialize(bodyNode);
-                                    serial = serial.substring(serial.indexOf("<table"), serial.indexOf("</table>"));
-                                    // console.log(serial);
+            JSZip.loadAsync(fileString, { base64: true })
+                .then(function (zip: any) {
+                    zip.file('index.htm')
+                        .async("string")
+                        .then((str: string) => {
+                            let Document = parse5.parse(str) as parse5.AST.Default.Document;
+                            let serial = "";
+                            for (let node of Document.childNodes) {
+                                if (node.nodeName === 'html') {
+                                    let nodeParse: any = node;
+                                    for (let bodyNode of nodeParse.childNodes) {
+                                        if (bodyNode.nodeName == 'body') {
+                                            serial = parse5.serialize(bodyNode);
+                                            serial = serial.substring(serial.indexOf("<table"), serial.indexOf("</table>"));
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                    let Table: any = parse5.parseFragment(serial) as parse5.AST.HtmlParser2.DocumentFragment;
-                    for (let node of Table.childNodes[0].childNodes) {
-                        if (node.tagName == 'tbody') {
-                            //THESE CHILD NODES ARE THE TABLE ROWS
-                            console.log(node.childNodes);
-                            fulfill();
-                        }
-                    };
+                            let Table: any = parse5.parseFragment(serial) as parse5.AST.HtmlParser2.DocumentFragment;
+                            for (let node of Table.childNodes[0].childNodes) {
+                                if (node.tagName == 'tbody') {
+                                    //THESE CHILD NODES ARE THE TABLE ROWS
+                                    let arr: roomRecord[] = [];
+                                    for (let building of node.childNodes) {
+                                        if (building.nodeName == 'tr') {
+                                            let room: roomRecord = {};
+                                            for (let data of building.childNodes) {
+                                                if (data.nodeName == 'td') {
+                                                    switch (data.attrs[0].value) {
+                                                        case 'views-field views-field-field-building-code':
+                                                            room.rooms_shortname = data.childNodes[0].value.replace(/\s|\n/g, "");
+                                                            break;
+
+                                                        case 'views-field views-field-title':
+                                                            room.rooms_fullname = data.childNodes[1].childNodes[0].value;
+                                                            room.rooms_href = data.childNodes[1].attrs[0].value;
+                                                            break;
+
+                                                        case 'views-field views-field-field-building-address':
+                                                            room.rooms_address = data.childNodes[0].value.trim();
+                                                            break;
+                                                    }
+                                                }
+                                            }
+                                            promiseArray.push(self.loadRoomInfo(room));
+                                        }
+
+                                    }
+                                    fulfill(promiseArray);
+                                }
+                            };
+                        });
+                })
+                .catch(function (err: any) {
+                    reject({
+                        code: 400,
+                        body: { "error": err }
+                    });
                 });
-        })
+        });
+    }
+
+    loadRoomInfo(room: roomRecord): [roomRecord] {
+        let relPath = room.rooms_href;
+        room.rooms_href = 'http://students.ubc.ca' + room.rooms_href.substr(1);
+
+
+        return null;
     }
 
     loadCoursesFromFile(file: any): Promise<[Object]> {
@@ -91,30 +133,18 @@ export default class Helpers {
         })
     }
 
-
-    // Parses the base64 fileString into an array of courseRecords 
-    parseData(id: string, fileString: string): Promise<[[courseRecord]]> {
+    // Parses the base64 fileString into an array of courseRecord arrays
+    parseCourseData(fileString: string): Promise<[[Object]]> {
         let promiseArray: any = [];
         let self = this;
         return new Promise((fulfill, reject) => {
             JSZip.loadAsync(fileString, { base64: true })
                 .then(function (zip: any) {
-                    // if (id === "courses") {
-                        zip.folder(id)
-                            .forEach(function (relativePath: any, file: any) {
-                                promiseArray.push(self.loadCoursesFromFile(file));
-                            });
-                        return promiseArray;
-                    // }
-                    // else if (id === "rooms") {
-                    //     return self.parseDataForRooms(zip);
-                    // }
-                    // else {
-                    //     reject({
-                    //         code: 400,
-                    //         body: { "error": "Invalid id" }
-                    //     });
-                    // }
+                    zip.folder("courses")
+                        .forEach(function (relativePath: any, file: any) {
+                            promiseArray.push(self.loadCoursesFromFile(file));
+                        });
+                    return promiseArray;
                 })
                 .then((response: any) => {
                     if (response !== undefined) {

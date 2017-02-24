@@ -30,10 +30,10 @@ describe("InsightSpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
-    it("performQuery 424", function () {
+    it("performQuery 424 no dataSet", function () {
         let query: any = {
             "WHERE": {
-                "HE": {
+                "GT": {
                     "class_avg": 98
                 }
             },
@@ -57,7 +57,35 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Should return error on new dataSet", (done) => {
+
+    it("Should add new rooms dataSet", (done) => {
+        fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
+            if (!err) {
+                return insFac.addDataset("rooms", data)
+                    .then(res => {
+                        //console.log(res, "204");
+                        expect(res).to.deep.equal(
+                            {
+                                code: 204,
+                                body: {}
+                            }
+                        );
+                        done();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        done();
+                    });
+            }
+            else {
+                console.log(err);
+                expect.fail();
+                done();
+            }
+        });
+    });
+
+    it("Should return error on invalid dataSet", (done) => {
         fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
                 return insFac.addDataset("fail", data)
@@ -75,6 +103,7 @@ describe("InsightSpec", function () {
             else {
                 console.log(err);
                 expect.fail();
+                done();
             }
         });
     });
@@ -101,6 +130,7 @@ describe("InsightSpec", function () {
             else {
                 console.log(err);
                 expect.fail();
+                done();
             }
         });
     });
@@ -127,12 +157,12 @@ describe("InsightSpec", function () {
             else {
                 console.log(err);
                 expect.fail();
+                done();
             }
         });
     });
 
     it("Should not set empty dataSet", () => {
-
         return insFac.addDataset("courses", "")
             .then(res => {
                 expect.fail();
@@ -153,7 +183,7 @@ describe("InsightSpec", function () {
                         done();
                     })
                     .catch(err => {
-                        console.error(err);
+                        //console.error(err);
                         expect(err.code).to.equal(400);
                         done();
                     });
@@ -161,9 +191,65 @@ describe("InsightSpec", function () {
             else {
                 console.log(err);
                 expect.fail();
+                done();
             }
         });
     });
+
+    it("performQuery 424 invalid dataSet", function () {
+        let query: any = {
+            "WHERE": {
+                "GT": {
+                    "instructor_avg": 98
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "instructor_dept",
+                    "instructor_avg"
+                ],
+                "ORDER": "instructor_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+                expect.fail();
+            })
+            .catch(err => {
+                //console.log(err);
+                expect(err.code).to.equal(424);
+            });
+    });
+
+    it("Should return code 200", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "IS": {
+                    "courses_dept": "adhe"
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER": "courses_id",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(JSON.stringify(res));
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
 
     it("Should return code 200", function () {
         let query: QueryRequest = {

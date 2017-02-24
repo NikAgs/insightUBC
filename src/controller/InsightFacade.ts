@@ -20,41 +20,50 @@ export default class InsightFacade implements IInsightFacade {
         // console.log("In addDataset");
         let self = this;
         return new Promise((fulfill, reject) => {
-            this.helpers.parseData(id, content)
-                .then((response) => {
-                    fs.access(id, function (err) {
-                        if (response.length > 0) {
-                            self.helpers.dataSet.set(id, response);
-                            if (err) {
-                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                    fulfill({
-                                        code: 204,
-                                        body: {}
+            if (id === "courses") {
+                self.helpers.parseCourseData(content)
+                    .then((response) => {
+                        fs.access(id, function (err) {
+                            if (response.length > 0) {
+                                self.helpers.dataSet.set(id, response);
+                                if (err) {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 204,
+                                            body: {}
+                                        });
                                     });
-                                });
+                                }
+                                else {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 201,
+                                            body: {}
+                                        });
+                                    });
+                                }
                             }
                             else {
-                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                    fulfill({
-                                        code: 201,
-                                        body: {}
-                                    });
+                                reject({
+                                    code: 400,
+                                    body: { "error": "No real data" }
                                 });
                             }
-                        }
-                        else {
-                            reject({
-                                code: 400,
-                                body: {"error": "no real data"}
-                            });
-                        }
+                        });
+                    })
+                    .catch((err) => {
+                        // console.log(err);
+                        reject(err);
                     });
-
-                })
-                .catch((err) => {
-                    // console.log(err);
-                    reject(err);
+            } else if (id === "rooms") {
+                self.helpers.parseDataForRooms(content);
+            }
+            else {
+                reject({
+                    code: 400,
+                    body: { "error": "Invalid id" }
                 });
+            }
         });
     }
 

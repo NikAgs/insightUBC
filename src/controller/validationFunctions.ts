@@ -180,26 +180,27 @@ export default class Validate {
             return str.endsWith(clean);
         }
     }
-/*
-    getGeoCode(address: string): Promise<GeoResponse> {
-        let parsedAddress = encodeURI(address);
-        let options = {
-            uri: 'http://skaha.cs.ubc.ca:11316/api/v1/team114/' + parsedAddress,
-            json: true
-        };
-        return new Promise((fulfill, reject) => {
-            rp(options).
-                then((res: GeoResponse) => {
-                    console.log(res);
-                    if (res.error) {
-                        reject(res.error);
-                    }
-                    else {
-                        fulfill(res);
-                    }
-                })
-        });
-    }
-    */
+
+    /*
+        getGeoCode(address: string): Promise<GeoResponse> {
+            let parsedAddress = encodeURI(address);
+            let options = {
+                uri: 'http://skaha.cs.ubc.ca:11316/api/v1/team114/' + parsedAddress,
+                json: true
+            };
+            return new Promise((fulfill, reject) => {
+                rp(options).
+                    then((res: GeoResponse) => {
+                        console.log(res);
+                        if (res.error) {
+                            reject(res.error);
+                        }
+                        else {
+                            fulfill(res);
+                        }
+                    })
+            });
+        }
+        */
 
 }
