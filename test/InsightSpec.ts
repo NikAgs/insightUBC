@@ -281,13 +281,42 @@ describe("InsightSpec", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "EQ": {
+                    "courses_year": 2011
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_avg",
+                    "courses_year"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should return 200 [EQ]", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "EQ": {
                     "courses_avg": 98
                 }
             },
             "OPTIONS": {
                 "COLUMNS": [
                     "courses_dept",
-                    "courses_avg"
+                    "courses_avg",
+                    "courses_year"
                 ],
                 "ORDER": "courses_avg",
                 "FORM": "TABLE"

@@ -11,6 +11,7 @@ export default class Validate {
         "courses_fail",
         "courses_audit",
         "courses_uuid",
+        "courses_year",
         "rooms_fullname",
         "rooms_shortname",
         "rooms_number",
@@ -46,8 +47,15 @@ export default class Validate {
         "courses_pass",
         "courses_fail",
         "courses_audit",
-        "courses_uuid"
+        "courses_uuid",
+        "courses_year"
     ]
+
+    public numericColumns: [string] = ['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id', 'courses_year'
+        , "rooms_lat", "rooms_lon", "rooms_seats"]
+
+    public stringColumns: [string] = ['courses_dept', 'courses_id', 'courses_instructor', 'courses_title',
+        "rooms_fullname", "rooms_shortname", "rooms_number", "rooms_name", "rooms_address", "rooms_type", "rooms_furniture", "rooms_href"]
 
     union(a: any, b: any): Promise<any> {
         return a.concat(b.filter(function (r: any) {
@@ -183,8 +191,7 @@ export default class Validate {
                     switch (type) {
                         case 'string':
                             {
-                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title',
-                                    "rooms_fullname", "rooms_shortname", "rooms_number", "rooms_name", "rooms_address", "rooms_type", "rooms_furniture", "rooms_href"].indexOf(column) == -1) {
+                                if (self.stringColumns.indexOf(column) == -1) {
                                     reject({
                                         code: 400,
                                         body: {
@@ -196,9 +203,7 @@ export default class Validate {
                             }
                         case 'integer': {
                             if (
-                                ['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id'
-                                    , "rooms_lat", "rooms_lon", "rooms_seats",
-                                ].indexOf(column) == -1) {
+                                self.numericColumns.indexOf(column) == -1) {
                                 reject({
                                     code: 400,
                                     body: {

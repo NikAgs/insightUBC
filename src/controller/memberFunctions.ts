@@ -203,8 +203,7 @@ export default class Helpers {
                         course.courses_title = entry.Title;
                         course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
-                        course.courses_year = (entry.Section == 'overall') ? 1990 : entry.Year;
-
+                        course.courses_year = (entry.Section === 'overall') ? 1900 : entry.Year;
                         if (course != {}) {
                             arr.push(course);
                         }
