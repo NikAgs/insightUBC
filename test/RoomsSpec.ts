@@ -134,6 +134,40 @@ describe("RoomsSpec", function () {
     });
 
 
+    it("Invalid query having keys for more than 1 dataset should result in 400..", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "GT": {
+                            "rooms_seats": 90
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_dept": "adhe"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_address", "rooms_seats", "rooms_furniture"
+                ],
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect.fail();
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
     it("Should be able to find rooms with more than a certain number of seats.", function () {
         let query: QueryRequest = {
             "WHERE": {

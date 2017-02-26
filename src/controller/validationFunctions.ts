@@ -68,27 +68,18 @@ export default class Validate {
             let options = query.OPTIONS;
             let columns = options.COLUMNS;
             let courseQuery = true;
+            let sub = columns[0].substr(0, columns[0].indexOf('_'));
             columns.forEach(column => {
-                if (this.coursesColumns.indexOf(column) == -1) {
-                    courseQuery = false;
+                if (!column.includes(sub)) {
+                    reject({
+                        code: 400,
+                        body: {
+                            "error": "Invalid QueryRequest"
+                        }
+                    })
                 }
             });
-            if (courseQuery) {
-                fulfill('courses');
-            }
-            else {
-                columns.forEach(column => {
-                    if (this.roomsColumns.indexOf(column) == -1) {
-                        reject({
-                            code: 424,
-                            body: {
-                                "missing": ["courses"]
-                            }
-                        });
-                    }
-                });
-                fulfill('rooms');
-            }
+            fulfill(sub);
         })
 
     }
