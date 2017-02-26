@@ -193,6 +193,41 @@ describe("RoomsSpec", function () {
             });
     });
 
+    it("Should be able to find rooms with a certain type of furniture.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_fullname",
+                    "rooms_shortname",
+                    "rooms_number",
+                    "rooms_name",
+                    "rooms_address",
+                    "rooms_lat",
+                    "rooms_lon",
+                    "rooms_seats",
+                    "rooms_type",
+                    "rooms_furniture",
+                    "rooms_href"
+                ],
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
     it("Should removeDataSet", () => {
         return insFac.removeDataset("rooms")
             .then(res => {

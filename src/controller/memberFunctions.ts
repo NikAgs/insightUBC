@@ -101,10 +101,12 @@ export default class Helpers {
         let self = this;
         let relPath = roomRec.rooms_href.substr(2);
         roomRec.rooms_href = 'http://students.ubc.ca' + roomRec.rooms_href.substr(1);
-        self.loadGeoInfo(roomRec, roomRec.rooms_address)
-            .then(val => {
-                roomRec = val;
-            });
+        return self.loadGeoInfo(roomRec, roomRec.rooms_address)
+            .then(val => self.parseRoomInfo(relPath, val, zip));
+    }
+
+    parseRoomInfo(relPath: string, roomRec: Object, zip: any) {
+        let self = this;
         let arr: roomRecord[] = [];
         return new Promise((fulfill, reject) => {
             zip.file(relPath)
@@ -174,6 +176,7 @@ export default class Helpers {
                             roomRec.rooms_lat = geoRes.lat;
                             roomRec.rooms_lon = geoRes.lon;
                         }
+                        // console.log(roomRec);
                         fulfill(roomRec);
                     } catch (e) {
                         reject(null);
