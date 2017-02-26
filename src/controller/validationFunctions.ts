@@ -63,26 +63,34 @@ export default class Validate {
         }));
     };
 
-    checkForFields(query: QueryRequest) {
-        let options = query.OPTIONS;
-        let columns = options.COLUMNS;
-        let courseQuery = true;
-        columns.forEach(column => {
-            if (this.coursesColumns.indexOf(column) == -1) {
-                courseQuery = false;
-            }
-        });
-        if (courseQuery) {
-            return 'courses';
-        }
-        else {
+    findDataset(query: QueryRequest) {
+        return new Promise((fulfill, reject) => {
+            let options = query.OPTIONS;
+            let columns = options.COLUMNS;
+            let courseQuery = true;
             columns.forEach(column => {
-                if (this.roomsColumns.indexOf(column) == -1) {
-                    return false;
+                if (this.coursesColumns.indexOf(column) == -1) {
+                    courseQuery = false;
                 }
             });
-            return 'rooms';
-        }
+            if (courseQuery) {
+                fulfill('courses');
+            }
+            else {
+                columns.forEach(column => {
+                    if (this.roomsColumns.indexOf(column) == -1) {
+                        reject({
+                            code: 424,
+                            body: {
+                                "missing": ["courses"]
+                            }
+                        });
+                    }
+                });
+                fulfill('rooms');
+            }
+        })
+
     }
 
     checkForQuery(query: QueryRequest) {
@@ -92,7 +100,6 @@ export default class Validate {
             if (filter && optionsRequest) {
                 this.checkForOptions(optionsRequest)
                     .then(() => this.checkForWhere(filter))
-                    .then(() => this.checkForFields(query))
                     .then((res) => {
                         fulfill(res);
                     })

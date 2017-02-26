@@ -74,7 +74,7 @@ describe("RoomsSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -99,7 +99,58 @@ describe("RoomsSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should be able to find rooms with more than a certain number of seats.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "GT": {
+                    "rooms_seats": 200
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_address", "rooms_name", "rooms_seats", "rooms_furniture"
+                ],
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+
+    it("Should be able to find rooms with more than a certain number of seats.", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "GT": {
+                    "rooms_seats": 200
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_address", "rooms_name", "rooms_seats", "rooms_furniture"
+                ],
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {

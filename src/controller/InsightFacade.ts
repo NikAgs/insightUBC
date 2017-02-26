@@ -124,21 +124,25 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((fulfill, reject) => {
             let filter = query.WHERE;
             let optionsRequest = query.OPTIONS;
-            // if (
-            //     (!this.helpers.dataSet.has("courses") && this.helpers.dataSet.get('courses').length > 0)
-            // ) {
-            //     reject({
-            //         code: 424,
-            //         body: {
-            //             "missing": ["courses"]
-            //         }
-            //     });
-            // }
-            // else {
-            this.helpers.validate.checkForQuery(query)
-                .then((tableType: string) => this.helpers.runForFilter(filter, tableType))
-                .then((response) => this.helpers.runForOptions(response, optionsRequest))
-                .then((response) => {
+            let chosenDataset: string;
+            this.helpers.validate.findDataset(query)
+                .then((tableType: string) => {
+                    if (!this.helpers.dataSet.has(tableType)) {
+                        reject({
+                            code: 424,
+                            body: {
+                                "missing": ["courses"]
+                            }
+                        });
+                    }
+                    else {
+                        chosenDataset = tableType;
+                        return this.helpers.validate.checkForQuery(query);
+                    }
+                })
+                .then(() => this.helpers.runForFilter(filter, chosenDataset))
+                .then((response: [Object]) => this.helpers.runForOptions(response, optionsRequest))
+                .then((response: [Object]) => {
                     //console.log(response);
                     fulfill(
                         {
@@ -149,7 +153,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         });
                 })
-                .catch(err => {
+                .catch((err: InsightResponse) => {
                     reject(err);
                 });
             // }
