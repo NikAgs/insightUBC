@@ -257,7 +257,7 @@ export default class Helpers {
         });
     }
 
-    filterForString(filter: Object): Promise<[Object]> {
+    filterForString(filter: Object, table: string): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             let columnName: string;
@@ -279,7 +279,7 @@ export default class Helpers {
                 .then(() => {
                     let finalObj: [Object];
                     // console.log(self.dataSet.length);
-                    self.dataSet.get("courses").forEach(course => {
+                    self.dataSet.get(table).forEach(course => {
                         if (course.length > 0) {
                             course.forEach((record: any) => {
                                 if (self.validate.comparePartial(record[columnName], value)) {
@@ -300,7 +300,7 @@ export default class Helpers {
         })
     }
 
-    filterForMath(filter: Object, comp: string): Promise<[Object]> {
+    filterForMath(filter: Object, comp: string, table: string): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             let columnName: string;
@@ -324,7 +324,7 @@ export default class Helpers {
                     switch (comp) {
                         case "GT": {
                             // console.log(columnName, value, "In GT");
-                            self.dataSet.get("courses").forEach(course => {
+                            self.dataSet.get(table).forEach(course => {
                                 if (course.length > 0) {
                                     course.forEach((record: any) => {
                                         let recordValue = record[columnName];
@@ -343,7 +343,7 @@ export default class Helpers {
                         }
                         case "LT": {
                             // console.log(columnName, value, "In LT");
-                            self.dataSet.get("courses").forEach(course => {
+                            self.dataSet.get(table).forEach(course => {
                                 if (course.length > 0) {
                                     course.forEach((record: any) => {
                                         if (record[columnName] < value) {
@@ -361,7 +361,7 @@ export default class Helpers {
                         }
                         case "EQ": {
                             // console.log(columnName, value, "In Eq");
-                            self.dataSet.get("courses").forEach(course => {
+                            self.dataSet.get(table).forEach(course => {
                                 if (course.length > 0) {
                                     course.forEach((record: any) => {
                                         if (record[columnName] == value) {
@@ -385,13 +385,13 @@ export default class Helpers {
         });
     }
 
-    runForFilter(query: FILTER): Promise<[courseRecord]> {
+    runForFilter(query: FILTER, id: string): Promise<[courseRecord]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             let filterKeys = Object.keys(query);
             filterKeys.forEach(key => {
                 if (key === "IS") {
-                    this.filterForString(query[key])
+                    this.filterForString(query[key], id)
                         .then((records) => {
                             // console.log(records);
                             fulfill(records);
@@ -411,7 +411,7 @@ export default class Helpers {
                         });
                 }
                 else if (key === "GT" || key === "LT" || key === "EQ") {
-                    this.filterForMath(query[key], key)
+                    this.filterForMath(query[key], key, id)
                         .then((recordsFromMath) => {
                             fulfill(recordsFromMath);
                         })
@@ -443,9 +443,9 @@ export default class Helpers {
                     }
                     filters.forEach(filter => {
                         if (promiseArray && promiseArray.length > 0)
-                            promiseArray.push(this.runForFilter(filter));
+                            promiseArray.push(this.runForFilter(filter, id));
                         else
-                            promiseArray = [this.runForFilter(filter)];
+                            promiseArray = [this.runForFilter(filter, id)];
                     });
                     Promise.all(promiseArray)
                         .then(records => {
@@ -489,12 +489,12 @@ export default class Helpers {
                         });
                 }
                 else if (key === "NOT") {
-                    this.runForFilter(query[key])
+                    this.runForFilter(query[key], id)
                         .then(records => {
                             // console.log(key);
                             let finalObj: any = [];
                             // console.log("Records length", records.length);
-                            self.dataSet.get("courses").forEach((courseArray => {
+                            self.dataSet.get(id).forEach((courseArray => {
                                 let test = courseArray.filter(function (n: courseRecord) {
                                     return records.indexOf(n) === -1;
                                 });

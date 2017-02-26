@@ -57,35 +57,35 @@ export default class InsightFacade implements IInsightFacade {
                     });
             } else if (id === "rooms") {
                 self.helpers.parseDataForRooms(content)
-                .then((response) => {
-                    fs.access(id, function (err) {
-                        if (response.length > 0) {
-                            self.helpers.dataSet.set(id, response);
-                            if (err) {
-                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                    fulfill({
-                                        code: 204,
-                                        body: {}
+                    .then((response) => {
+                        fs.access(id, function (err) {
+                            if (response.length > 0) {
+                                self.helpers.dataSet.set(id, response);
+                                if (err) {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 204,
+                                            body: {}
+                                        });
                                     });
-                                });
+                                }
+                                else {
+                                    fs.writeFile(id, JSON.stringify(response), function (err: any) {
+                                        fulfill({
+                                            code: 201,
+                                            body: {}
+                                        });
+                                    });
+                                }
                             }
                             else {
-                                fs.writeFile(id, JSON.stringify(response), function (err: any) {
-                                    fulfill({
-                                        code: 201,
-                                        body: {}
-                                    });
+                                reject({
+                                    code: 400,
+                                    body: { "error": "No real data" }
                                 });
                             }
-                        }
-                        else {
-                            reject({
-                                code: 400,
-                                body: { "error": "No real data" }
-                            });
-                        }
-                    });
-                })
+                        });
+                    })
                     .catch((err) => {
                         // console.log(err);
                         reject(err);
@@ -124,33 +124,35 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((fulfill, reject) => {
             let filter = query.WHERE;
             let optionsRequest = query.OPTIONS;
-            if (!this.helpers.dataSet.has("courses")) {
-                reject({
-                    code: 424,
-                    body: {
-                        "missing": ["courses"]
-                    }
+            // if (
+            //     (!this.helpers.dataSet.has("courses") && this.helpers.dataSet.get('courses').length > 0)
+            // ) {
+            //     reject({
+            //         code: 424,
+            //         body: {
+            //             "missing": ["courses"]
+            //         }
+            //     });
+            // }
+            // else {
+            this.helpers.validate.checkForQuery(query)
+                .then((tableType: string) => this.helpers.runForFilter(filter, tableType))
+                .then((response) => this.helpers.runForOptions(response, optionsRequest))
+                .then((response) => {
+                    //console.log(response);
+                    fulfill(
+                        {
+                            code: 200,
+                            body: {
+                                render: 'TABLE',
+                                result: response
+                            }
+                        });
+                })
+                .catch(err => {
+                    reject(err);
                 });
-            }
-            else {
-                this.helpers.validate.checkForQuery(query)
-                    .then(() => this.helpers.runForFilter(filter))
-                    .then((response) => this.helpers.runForOptions(response, optionsRequest))
-                    .then((response) => {
-                        //console.log(response);
-                        fulfill(
-                            {
-                                code: 200,
-                                body: {
-                                    render: 'TABLE',
-                                    result: response
-                                }
-                            });
-                    })
-                    .catch(err => {
-                        reject(err);
-                    });
-            }
+            // }
         })
     }
 }

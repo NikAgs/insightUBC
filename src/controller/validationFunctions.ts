@@ -23,12 +23,59 @@ export default class Validate {
         "rooms_furniture",
         "rooms_href",];
 
+    public roomsColumns: [string] = [
+        "rooms_fullname",
+        "rooms_shortname",
+        "rooms_number",
+        "rooms_name",
+        "rooms_address",
+        "rooms_lat",
+        "rooms_lon",
+        "rooms_seats",
+        "rooms_type",
+        "rooms_furniture",
+        "rooms_href"
+    ]
+
+    public coursesColumns: [String] = [
+        "courses_dept",
+        "courses_id",
+        "courses_avg",
+        "courses_instructor",
+        "courses_title",
+        "courses_pass",
+        "courses_fail",
+        "courses_audit",
+        "courses_uuid"
+    ]
 
     union(a: any, b: any): Promise<any> {
         return a.concat(b.filter(function (r: any) {
             return a.indexOf(r) < 0;
         }));
     };
+
+    checkForFields(query: QueryRequest) {
+        let options = query.OPTIONS;
+        let columns = options.COLUMNS;
+        let courseQuery = true;
+        columns.forEach(column => {
+            if (this.coursesColumns.indexOf(column) == -1) {
+                courseQuery = false;
+            }
+        });
+        if (courseQuery) {
+            return 'courses';
+        }
+        else {
+            columns.forEach(column => {
+                if (this.roomsColumns.indexOf(column) == -1) {
+                    return false;
+                }
+            });
+            return 'rooms';
+        }
+    }
 
     checkForQuery(query: QueryRequest) {
         return new Promise((fulfill, reject) => {
@@ -37,8 +84,9 @@ export default class Validate {
             if (filter && optionsRequest) {
                 this.checkForOptions(optionsRequest)
                     .then(() => this.checkForWhere(filter))
-                    .then(() => {
-                        fulfill();
+                    .then(() => this.checkForFields(query))
+                    .then((res) => {
+                        fulfill(res);
                     })
                     .catch((err) => {
                         reject(err);
@@ -135,7 +183,8 @@ export default class Validate {
                     switch (type) {
                         case 'string':
                             {
-                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title'].indexOf(column) == -1) {
+                                if (['courses_dept', 'courses_id', 'courses_instructor', 'courses_title',
+                                    "rooms_fullname", "rooms_shortname", "rooms_number", "rooms_name", "rooms_address", "rooms_type", "rooms_furniture", "rooms_href"].indexOf(column) == -1) {
                                     reject({
                                         code: 400,
                                         body: {
@@ -146,7 +195,10 @@ export default class Validate {
                                 break;
                             }
                         case 'integer': {
-                            if (['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id'].indexOf(column) == -1) {
+                            if (
+                                ['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id'
+                                    , "rooms_lat", "rooms_lon", "rooms_seats",
+                                ].indexOf(column) == -1) {
                                 reject({
                                     code: 400,
                                     body: {
