@@ -141,7 +141,7 @@ export default class Helpers {
                                             }
                                         }
                                         retRoom.rooms_name = retRoom.rooms_shortname + "_" + retRoom.rooms_number;
-                                        retRoom.rooms_href = roomRec.rooms_href + "-" + retRoom.rooms_number;
+                                        retRoom.rooms_href = 'http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/' + retRoom.rooms_shortname + "-" + retRoom.rooms_number;
                                         arr.push(retRoom);
                                     }
                                 }
