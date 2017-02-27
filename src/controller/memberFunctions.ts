@@ -105,7 +105,7 @@ export default class Helpers {
             .then(val => self.parseRoomInfo(relPath, val, zip));
     }
 
-    parseRoomInfo(relPath: string, roomRec: Object, zip: any) {
+    parseRoomInfo(relPath: string, roomRec: any, zip: any) {
         let self = this;
         let arr: roomRecord[] = [];
         return new Promise((fulfill, reject) => {
@@ -141,6 +141,7 @@ export default class Helpers {
                                             }
                                         }
                                         retRoom.rooms_name = retRoom.rooms_shortname + "_" + retRoom.rooms_number;
+                                        retRoom.rooms_href = roomRec.rooms_href + "-" + retRoom.rooms_number;
                                         arr.push(retRoom);
                                     }
                                 }
