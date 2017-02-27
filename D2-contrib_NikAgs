@@ -1,0 +1,12 @@
+# TEST PASS RATE: 84%
+# COVER RATE:  93%
+
+## Contributions
+- Wrote Partial Names code [https://github.com/CS310-2017Jan/cpsc310project_team114/commit/b87a5e42ae7a430a1a64c72b971aa9c81c5010fd]
+- Modified addDataSet to work with rooms [https://github.com/CS310-2017Jan/cpsc310project_team114/commit/067fd0023378f44b711b1a25cdf3e5207b4f686f]
+	- parsed building info from index.htm
+	- parsed room info from link
+	- retrieved GeoResponse 
+
+## Retrospective
+The deliverable was overall much easier than d1. We finished most of the remaining d1 work within the first week and almost all of d2 in the last week. We never really struggled on time as we did last time. Next deliverable will hopefully go the same way. 
