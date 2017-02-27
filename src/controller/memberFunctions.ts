@@ -127,7 +127,7 @@ export default class Helpers {
                                                         break;
 
                                                     case "views-field views-field-field-room-capacity":
-                                                        retRoom.rooms_seats = data.childNodes[0].value.trim();
+                                                        retRoom.rooms_seats = parseInt(data.childNodes[0].value.trim());
                                                         break;
 
                                                     case "views-field views-field-field-room-furniture":
