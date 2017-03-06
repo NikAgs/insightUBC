@@ -36,10 +36,14 @@ export interface roomRecord {
     rooms_href?: string;
 }
 
+export interface ORDER{
+    "dir" ?: string;
+    "keys" ?: [string];
+}
 
 export interface OPTIONS {
     COLUMNS: [string];
-    ORDER?: string;
+    ORDER?: ORDER;
     FORM?: 'TABLE';
 }
 
@@ -65,10 +69,22 @@ export interface NEGATION {
     "NOT"?: FILTER
 }
 
+export interface GROUP {
+    GROUP: [string];
+}
+
+export interface APPLY {
+    APPLY: any
+}
+
+export interface TRANSFORMATIONS extends GROUP, APPLY {
+}
+
 export interface QueryRequest {
     // you can define your own structure that complies with the EBNF here
     WHERE: FILTER;
     OPTIONS: OPTIONS;
+    TRANSFORMATIONS?: TRANSFORMATIONS;
 }
 
 export interface GeoResponse {
