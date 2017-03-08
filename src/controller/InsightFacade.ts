@@ -125,6 +125,7 @@ export default class InsightFacade implements IInsightFacade {
             let filter = query.WHERE;
             let optionsRequest = query.OPTIONS;
             let chosenDataset: string;
+            let transformations = query.TRANSFORMATIONS;
             this.helpers.validate.findDataset(query)
                 .then((tableType: string) => {
                     if (!this.helpers.dataSet.has(tableType)) {
@@ -141,6 +142,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
                 })
                 .then(() => this.helpers.runForFilter(filter, chosenDataset))
+                .then((response: [Object])=> this.helpers.applyTransformations(response, transformations))
                 .then((response: [Object]) => this.helpers.runForOptions(response, optionsRequest))
                 .then((response: [Object]) => {
                     //console.log(response);

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import {
     IInsightFacade, InsightResponse,
     QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION,
-    courseRecord, roomRecord, GeoResponse
+    courseRecord, roomRecord, GeoResponse, TRANSFORMATIONS
 } from "./IInsightFacade";
 
 import * as parse5 from 'parse5';
@@ -527,6 +527,15 @@ export default class Helpers {
                 }
             });
         })
+    }
+
+    applyTransformations(records: [courseRecord], transformations: TRANSFORMATIONS): Promise<[Object]> {
+        let self = this;
+        let group = transformations.GROUP;
+        let apply = transformations.APPLY;
+        return new Promise((fulfill, reject) => {
+            fulfill(records);
+        });
     }
 
     runForOptions(records: [courseRecord], options: OPTIONS): Promise<[courseRecord]> {
