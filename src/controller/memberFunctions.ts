@@ -544,7 +544,18 @@ export default class Helpers {
                 })
                 finalRecords.push(recordObj);
             });
-            if (order) {
+            if (typeof order === 'object') {
+                var fields = order.keys;
+                finalRecords.sort(
+                    (a: any, b: any) => fields.map((o: any) => {
+                        return a[o] > b[o] ? 1 : a[o] < b[o] ? -1 : 0;
+                    })
+                        .reduce((p: any, n: any) => p ? p : n, 0));
+                if (order.dir === "DOWN") {
+                    finalRecords.reverse();
+                }
+            }
+            else if (typeof order === 'string') {
                 finalRecords.sort((a: any, b: any) => {
                     return a[order] > b[order] ? 1 : -1;
                 });

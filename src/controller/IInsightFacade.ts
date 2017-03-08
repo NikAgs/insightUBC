@@ -36,14 +36,9 @@ export interface roomRecord {
     rooms_href?: string;
 }
 
-export interface ORDER{
-    "dir" ?: string;
-    "keys" ?: [string];
-}
-
 export interface OPTIONS {
     COLUMNS: [string];
-    ORDER?: ORDER;
+    ORDER?: any;
     FORM?: 'TABLE';
 }
 

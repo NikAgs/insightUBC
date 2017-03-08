@@ -155,17 +155,44 @@ export default class Validate {
             self.checkColumnIsValid(columns, '')
                 .then(() => {
                     if (order) {
-                        if (columns.indexOf(order) == -1) {
-                            reject(
-                                {
-                                    code: 400,
-                                    body: {
-                                        "error": "You can only sort on column declared in options"
+                        //for object
+                        if (typeof order === 'object') {
+                            if (order.dir != 'DOWN' || order.dir != 'UP') {
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "You can only sort in order up or down"
+                                        }
+                                    });
+                            } else {
+                                (order.keys).forEach((key: string) => {
+                                    if (columns.indexOf(order) == -1) {
+                                        reject(
+                                            {
+                                                code: 400,
+                                                body: {
+                                                    "error": "You can only sort on column declared in options"
+                                                }
+                                            });
                                     }
                                 });
+                                fulfill();
+                            }
                         }
                         else {
-                            fulfill();
+                            if (columns.indexOf(order) == -1) {
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "You can only sort on column declared in options"
+                                        }
+                                    });
+                            }
+                            else {
+                                fulfill();
+                            }
                         }
                     }
                     else
