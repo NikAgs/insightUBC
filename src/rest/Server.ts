@@ -6,7 +6,8 @@
 import restify = require('restify');
 
 import Log from "../Util";
-import {InsightResponse} from "../controller/IInsightFacade";
+import { InsightResponse } from "../controller/IInsightFacade";
+import InsightFacade from "../controller/InsightFacade";
 
 /**
  * This configures the REST endpoints for the server.
@@ -15,10 +16,13 @@ export default class Server {
 
     private port: number;
     private rest: restify.Server;
+    private insFac: InsightFacade = null;
+
 
     constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
         this.port = port;
+        this.insFac = new InsightFacade();
     }
 
     /**
@@ -59,6 +63,56 @@ export default class Server {
                     return next();
                 });
 
+                that.rest.use(restify.bodyParser({ mapParams: true, mapFiles: true }));
+
+                that.rest.put('/dataset/:id', (req: restify.Request, res: restify.Response, next: restify.Next) => {
+                    let dataStr = new Buffer(req.params.body).toString('base64');
+                    return that.insFac.addDataset(req.params.id, dataStr)
+                        .then(sol => {
+                            console.log("Res", sol);
+                            // res.code = sol.code;
+                            res.send(sol.code, sol.body);
+                            return next();
+                        })
+                        .catch((err) => {
+                            // console.log("Err", err);
+                            res.code = err.code;
+                            res.send(err.code, err.body);
+                            return next();
+                        })
+                });
+
+                that.rest.post('/query', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    return that.insFac.performQuery(req.body)
+                        .then(sol => {
+                            // console.log("Res", sol);
+                            // res.code = sol.code;
+                            res.send(sol.code, sol.body);
+                            return next();
+                        })
+                        .catch((err) => {
+                            console.log("Err", err);
+                            res.send(err.code, err.body);
+                            return next();
+                        })
+                });
+
+                that.rest.del('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    return that.insFac.removeDataset(req.params.id)
+                        .then(sol => {
+                            console.log("Res", sol);
+                            // res.code = sol.code;
+                            res.send(sol.code, sol.body);
+                            return next();
+                        })
+                        .catch((err) => {
+                            // console.log("Err", err);
+                            res.code = err.code;
+                            res.send(err.code, err.body);
+                            return next();
+                        })
+                });
+                
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
                 that.rest.get('/echo/:msg', Server.echo);
@@ -94,16 +148,16 @@ export default class Server {
             res.json(result.code, result.body);
         } catch (err) {
             Log.error('Server::echo(..) - responding 400');
-            res.json(400, {error: err.message});
+            res.json(400, { error: err.message });
         }
         return next();
     }
 
     public static performEcho(msg: string): InsightResponse {
         if (typeof msg !== 'undefined' && msg !== null) {
-            return {code: 200, body: {message: msg + '...' + msg}};
+            return { code: 200, body: { message: msg + '...' + msg } };
         } else {
-            return {code: 400, body: {error: 'Message not provided'}};
+            return { code: 400, body: { error: 'Message not provided' } };
         }
     }
 
