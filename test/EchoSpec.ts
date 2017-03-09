@@ -64,6 +64,24 @@ describe("EchoSpec", function () {
                 // some assertions
                 console.log(err.status)
             });
+    }); 
+    
+    it("PUT description fail", function () {
+        return chai.request("localhost:3000")
+            .put('/dataset/rooms')
+            // .attach("body", fs.readFileSync("./rooms.zip"), "rooms.zip")
+            .then(function (res: any) {
+                Log.trace('then:');
+                // some assertions
+                console.log(res.status);
+                expect.fail();
+                // console.log(res.body);
+            })
+            .catch(function (err: any) {
+                Log.trace('catch:');
+                // some assertions
+                console.log(err.status)
+            });
     });
 
     it("PUT description", function () {

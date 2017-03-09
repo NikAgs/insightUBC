@@ -66,20 +66,27 @@ export default class Server {
                 that.rest.use(restify.bodyParser({ mapParams: true, mapFiles: true }));
 
                 that.rest.put('/dataset/:id', (req: restify.Request, res: restify.Response, next: restify.Next) => {
-                    let dataStr = new Buffer(req.params.body).toString('base64');
-                    return that.insFac.addDataset(req.params.id, dataStr)
-                        .then(sol => {
-                            console.log("Res", sol);
-                            // res.code = sol.code;
-                            res.send(sol.code, sol.body);
-                            return next();
-                        })
-                        .catch((err) => {
-                            // console.log("Err", err);
-                            res.code = err.code;
-                            res.send(err.code, err.body);
-                            return next();
-                        })
+                    if (req.params.body) {
+                        let dataStr = new Buffer(req.params.body).toString('base64');
+                        return that.insFac.addDataset(req.params.id, dataStr)
+                            .then(sol => {
+                                console.log("Res", sol);
+                                // res.code = sol.code;
+                                res.send(sol.code, sol.body);
+                                return next();
+                            })
+                            .catch((err) => {
+                                // console.log("Err", err);
+                                res.code = err.code;
+                                res.send(err.code, err.body);
+                                return next();
+                            })
+                    }
+                    else {
+                        res.send(400, { "error": "No real data" });
+                        return next();
+                    }
+
                 });
 
                 that.rest.post('/query', function (req: restify.Request, res: restify.Response, next: restify.Next) {
@@ -112,7 +119,7 @@ export default class Server {
                             return next();
                         })
                 });
-                
+
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
                 that.rest.get('/echo/:msg', Server.echo);
