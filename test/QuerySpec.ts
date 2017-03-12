@@ -81,18 +81,18 @@ describe("QuerySpec", function () {
                 },
                 "FORM": "TABLE"
             },
-            // "TRANSFORMATIONS": {
-            //     "GROUP": ["rooms_shortname"],
-            //     "APPLY": [{
-            //         "string": {
-            //             "MAX": "rooms_seats"
-            //         }
-            //     }]
-            // }
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname"],
+                "APPLY": [{
+                    "stringMax": {
+                        "COUNT": "rooms_shortname"
+                    }
+                }]
+            }
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {

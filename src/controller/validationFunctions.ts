@@ -1,28 +1,6 @@
-import { GeoResponse, InsightResponse, QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
+import { GeoResponse, InsightResponse, QueryRequest, FILTER, TRANSFORMATIONS, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION, courseRecord } from "./IInsightFacade";
 
 export default class Validate {
-    public columnNames: [String] =
-    ["courses_dept",
-        "courses_id",
-        "courses_avg",
-        "courses_instructor",
-        "courses_title",
-        "courses_pass",
-        "courses_fail",
-        "courses_audit",
-        "courses_uuid",
-        "courses_year",
-        "rooms_fullname",
-        "rooms_shortname",
-        "rooms_number",
-        "rooms_name",
-        "rooms_address",
-        "rooms_lat",
-        "rooms_lon",
-        "rooms_seats",
-        "rooms_type",
-        "rooms_furniture",
-        "rooms_href",];
 
     public roomsColumns: [string] = [
         "rooms_fullname",
@@ -38,7 +16,7 @@ export default class Validate {
         "rooms_href"
     ]
 
-    public coursesColumns: [String] = [
+    public coursesColumns: [string] = [
         "courses_dept",
         "courses_id",
         "courses_avg",
@@ -51,11 +29,19 @@ export default class Validate {
         "courses_year"
     ]
 
+    public columnNames: string[] = this.roomsColumns.concat(this.coursesColumns);
+
+
     public numericColumns: [string] = ['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id', 'courses_year'
         , "rooms_lat", "rooms_lon", "rooms_seats"]
 
     public stringColumns: [string] = ['courses_dept', 'courses_id', 'courses_instructor', 'courses_title',
         "rooms_fullname", "rooms_shortname", "rooms_number", "rooms_name", "rooms_address", "rooms_type", "rooms_furniture", "rooms_href"]
+
+
+    public numberTransforms: [string] = ['MAX', 'MIN', 'AVG', 'SUM'];
+
+    public acceptableTranforms: string[] = this.numberTransforms.concat(['COUNT']);
 
     union(a: any, b: any): Promise<any> {
         return a.concat(b.filter(function (r: any) {
@@ -97,12 +83,18 @@ export default class Validate {
         return new Promise((fulfill, reject) => {
             let filter = query.WHERE;
             let optionsRequest = query.OPTIONS;
+            let transformationRequest = query.TRANSFORMATIONS;
             if (filter && optionsRequest) {
                 this.checkForOptions(optionsRequest)
                     .then(() => this.checkForWhere(filter))
-                    .then((res) => {
-                        fulfill(res);
+                    .then(() => {
+                        if (transformationRequest) {
+                            return this.checkForTransformations(transformationRequest);
+                        }
+                        else
+                            return true;
                     })
+                    .then(() => fulfill())
                     .catch((err) => {
                         reject(err);
                     })
@@ -155,53 +147,13 @@ export default class Validate {
             self.checkColumnIsValid(columns, '')
                 .then(() => {
                     if (order) {
-                        //for object
-                        if (typeof order === 'object') {
-                            if (order.dir.includes("DOWN") || order.dir.includes("UP")) {
-                                let orderKeys: [string] = order.keys;
-                                (order.keys).forEach((key: string) => {
-                                    orderKeys.forEach(key => {
-                                        if (columns.indexOf(key) == -1) {
-                                            reject(
-                                                {
-                                                    code: 400,
-                                                    body: {
-                                                        "error": "You can only sort on column declared in options"
-                                                    }
-                                                });
-                                        }
-                                    })
-
-                                });
-                                fulfill();
-                            } else {
-                                reject(
-                                    {
-                                        code: 400,
-                                        body: {
-                                            "error": "You can only sort in order up or down"
-                                        }
-                                    });
-                            }
-                        }
-                        else {
-                            if (columns.indexOf(order) == -1) {
-                                reject(
-                                    {
-                                        code: 400,
-                                        body: {
-                                            "error": "You can only sort on column declared in options"
-                                        }
-                                    });
-                            }
-                            else {
-                                fulfill();
-                            }
-                        }
+                        return self.checkForOrder(order, columns);
                     }
                     else
                         fulfill();
-                }).catch(err => {
+                })
+                .then(() => fulfill())
+                .catch(err => {
                     // console.log(err);
                     reject(
                         {
@@ -211,6 +163,113 @@ export default class Validate {
                             }
                         });
                 })
+        })
+    }
+
+    checkForTransformations(trans: TRANSFORMATIONS) {
+        let self = this;
+        return new Promise((fulfill, reject) => {
+            let group = trans.GROUP;
+            let apply = trans.APPLY;
+            self.checkColumnIsValid(group, '')
+                .then(() => {
+                    apply.forEach((obj: any) => {
+                        let keys = Object.keys(obj);
+                        if (keys.length > 1) {
+                            reject({
+                                code: 400,
+                                body: {
+                                    "error": "Not more than one key in APPLY TOKEN"
+                                }
+                            })
+                        }
+                        else {
+                            if (keys[0].includes("_")) {
+                                reject({
+                                    code: 400,
+                                    body: {
+                                        "error": "Cannot include _"
+                                    }
+                                })
+                            }
+                            let actualTransform = obj[keys[0]];
+                            let actObjKeys = Object.keys(actualTransform);
+                            if (self.acceptableTranforms.indexOf(actObjKeys[0]) == -1) {
+                                reject({
+                                    code: 400,
+                                    body: {
+                                        "error": "Not a permissable transform"
+                                    }
+                                })
+                            }
+                            else {
+                                if (self.numberTransforms.indexOf(actObjKeys[0]) > -1) {
+                                    return self.checkColumnIsValid([actualTransform[actObjKeys[0]]], 'integer')
+                                        .catch((err) => {
+                                            reject(err);
+                                        })
+                                }
+                                else {
+                                    return true;
+                                }
+                            }
+                        }
+                    })
+                })
+                .catch((err) => {
+                    reject(err);
+                })
+                .then(() => fulfill())
+                .catch((err) => {
+                    reject(err);
+                })
+        })
+    }
+
+    checkForOrder(order: any, columns: [string]) {
+        return new Promise((fulfill, reject) => {
+            if (typeof order === 'object') {
+                if (order.dir.includes("DOWN") || order.dir.includes("UP")) {
+                    let orderKeys: [string] = order.keys;
+                    (order.keys).forEach((key: string) => {
+                        orderKeys.forEach(key => {
+                            if (columns.indexOf(key) == -1) {
+                                reject(
+                                    {
+                                        code: 400,
+                                        body: {
+                                            "error": "You can only sort on column declared in options"
+                                        }
+                                    });
+                            }
+                        })
+
+                    });
+                    fulfill();
+                } else {
+                    reject(
+                        {
+                            code: 400,
+                            body: {
+                                "error": "You can only sort in order up or down"
+                            }
+                        });
+                }
+            }
+            else {
+                if (columns.indexOf(order) == -1) {
+                    reject(
+                        {
+                            code: 400,
+                            body: {
+                                "error": "You can only sort on column declared in options"
+                            }
+                        });
+                }
+                else {
+                    fulfill();
+                }
+            }
         })
     }
 

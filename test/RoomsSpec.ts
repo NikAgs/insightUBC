@@ -246,7 +246,7 @@ describe("RoomsSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
