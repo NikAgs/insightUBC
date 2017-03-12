@@ -157,7 +157,24 @@ export default class Validate {
                     if (order) {
                         //for object
                         if (typeof order === 'object') {
-                            if (order.dir != 'DOWN' || order.dir != 'UP') {
+                            if (order.dir.includes("DOWN") || order.dir.includes("UP")) {
+                                let orderKeys: [string] = order.keys;
+                                (order.keys).forEach((key: string) => {
+                                    orderKeys.forEach(key => {
+                                        if (columns.indexOf(key) == -1) {
+                                            reject(
+                                                {
+                                                    code: 400,
+                                                    body: {
+                                                        "error": "You can only sort on column declared in options"
+                                                    }
+                                                });
+                                        }
+                                    })
+
+                                });
+                                fulfill();
+                            } else {
                                 reject(
                                     {
                                         code: 400,
@@ -165,19 +182,6 @@ export default class Validate {
                                             "error": "You can only sort in order up or down"
                                         }
                                     });
-                            } else {
-                                (order.keys).forEach((key: string) => {
-                                    if (columns.indexOf(order) == -1) {
-                                        reject(
-                                            {
-                                                code: 400,
-                                                body: {
-                                                    "error": "You can only sort on column declared in options"
-                                                }
-                                            });
-                                    }
-                                });
-                                fulfill();
                             }
                         }
                         else {
@@ -198,6 +202,7 @@ export default class Validate {
                     else
                         fulfill();
                 }).catch(err => {
+                    // console.log(err);
                     reject(
                         {
                             code: 400,

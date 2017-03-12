@@ -556,11 +556,12 @@ export default class Helpers {
             if (typeof order === 'object') {
                 var fields = order.keys;
                 finalRecords.sort(
-                    (a: any, b: any) => fields.map((o: any) => {
-                        return a[o] > b[o] ? 1 : a[o] < b[o] ? -1 : 0;
-                    })
-                        .reduce((p: any, n: any) => p ? p : n, 0));
-                if (order.dir === "DOWN") {
+                    (a: any, b: any) =>
+                        fields.map((o: any) => {
+                            return a[o] > b[o] ? 1 : a[o] < b[o] ? -1 : 0;
+                        })
+                            .reduce((p: any, n: any) => p ? p : n, 0));
+                if (order.dir.includes("DOWN")) {
                     finalRecords.reverse();
                 }
             }
