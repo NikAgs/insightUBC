@@ -173,48 +173,52 @@ export default class Validate {
             let apply = trans.APPLY;
             self.checkColumnIsValid(group, '')
                 .then(() => {
-                    apply.forEach((obj: any) => {
-                        let keys = Object.keys(obj);
-                        if (keys.length > 1) {
-                            reject({
-                                code: 400,
-                                body: {
-                                    "error": "Not more than one key in APPLY TOKEN"
-                                }
-                            })
-                        }
-                        else {
-                            if (keys[0].includes("_")) {
+                    if (apply.length == 0) {
+                        fulfill();
+                    } else {
+                        apply.forEach((obj: any) => {
+                            let keys = Object.keys(obj);
+                            if (keys.length > 1) {
                                 reject({
                                     code: 400,
                                     body: {
-                                        "error": "Cannot include _"
-                                    }
-                                })
-                            }
-                            let actualTransform = obj[keys[0]];
-                            let actObjKeys = Object.keys(actualTransform);
-                            if (self.acceptableTranforms.indexOf(actObjKeys[0]) == -1) {
-                                reject({
-                                    code: 400,
-                                    body: {
-                                        "error": "Not a permissable transform"
+                                        "error": "Not more than one key in APPLY TOKEN"
                                     }
                                 })
                             }
                             else {
-                                if (self.numberTransforms.indexOf(actObjKeys[0]) > -1) {
-                                    return self.checkColumnIsValid([actualTransform[actObjKeys[0]]], 'integer')
-                                        .catch((err) => {
-                                            reject(err);
-                                        })
+                                if (keys[0].includes("_")) {
+                                    reject({
+                                        code: 400,
+                                        body: {
+                                            "error": "Cannot include _"
+                                        }
+                                    })
+                                }
+                                let actualTransform = obj[keys[0]];
+                                let actObjKeys = Object.keys(actualTransform);
+                                if (self.acceptableTranforms.indexOf(actObjKeys[0]) == -1) {
+                                    reject({
+                                        code: 400,
+                                        body: {
+                                            "error": "Not a permissable transform"
+                                        }
+                                    })
                                 }
                                 else {
-                                    return true;
+                                    if (self.numberTransforms.indexOf(actObjKeys[0]) > -1) {
+                                        return self.checkColumnIsValid([actualTransform[actObjKeys[0]]], 'integer')
+                                            .catch((err) => {
+                                                reject(err);
+                                            })
+                                    }
+                                    else {
+                                        return true;
+                                    }
                                 }
                             }
-                        }
-                    })
+                        })
+                    }
                 })
                 .catch((err) => {
                     reject(err);
