@@ -156,7 +156,7 @@ describe("QuerySpec", function () {
                 "COLUMNS": [
                     "rooms_shortname",
                     "maxSeats",
-                    "minSeats"
+                    "averageSeats"
                 ],
                 "ORDER": "maxSeats",
                 "FORM": "TABLE"
@@ -172,8 +172,8 @@ describe("QuerySpec", function () {
                         }
                     },
                     {
-                        "minSeats": {
-                            "MIN": "rooms_seats"
+                        "averageSeats": {
+                            "AVG": "rooms_seats"
                         }
                     }
                 ]
@@ -181,11 +181,11 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
-                console.log(err);
+                // console.log(err);
                 expect.fail();
             });
     });
@@ -246,7 +246,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {

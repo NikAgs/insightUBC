@@ -619,10 +619,15 @@ export default class Helpers {
                 case 'AVG': {
                     let runningTotal = 0;
                     records.forEach((rec: any) => {
-                        runningTotal += rec[columnOn];
+                        let x: number = rec[columnOn] * 10;
+                        x = Number(x.toFixed(0));
+                        runningTotal += x;
                     });
+                    let avg = runningTotal / records.length;
+                    avg = avg / 10;
+                    let res = Number(avg.toFixed(2))
                     recordToKeep = records[0];
-                    recordToKeep.AVG = runningTotal / records.length;
+                    recordToKeep.AVG = res;
                     if (finalName) {
                         recordToKeep[finalName] = recordToKeep.AVG;
                     }
@@ -632,10 +637,69 @@ export default class Helpers {
                     recordToKeep = records[0];
                 }
             }
-            // console.log("Here", recordToKeep);
             fulfill(recordToKeep);
         })
     }
+
+    runForAllTransforms(records: [Object], apply: Object[]): Promise<Object> {
+        let self = this;
+        return new Promise((fulfill, reject) => {
+            let promiseArray: Promise<Object>[] = [];
+            if (apply.length > 0) {
+                try {
+                    apply.forEach(trans => {
+                        let obj: any = apply.length > 0 ? trans : null;
+                        let keys = obj ? Object.keys(trans) : null;
+                        let actualTransformObj = obj ? obj[keys[0]] : null;
+                        let actObjKeys = actualTransformObj ? Object.keys(actualTransformObj) : null;
+                        let val = actualTransformObj ? actualTransformObj[actObjKeys[0]] : null;
+                        let transform = actObjKeys ? actObjKeys[0] : null;
+                        let name = keys ? keys[0] : null;
+                        return promiseArray.push(self.applyTransform(records, transform, val, name));
+                    })
+                } catch (e) {
+                    console.log(e);
+                    reject({
+                        code: 400,
+                        body: {
+                            "error": e
+                        }
+                    });
+                }
+                Promise.all(promiseArray)
+                    .then(res => {
+                        let recordToSend: any = res[0];
+                        res.forEach((rec: any) => {
+                            apply.forEach(trans => {
+                                let obj: any = apply.length > 0 ? trans : null;
+                                let keys = obj ? Object.keys(trans) : null;
+                                let name = keys ? keys[0] : null;
+                                if (rec[name]) {
+                                    recordToSend[name] = rec[name];
+                                }
+                            });
+                        });
+                        fulfill(recordToSend);
+                    })
+            }
+            else {
+                let trans = apply[0];
+                let obj: any = apply.length > 0 ? trans : null;
+                let keys = obj ? Object.keys(trans) : null;
+                let actualTransformObj = obj ? obj[keys[0]] : null;
+                let actObjKeys = actualTransformObj ? Object.keys(actualTransformObj) : null;
+                let val = actualTransformObj ? actualTransformObj[actObjKeys[0]] : null;
+                let transform = actObjKeys ? actObjKeys[0] : null;
+                let name = keys ? keys[0] : null;
+                return self.applyTransform(records, transform, val, name)
+                    .then(res => {
+                        fulfill(res);
+                    });
+            }
+        })
+
+    }
+
     transform(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
@@ -649,29 +713,10 @@ export default class Helpers {
                         let resKeys: string[] = Object.keys(res);
                         let promiseArray: Promise<Object>[] = [];
                         resKeys.forEach((key: string) => {
-                            try {
-                                let recordsForKey: [any] = res[key];
-                                let obj = apply.length > 0 ? apply[0] : null;
-                                let keys = obj ? Object.keys(apply[0]) : null;
-                                let actualTransformObj = obj ? obj[keys[0]] : null;
-                                let actObjKeys = actualTransformObj ? Object.keys(actualTransformObj) : null;
-                                let val = actualTransformObj ? actualTransformObj[actObjKeys[0]] : null;
-                                let transform = actObjKeys ? actObjKeys[0] : null;
-                                let name = keys ? keys[0] : null;
-                                return promiseArray.push(self.applyTransform(recordsForKey, transform, val, name));
-                            } catch (e) {
-                                console.log(e);
-                                reject({
-                                    code: 400,
-                                    body: {
-                                        "error": e
-                                    }
-                                });
-                            }
+                            promiseArray.push(self.runForAllTransforms(res[key], apply))
                         });
                         Promise.all(promiseArray)
                             .then(res => {
-                                // console.log(res);
                                 fulfill(res);
                             })
                     })
