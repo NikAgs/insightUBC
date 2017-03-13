@@ -683,15 +683,7 @@ export default class Helpers {
                     })
             }
             else {
-                let trans = apply[0];
-                let obj: any = apply.length > 0 ? trans : null;
-                let keys = obj ? Object.keys(trans) : null;
-                let actualTransformObj = obj ? obj[keys[0]] : null;
-                let actObjKeys = actualTransformObj ? Object.keys(actualTransformObj) : null;
-                let val = actualTransformObj ? actualTransformObj[actObjKeys[0]] : null;
-                let transform = actObjKeys ? actObjKeys[0] : null;
-                let name = keys ? keys[0] : null;
-                return self.applyTransform(records, transform, val, name)
+                return self.applyTransform(records, null, null, null)
                     .then(res => {
                         fulfill(res);
                     });
