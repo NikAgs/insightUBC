@@ -538,12 +538,13 @@ export default class Helpers {
         })
     }
 
-    groupBy(grouping: string, records: [Object]): Promise<Object> {
+    groupBy(grouping: any[], records: [Object]): Promise<Object> {
         return new Promise((fulfill, reject) => {
             if (records.length != 0) {
                 let recordArrayObj: any = {};
                 records.forEach((record: any) => {
-                    let key = record[grouping];
+                    let key: string = "";
+                    grouping.forEach((group: string) => { return key += record[group] });
                     if (recordArrayObj[key]) {
                         recordArrayObj[key].push(record);
                     }
@@ -627,6 +628,9 @@ export default class Helpers {
                     }
                     break;
                 }
+                default: {
+                    recordToKeep = records[0];
+                }
             }
             // console.log("Here", recordToKeep);
             fulfill(recordToKeep);
@@ -640,34 +644,39 @@ export default class Helpers {
                 let apply = transformations.APPLY;
                 let finalRecords: Object[] = [];
                 // console.log(transformations);
-                return self.groupBy(group[0], records)
+                return self.groupBy(group, records)
                     .then((res: any) => {
                         let resKeys: string[] = Object.keys(res);
                         let promiseArray: Promise<Object>[] = [];
                         resKeys.forEach((key: string) => {
-                            let recordsForKey: [any] = res[key];
-                            let obj = apply[0];
-                            let keys = Object.keys(apply[0]);
-                            let actualTransformObj = obj[keys[0]];
-                            let actObjKeys = Object.keys(actualTransformObj);
-                            let val = actualTransformObj[actObjKeys[0]];
-                            let transform = actObjKeys[0];
-                            let name = keys[0];
-                            return promiseArray.push(self.applyTransform(recordsForKey, transform, val, name));
-                            // apply.forEach((columnName: string, obj: any) => {
-
-                            //     console.log(finalRecords);
-                            // });
+                            try {
+                                let recordsForKey: [any] = res[key];
+                                let obj = apply.length > 0 ? apply[0] : null;
+                                let keys = obj ? Object.keys(apply[0]) : null;
+                                let actualTransformObj = obj ? obj[keys[0]] : null;
+                                let actObjKeys = actualTransformObj ? Object.keys(actualTransformObj) : null;
+                                let val = actualTransformObj ? actualTransformObj[actObjKeys[0]] : null;
+                                let transform = actObjKeys ? actObjKeys[0] : null;
+                                let name = keys ? keys[0] : null;
+                                return promiseArray.push(self.applyTransform(recordsForKey, transform, val, name));
+                            } catch (e) {
+                                console.log(e);
+                                reject({
+                                    code: 400,
+                                    body: {
+                                        "error": e
+                                    }
+                                });
+                            }
                         });
                         Promise.all(promiseArray)
                             .then(res => {
                                 // console.log(res);
                                 fulfill(res);
                             })
-                        // fulfill(finalRecords);
                     })
             }
-            else{
+            else {
                 fulfill(records);
             }
         });

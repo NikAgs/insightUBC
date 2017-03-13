@@ -199,7 +199,7 @@ describe("QuerySpec", function () {
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "rooms_shortname",
+                    "rooms_shortname", "rooms_furniture",
                     "sumSeats"
                 ],
                 "ORDER": "rooms_shortname",
@@ -207,7 +207,7 @@ describe("QuerySpec", function () {
             },
             "TRANSFORMATIONS": {
                 "GROUP": [
-                    "rooms_shortname"
+                    "rooms_shortname", "rooms_furniture"
                 ],
                 "APPLY": [
                     {
