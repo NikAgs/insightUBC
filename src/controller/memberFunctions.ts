@@ -548,7 +548,7 @@ export default class Helpers {
                 if (records.length != 0) {
                     let finalRecords: any[] = [];
                     let past: any[] = [];
-                    let applyVals: APPLYTOKEN[] = [];
+                    let applyVals: Map<string, number>[] = [];
 
                     records.forEach((record: any) => {
                         let recordObj: any[] = [];
@@ -564,27 +564,27 @@ export default class Helpers {
                                 let actObjKeys = Object.keys(actualTransform);
                                 let val = actualTransform[actObjKeys[0]];
                                 if (applyVals[ind] == undefined) {
-                                    applyVals[ind] = {};
+                                    applyVals[ind] = new Map<any, any>();
                                 }
                                 switch (actObjKeys[0]) {
                                     case 'MAX':
                                         //console.log("we out here");
-                                        if (applyVals[ind].MAX) {
-                                            if (record[val] > applyVals[ind].MAX) {
-                                                applyVals[ind].MAX = record[val];
+                                        if (applyVals[ind].has(keys[0])) {
+                                            if (record[val] > applyVals[ind].get(keys[0])) {
+                                                applyVals[ind].set(keys[0], record[val]);
                                             }
                                         } else {
-                                            applyVals[ind].MAX = record[val];
+                                            applyVals[ind].set(keys[0], record[val]);
                                         }
                                         break;
 
                                     case 'MIN':
-                                        if (applyVals[ind].MAX) {
-                                            if (record[val] < applyVals[ind].MAX) {
-                                                applyVals[ind].MAX = record[val];
+                                        if (applyVals[ind].has(keys[0])) {
+                                            if (record[val] < applyVals[ind].get(keys[0])) {
+                                                applyVals[ind].set(keys[0], record[val]);
                                             }
                                         } else {
-                                            applyVals[ind].MAX = record[val];
+                                            applyVals[ind].set(keys[0], record[val]);
                                         }
                                         break;
 
@@ -599,18 +599,18 @@ export default class Helpers {
                                         break;
 
                                     case 'COUNT':
-                                        if (applyVals[ind].COUNT) {
-                                            applyVals[ind].COUNT++;
+                                        if (applyVals[ind].has(keys[0])) {
+                                            applyVals[ind].set(keys[0], applyVals[ind].get(keys[0]) + 1);
                                         } else {
-                                            applyVals[ind].COUNT = 1;
+                                            applyVals[ind].set(keys[0], 1);
                                         }
                                         break;
 
                                     case 'SUM':
-                                        if (applyVals[ind].SUM) {
-                                            applyVals[ind].SUM += record[val];
+                                        if (applyVals[ind].has(keys[0])) {
+                                            applyVals[ind].set(keys[0], applyVals[ind].get(keys[0]) + record[val]);
                                         } else {
-                                            applyVals[ind].SUM = record[val];
+                                            applyVals[ind].set(keys[0], record[val]);
                                         }
                                         break;
                                 }
@@ -625,27 +625,27 @@ export default class Helpers {
                                 let actObjKeys = Object.keys(actualTransform);
                                 let val = actualTransform[actObjKeys[0]];
                                 if (applyVals[index] == undefined) {
-                                    applyVals[index] = {};
+                                    applyVals[index] = new Map<any, any>();
                                 }
                                 switch (actObjKeys[0]) {
                                     case 'MAX':
                                         //console.log("we out here");
-                                        if (applyVals[index].MAX) {
-                                            if (record[val] > applyVals[index].MAX) {
-                                                applyVals[index].MAX = record[val];
+                                        if (applyVals[index].has(keys[0])) {
+                                            if (record[val] > applyVals[index].get(keys[0])) {
+                                                applyVals[index].set(keys[0], record[val]);
                                             }
                                         } else {
-                                            applyVals[index].MAX = record[val];
+                                            applyVals[index].set(keys[0], record[val]);
                                         }
                                         break;
 
                                     case 'MIN':
-                                        if (applyVals[index].MAX) {
-                                            if (record[val] < applyVals[index].MAX) {
-                                                applyVals[index].MAX = record[val];
+                                        if (applyVals[index].has(keys[0])) {
+                                            if (record[val] < applyVals[index].get(keys[0])) {
+                                                applyVals[index].set(keys[0], record[val]);
                                             }
                                         } else {
-                                            applyVals[index].MAX = record[val];
+                                            applyVals[index].set(keys[0], record[val]);
                                         }
                                         break;
 
@@ -660,46 +660,61 @@ export default class Helpers {
                                         break;
 
                                     case 'COUNT':
-                                        if (applyVals[index].COUNT) {
-                                            applyVals[index].COUNT++;
+                                        if (applyVals[index].has(keys[0])) {
+                                            applyVals[index].set(keys[0], applyVals[index].get(keys[0]) + 1);
                                         } else {
-                                            applyVals[index].COUNT = 1;
+                                            applyVals[index].set(keys[0], 1);
                                         }
                                         break;
 
                                     case 'SUM':
-                                        if (applyVals[index].SUM) {
-                                            applyVals[index].SUM += record[val];
+                                        if (applyVals[index].has(keys[0])) {
+                                            applyVals[index].set(keys[0], applyVals[index].get(keys[0]) + record[val]);
                                         } else {
-                                            applyVals[index].SUM = record[val];
+                                            applyVals[index].set(keys[0], record[val]);
                                         }
                                         break;
                                 }
                             })
                         }
                     });
-                    console.log(applyVals);
-                    fulfill(finalRecords);
+                    //console.log(applyVals);
+                    fulfill({
+                        'recs': finalRecords,
+                        'applys': applyVals
+                    });
                 }
-            } else fulfill(records);
+            } else fulfill({
+                'recs': records,
+                'applys': []
+            });
         });
     }
 
-    runForOptions(records: [Object], options: OPTIONS): Promise<[Object]> {
+    runForOptions(obj: any, options: OPTIONS): Promise<[Object]> {
         let self = this;
+        let records = obj['recs'];
+        let applys = obj['applys'];
         return new Promise((fulfill, reject) => {
             // console.log("BEFORE OPTIONS", records.length);
             let columns = options.COLUMNS;
             let order = options.ORDER;
             let form = options.FORM;
             let finalRecords: any = [];
-            records.forEach((record: any) => {
+            for (let i = 0; i < records.length; i++) {
                 let recordObj: any = {};
-                columns.forEach(columnName => {
-                    recordObj[columnName] = record[columnName];
-                })
+                columns.forEach((column: any) => {
+                    if (!column.includes("_")) {
+                        console.log(applys[i]);
+                        recordObj[column] = applys[i].get(column);
+                    } else {
+                        recordObj[column] = records[i][column];
+                    }
+
+                });
                 finalRecords.push(recordObj);
-            });
+            }
+
             if (typeof order === 'object') {
                 var fields = order.keys;
                 finalRecords.sort(
