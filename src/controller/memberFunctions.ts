@@ -393,7 +393,13 @@ export default class Helpers {
         return new Promise((fulfill, reject) => {
             let filterKeys = Object.keys(query);
             if (filterKeys.length < 1) {
-                fulfill(self.dataSet.get(id));
+                let finalRecords: any = [];
+                self.dataSet.get(id).forEach((dataType: any) => {
+                    dataType.forEach((record: any) => {
+                        finalRecords.push(record);
+                    })
+                })
+                fulfill(finalRecords);
             }
             filterKeys.forEach(key => {
                 if (key === "IS") {
@@ -534,10 +540,37 @@ export default class Helpers {
 
     applyTransformations(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {
         let self = this;
-        let group = transformations.GROUP;
-        let apply = transformations.APPLY;
         return new Promise((fulfill, reject) => {
-            fulfill(records);
+            if (transformations) {
+                let group = transformations.GROUP;
+                let apply = transformations.APPLY;
+                let retArr = [];
+                if (records.length != 0) {
+                    let finalRecords: any[] = [];
+                    let prev: any[] = [];
+                    let past: any[] = [];
+                    group.forEach((key: any) => {
+                        let firstRec: any = records[0];
+                        prev.push(firstRec[key]);
+                    });
+                    past.push(prev);
+                    finalRecords.push(records[0]);
+                    records.forEach((record: any) => {
+                        let recordObj: any[] = [];
+                        group.forEach((key: any) => {
+                            recordObj.push(record[key]);
+                        });
+                        if (self.validate.encounteredRec(recordObj, past)) {
+                            // Do Apply stuff here
+                        } else {
+                            prev = recordObj;
+                            past.push(prev);
+                            finalRecords.push(record);
+                        }
+                    });
+                    fulfill(finalRecords);
+                }
+            } else fulfill(records);
         });
     }
 

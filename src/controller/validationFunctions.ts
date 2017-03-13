@@ -353,6 +353,26 @@ export default class Validate {
         }
     }
 
+    encounteredRec(recordObj: string[], past: string[]) {
+        let bool = false;
+        past.forEach((criteria: any) => {
+            if (this.sameArrays(recordObj,criteria)) {
+                bool = true;
+            }
+        })
+        return bool;
+    }
+
+    sameArrays(arr1: any, arr2: any) {
+        let bool = true;
+        arr1.forEach((data: any) => {
+            if (arr2.indexOf(data) == -1) {
+                bool = false;
+            }
+        })
+        return bool;
+    }
+
     /*
         getGeoCode(address: string): Promise<GeoResponse> {
             let parsedAddress = encodeURI(address);

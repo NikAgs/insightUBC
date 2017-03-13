@@ -101,6 +101,32 @@ describe("QuerySpec", function () {
             });
     });
 
+    it("Should return code 200", function () {
+        let query: QueryRequest = {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_furniture"
+                ],
+                "ORDER": "rooms_furniture",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_furniture"],
+                "APPLY": []
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
     it("Order key not in columns", function () {
         let query: QueryRequest = {
             "WHERE": {
@@ -173,6 +199,47 @@ describe("QuerySpec", function () {
             .then(res => {
                 console.log(res.body);
                 expect.fail();
+            })
+            .catch(err => {
+                //console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Column not in Group or Apply", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "rooms_seats"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_shortname", "rooms_furniture"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname", "rooms_furniture"],
+                "APPLY": []
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect.fail();
+
             })
             .catch(err => {
                 //console.log(err);
