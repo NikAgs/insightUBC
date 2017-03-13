@@ -193,5 +193,4 @@ describe("EchoSpec", function () {
         expect(out.body).to.have.property('error');
         expect(out.body).to.deep.equal({ error: 'Message not provided' });
     });
-
 });

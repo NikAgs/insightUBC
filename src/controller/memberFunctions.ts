@@ -538,139 +538,143 @@ export default class Helpers {
         })
     }
 
+    groupBy(grouping: string, records: [Object]): Promise<Object> {
+        return new Promise((fulfill, reject) => {
+            if (records.length != 0) {
+                let recordArrayObj: any = {};
+                records.forEach((record: any) => {
+                    let key = record[grouping];
+                    if (recordArrayObj[key]) {
+                        recordArrayObj[key].push(record);
+                    }
+                    else {
+                        recordArrayObj[key] = [];
+                        recordArrayObj[key].push(record);
+                    }
+                });
+                fulfill(recordArrayObj);
+            }
+            else {
+                reject({
+                    code: 400,
+                    body: {
+                        "error": "No records found"
+                    }
+                });
+            }
+        })
+    }
+
+    applyTransform(records: [Object], transform: string, columnOn: string, finalName: string): Promise<Object> {
+        return new Promise((fulfill, reject) => {
+            let recordToKeep: any;
+            switch (transform) {
+                case 'MAX': {
+                    let max = 0;
+                    records.forEach((rec: any) => {
+                        if (rec[columnOn] > max) {
+                            recordToKeep = rec;
+                            max = rec[columnOn];
+                        }
+                    });
+                    if (finalName) {
+                        recordToKeep[finalName] = recordToKeep[columnOn];
+                    }
+                    break;
+                }
+                case 'MIN': {
+                    let min = Number.MAX_SAFE_INTEGER;
+                    records.forEach((rec: any) => {
+                        if (rec[columnOn] < min) {
+                            recordToKeep = rec;
+                            min = rec[columnOn];
+                        }
+                    });
+                    if (finalName) {
+                        recordToKeep[finalName] = recordToKeep[columnOn];
+                    }
+                    break;
+                }
+                case 'COUNT': {
+                    recordToKeep = records[0];
+                    recordToKeep.COUNT = records.length;
+                    if (finalName) {
+                        recordToKeep[finalName] = recordToKeep.COUNT;
+                    }
+                    break;
+                }
+                case 'SUM': {
+                    let runningTotal = 0;
+                    records.forEach((rec: any) => {
+                        runningTotal += rec[columnOn];
+                    });
+                    recordToKeep = records[0];
+                    recordToKeep.SUM = runningTotal;
+                    if (finalName) {
+                        recordToKeep[finalName] = recordToKeep.SUM;
+                    }
+                    break;
+                }
+                case 'AVG': {
+                    let runningTotal = 0;
+                    records.forEach((rec: any) => {
+                        runningTotal += rec[columnOn];
+                    });
+                    recordToKeep = records[0];
+                    recordToKeep.AVG = runningTotal / records.length;
+                    if (finalName) {
+                        recordToKeep[finalName] = recordToKeep.AVG;
+                    }
+                    break;
+                }
+            }
+            // console.log("Here", recordToKeep);
+            fulfill(recordToKeep);
+        })
+    }
     transform(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             if (transformations) {
                 let group = transformations.GROUP;
                 let apply = transformations.APPLY;
-                if (records.length != 0) {
-                    let finalRecords: any[] = [];
-                    let past: any[] = [];
-                    let applyVals: Map<string, number>[] = [];
-                    let countCheck: any[] = [];
+                let finalRecords: Object[] = [];
+                // console.log(transformations);
+                return self.groupBy(group[0], records)
+                    .then((res: any) => {
+                        let resKeys: string[] = Object.keys(res);
+                        let promiseArray: Promise<Object>[] = [];
+                        resKeys.forEach((key: string) => {
+                            let recordsForKey: [any] = res[key];
+                            let obj = apply[0];
+                            let keys = Object.keys(apply[0]);
+                            let actualTransformObj = obj[keys[0]];
+                            let actObjKeys = Object.keys(actualTransformObj);
+                            let val = actualTransformObj[actObjKeys[0]];
+                            let transform = actObjKeys[0];
+                            let name = keys[0];
+                            return promiseArray.push(self.applyTransform(recordsForKey, transform, val, name));
+                            // apply.forEach((columnName: string, obj: any) => {
 
-                    records.forEach((record: any) => {
-                        let recordObj: any[] = [];
-                        group.forEach((key: any) => {
-                            recordObj.push(record[key]);
+                            //     console.log(finalRecords);
+                            // });
                         });
-                        let ind = self.validate.index(recordObj, past);
-                        //console.log(ind);
-                        if (ind !== -1) {
-                            apply.forEach((obj: any) => {
-                                let keys = Object.keys(obj);
-                                let actualTransform = obj[keys[0]];
-                                let actObjKeys = Object.keys(actualTransform);
-                                let val = actualTransform[actObjKeys[0]];
-                                if (applyVals[ind] == undefined) {
-                                    applyVals[ind] = new Map<any, any>();
-                                }
-                                switch (actObjKeys[0]) {
-                                    case 'MAX':
-                                        //console.log("we out here");
-                                        if (applyVals[ind].has(keys[0])) {
-                                            if (record[val] > applyVals[ind].get(keys[0])) {
-                                                applyVals[ind].set(keys[0], record[val]);
-                                            }
-                                        } else {
-                                            applyVals[ind].set(keys[0], record[val]);
-                                        }
-                                        break;
-
-                                    case 'MIN':
-                                        if (applyVals[ind].has(keys[0])) {
-                                            if (record[val] < applyVals[ind].get(keys[0])) {
-                                                applyVals[ind].set(keys[0], record[val]);
-                                            }
-                                        } else {
-                                            applyVals[ind].set(keys[0], record[val]);
-                                        }
-                                        break;
-
-                                    case 'AVG':
-                                        break;
-
-                                    case 'COUNT':
-                                        break;
-
-                                    case 'SUM':
-                                        if (applyVals[ind].has(keys[0])) {
-                                            applyVals[ind].set(keys[0], applyVals[ind].get(keys[0]) + record[val]);
-                                        } else {
-                                            applyVals[ind].set(keys[0], record[val]);
-                                        }
-                                        break;
-                                }
+                        Promise.all(promiseArray)
+                            .then(res => {
+                                // console.log(res);
+                                fulfill(res);
                             })
-                        } else {
-                            past.push(recordObj);
-                            finalRecords.push(record);
-                            let index = past.indexOf(recordObj);
-                            apply.forEach((obj: any) => {
-                                let keys = Object.keys(obj);
-                                let actualTransform = obj[keys[0]];
-                                let actObjKeys = Object.keys(actualTransform);
-                                let val = actualTransform[actObjKeys[0]];
-                                if (applyVals[index] == undefined) {
-                                    applyVals[index] = new Map<any, any>();
-                                }
-                                switch (actObjKeys[0]) {
-                                    case 'MAX':
-                                        //console.log("we out here");
-                                        if (applyVals[index].has(keys[0])) {
-                                            if (record[val] > applyVals[index].get(keys[0])) {
-                                                applyVals[index].set(keys[0], record[val]);
-                                            }
-                                        } else {
-                                            applyVals[index].set(keys[0], record[val]);
-                                        }
-                                        break;
-
-                                    case 'MIN':
-                                        if (applyVals[index].has(keys[0])) {
-                                            if (record[val] < applyVals[index].get(keys[0])) {
-                                                applyVals[index].set(keys[0], record[val]);
-                                            }
-                                        } else {
-                                            applyVals[index].set(keys[0], record[val]);
-                                        }
-                                        break;
-
-                                    case 'AVG':
-                                        break;
-
-                                    case 'COUNT':
-                                        break;
-
-                                    case 'SUM':
-                                        if (applyVals[index].has(keys[0])) {
-                                            applyVals[index].set(keys[0], applyVals[index].get(keys[0]) + record[val]);
-                                        } else {
-                                            applyVals[index].set(keys[0], record[val]);
-                                        }
-                                        break;
-                                }
-                            })
-                        }
-                    });
-                    //console.log(applyVals);
-                    fulfill({
-                        'recs': finalRecords,
-                        'applys': applyVals
-                    });
-                }
-            } else fulfill({
-                'recs': records,
-                'applys': []
-            });
+                        // fulfill(finalRecords);
+                    })
+            }
+            else{
+                fulfill(records);
+            }
         });
     }
 
-    runForOptions(obj: any, options: OPTIONS): Promise<[Object]> {
+    runForOptions(records: any[], options: OPTIONS): Promise<[Object]> {
         let self = this;
-        let records = obj['recs'];
-        let applys = obj['applys'];
         return new Promise((fulfill, reject) => {
             // console.log("BEFORE OPTIONS", records.length);
             let columns = options.COLUMNS;
@@ -680,16 +684,10 @@ export default class Helpers {
             for (let i = 0; i < records.length; i++) {
                 let recordObj: any = {};
                 columns.forEach((column: any) => {
-                    if (!column.includes("_")) {
-                        recordObj[column] = applys[i].get(column);
-                    } else {
-                        recordObj[column] = records[i][column];
-                    }
-
+                    recordObj[column] = records[i][column];
                 });
                 finalRecords.push(recordObj);
             }
-
             if (typeof order === 'object') {
                 var fields = order.keys;
                 finalRecords.sort(

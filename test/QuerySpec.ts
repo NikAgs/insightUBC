@@ -30,8 +30,6 @@ describe("QuerySpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
-
-/*
     it("Should add new rooms dataSet", (done) => {
         fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
@@ -74,7 +72,8 @@ describe("QuerySpec", function () {
             "OPTIONS": {
                 "COLUMNS": [
                     "rooms_shortname",
-                    "rooms_furniture"
+                    "rooms_furniture",
+                    "stringMax"
                 ],
                 "ORDER": {
                     "dir": "DOWN",
@@ -93,7 +92,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -137,7 +136,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -182,7 +181,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -191,7 +190,7 @@ describe("QuerySpec", function () {
             });
     });
 
-     it("Should return code 200", function () {
+    it("Should return code 200", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "IS": {
@@ -201,10 +200,9 @@ describe("QuerySpec", function () {
             "OPTIONS": {
                 "COLUMNS": [
                     "rooms_shortname",
-                    "maxSeats",
                     "sumSeats"
                 ],
-                "ORDER": "sumSeats",
+                "ORDER": "rooms_shortname",
                 "FORM": "TABLE"
             },
             "TRANSFORMATIONS": {
@@ -212,11 +210,6 @@ describe("QuerySpec", function () {
                     "rooms_shortname"
                 ],
                 "APPLY": [
-                    {
-                        "maxSeats": {
-                            "MAX": "rooms_seats"
-                        }
-                    },
                     {
                         "sumSeats": {
                             "SUM": "rooms_seats"
@@ -227,7 +220,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                // console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -292,7 +285,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
                 expect.fail();
 
             })
@@ -332,7 +325,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
                 expect.fail();
             })
             .catch(err => {
@@ -372,7 +365,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                // console.log(res.body);
                 expect.fail();
 
             })
@@ -399,7 +392,7 @@ describe("QuerySpec", function () {
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
-                console.log(err);
+                // console.log(err);
                 expect.fail();
             });
     });
@@ -414,5 +407,4 @@ describe("QuerySpec", function () {
                 expect.fail();
             });
     });
-    */
 });
