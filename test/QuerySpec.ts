@@ -31,6 +31,7 @@ describe("QuerySpec", function () {
     });
 
 
+/*
     it("Should add new rooms dataSet", (done) => {
         fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
@@ -413,4 +414,5 @@ describe("QuerySpec", function () {
                 expect.fail();
             });
     });
+    */
 });

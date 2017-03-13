@@ -592,15 +592,6 @@ export default class Helpers {
                                         break;
 
                                     case 'COUNT':
-                                        if (applyVals[ind].has(keys[0])) {
-                                            if (countCheck.indexOf(record[val]) == -1) {
-                                                applyVals[ind].set(keys[0], applyVals[ind].get(keys[0]) + 1);
-                                                countCheck.push(record[val]);
-                                            }
-                                        } else {
-                                            applyVals[ind].set(keys[0], 1);
-                                            countCheck.push(record[val]);
-                                        }
                                         break;
 
                                     case 'SUM':
@@ -650,15 +641,6 @@ export default class Helpers {
                                         break;
 
                                     case 'COUNT':
-                                        if (applyVals[index].has(keys[0])) {
-                                            if (countCheck.indexOf(record[val]) == -1) {
-                                                applyVals[index].set(keys[0], applyVals[index].get(keys[0]) + 1);
-                                                countCheck.push(record[val]);
-                                            }
-                                        } else {
-                                            applyVals[index].set(keys[0], 1);
-                                            countCheck.push(record[val]);
-                                        }
                                         break;
 
                                     case 'SUM':
