@@ -356,25 +356,25 @@ export default class Validate {
         }
     }
 
-    index(recordObj: string[], past: string[]) {
-        let ind = -1;
-        past.forEach((criteria: any) => {
-            if (this.sameArrays(recordObj, criteria)) {
-                ind = past.indexOf(criteria);
-            }
-        })
-        return ind;
-    }
+    // index(recordObj: string[], past: string[]) {
+    //     let ind = -1;
+    //     past.forEach((criteria: any) => {
+    //         if (this.sameArrays(recordObj, criteria)) {
+    //             ind = past.indexOf(criteria);
+    //         }
+    //     })
+    //     return ind;
+    // }
 
-    sameArrays(arr1: any, arr2: any) {
-        let bool = true;
-        arr1.forEach((data: any) => {
-            if (arr2.indexOf(data) == -1) {
-                bool = false;
-            }
-        })
-        return bool;
-    }
+    // sameArrays(arr1: any, arr2: any) {
+    //     let bool = true;
+    //     arr1.forEach((data: any) => {
+    //         if (arr2.indexOf(data) == -1) {
+    //             bool = false;
+    //         }
+    //     })
+    //     return bool;
+    // }
 
     /*
         getGeoCode(address: string): Promise<GeoResponse> {
