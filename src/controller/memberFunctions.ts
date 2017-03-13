@@ -672,7 +672,7 @@ export default class Helpers {
                             })
                         }
                     });
-                    console.log(applyVals);
+                    //console.log(applyVals);
                     fulfill({
                         'recs': finalRecords,
                         'applys': applyVals
