@@ -398,7 +398,7 @@ describe("InsightSpec", function () {
                 "COLUMNS": [
                     "test123",
                     "helllo",
-                    "courses_avg"
+                    "course"
                 ],
                 "ORDER": "courses_dept",
                 "FORM": "TABLE"

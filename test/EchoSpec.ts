@@ -124,7 +124,7 @@ describe("EchoSpec", function () {
                 Log.trace('then:');
                 // some assertions
                 console.log(res.status);
-                console.log(res.body);
+                //console.log(res.body);
             })
             .catch(function (err: any) {
                 Log.trace('catch:');

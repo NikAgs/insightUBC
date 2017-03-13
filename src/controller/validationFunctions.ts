@@ -55,18 +55,24 @@ export default class Validate {
             let columns = options.COLUMNS;
             let courseQuery = true;
             if (columns.length > 0) {
-                let sub = columns[0].substr(0, columns[0].indexOf('_'));
+                let id = '';
                 columns.forEach(column => {
-                    if (!column.includes(sub)) {
-                        reject({
-                            code: 400,
-                            body: {
-                                "error": "Invalid QueryRequest"
-                            }
-                        })
+                    let sub = column.substr(0, column.indexOf('_'));
+                    if (sub !== '') {
+                        id = sub;
                     }
                 });
-                fulfill(sub);
+                if (id !== '') {
+                    fulfill(id);
+                } else {
+                    reject({
+                        code: 400,
+                        body: {
+                            "error": "Invalid Columns"
+                        }
+                    })
+                }
+
             }
             else
                 reject({
@@ -85,19 +91,23 @@ export default class Validate {
             let optionsRequest = query.OPTIONS;
             let transformationRequest = query.TRANSFORMATIONS;
             if (filter && optionsRequest) {
-                this.checkForOptions(optionsRequest)
-                    .then(() => this.checkForWhere(filter))
-                    .then(() => {
-                        if (transformationRequest) {
-                            return this.checkForTransformations(transformationRequest);
-                        }
-                        else
-                            return true;
-                    })
-                    .then(() => fulfill())
-                    .catch((err) => {
-                        reject(err);
-                    })
+                if (transformationRequest) {
+                    this.checkForTransformations(query)
+                        .then((applyKeys: [any]) => this.checkForOptions(optionsRequest, applyKeys))
+                        .then(() => this.checkForWhere(filter))
+                        .then(() => fulfill())
+                        .catch((err) => {
+                            reject(err);
+                        });
+
+                } else {
+                    this.checkForOptions(optionsRequest, [''])
+                        .then(() => this.checkForWhere(filter))
+                        .then(() => fulfill())
+                        .catch((err) => {
+                            reject(err);
+                        });
+                }
             }
             else {
                 reject({
@@ -129,10 +139,10 @@ export default class Validate {
         });
     }
 
-    checkForOptions(options: OPTIONS) {
+    checkForOptions(options: OPTIONS, applyKeys: [any]) {
         let self = this;
         return new Promise((fulfill, reject) => {
-            let columns = options.COLUMNS;
+            let columns: string[] = options.COLUMNS;
             let order = options.ORDER;
             let form = options.FORM;
             if (form !== "TABLE") {
@@ -143,6 +153,11 @@ export default class Validate {
                             "error": "Only TABLE form is supported"
                         }
                     });
+            }
+            if (applyKeys != undefined) {
+                columns = columns.filter(function (col) {
+                    return (applyKeys.indexOf(col) == -1);
+                });
             }
             self.checkColumnIsValid(columns, '')
                 .then(() => {
@@ -166,7 +181,9 @@ export default class Validate {
         })
     }
 
-    checkForTransformations(trans: TRANSFORMATIONS) {
+    checkForTransformations(query: QueryRequest) {
+        let trans = query.TRANSFORMATIONS;
+        let cols = query.OPTIONS.COLUMNS
         let self = this;
         return new Promise((fulfill, reject) => {
             let group = trans.GROUP;
@@ -208,12 +225,15 @@ export default class Validate {
                                 else {
                                     if (self.numberTransforms.indexOf(actObjKeys[0]) > -1) {
                                         return self.checkColumnIsValid([actualTransform[actObjKeys[0]]], 'integer')
+                                            .then(() => {
+                                                fulfill(keys);
+                                            })
                                             .catch((err) => {
                                                 reject(err);
                                             })
                                     }
                                     else {
-                                        return true;
+                                        fulfill(keys);
                                     }
                                 }
                             }
@@ -223,31 +243,23 @@ export default class Validate {
                 .catch((err) => {
                     reject(err);
                 })
-                .then(() => fulfill())
-                .catch((err) => {
-                    reject(err);
-                })
         })
     }
 
-    checkForOrder(order: any, columns: [string]) {
+    checkForOrder(order: any, columns: string[]) {
         return new Promise((fulfill, reject) => {
             if (typeof order === 'object') {
-                if (order.dir.includes("DOWN") || order.dir.includes("UP")) {
-                    let orderKeys: [string] = order.keys;
+                if (order.dir === 'DOWN' || order.dir === 'UP') {
                     (order.keys).forEach((key: string) => {
-                        orderKeys.forEach(key => {
-                            if (columns.indexOf(key) == -1) {
-                                reject(
-                                    {
-                                        code: 400,
-                                        body: {
-                                            "error": "You can only sort on column declared in options"
-                                        }
-                                    });
-                            }
-                        })
-
+                        if (columns.indexOf(key) == -1) {
+                            reject(
+                                {
+                                    code: 400,
+                                    body: {
+                                        "error": "You can only sort on column declared in options"
+                                    }
+                                });
+                        }
                     });
                     fulfill();
                 } else {
@@ -277,7 +289,8 @@ export default class Validate {
         })
     }
 
-    checkColumnIsValid(columnNames: [string], type: string): Promise<{}> {
+    //TODO: Modify to work with Apply columns
+    checkColumnIsValid(columnNames: string[], type: string): Promise<{}> {
         let self = this;
         return new Promise((fulfill, reject) => {
             columnNames.forEach(column => {
