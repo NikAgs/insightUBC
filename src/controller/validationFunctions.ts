@@ -194,8 +194,10 @@ export default class Validate {
                     if (apply.length == 0) {
                         fulfill();
                     } else {
+                        let retArr: any[] = [];
                         apply.forEach((obj: any) => {
                             let keys = Object.keys(obj);
+                            retArr.push(keys[0]);
                             if (keys.length > 1) {
                                 reject({
                                     code: 400,
@@ -227,14 +229,14 @@ export default class Validate {
                                     if (self.numberTransforms.indexOf(actObjKeys[0]) > -1) {
                                         return self.checkColumnIsValid([actualTransform[actObjKeys[0]]], 'integer')
                                             .then(() => {
-                                                fulfill(keys);
+                                                fulfill(retArr);
                                             })
                                             .catch((err) => {
                                                 reject(err);
                                             })
                                     }
                                     else {
-                                        fulfill(keys);
+                                        fulfill(retArr);
                                     }
                                 }
                             }

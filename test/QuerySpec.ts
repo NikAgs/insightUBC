@@ -92,7 +92,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -136,6 +136,96 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
+                //console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Should return code 200", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "maxSeats",
+                    "minSeats"
+                ],
+                "ORDER": "maxSeats",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": [
+                    "rooms_shortname"
+                ],
+                "APPLY": [
+                    {
+                        "maxSeats": {
+                            "MAX": "rooms_seats"
+                        }
+                    },
+                    {
+                        "minSeats": {
+                            "MIN": "rooms_seats"
+                        }
+                    }
+                ]
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+     it("Should return code 200", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "maxSeats",
+                    "sumSeats"
+                ],
+                "ORDER": "sumSeats",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": [
+                    "rooms_shortname"
+                ],
+                "APPLY": [
+                    {
+                        "maxSeats": {
+                            "MAX": "rooms_seats"
+                        }
+                    },
+                    {
+                        "sumSeats": {
+                            "SUM": "rooms_seats"
+                        }
+                    }
+                ]
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
                 console.log(res.body);
                 expect(res.code).to.equal(200);
             })
@@ -162,7 +252,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -304,7 +394,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(JSON.stringify(res));
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {

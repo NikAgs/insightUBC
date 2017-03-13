@@ -544,11 +544,11 @@ export default class Helpers {
             if (transformations) {
                 let group = transformations.GROUP;
                 let apply = transformations.APPLY;
-                let retArr = [];
                 if (records.length != 0) {
                     let finalRecords: any[] = [];
                     let past: any[] = [];
                     let applyVals: Map<string, number>[] = [];
+                    let countCheck: any[] = [];
 
                     records.forEach((record: any) => {
                         let recordObj: any[] = [];
@@ -589,20 +589,17 @@ export default class Helpers {
                                         break;
 
                                     case 'AVG':
-                                        if (applyVals[ind].SUM) {
-                                            applyVals[ind].SUM += record[val];
-                                            applyVals[ind].COUNT++;
-                                        } else {
-                                            applyVals[ind].SUM = record[val];
-                                            applyVals[ind].COUNT = 1;
-                                        }
                                         break;
 
                                     case 'COUNT':
                                         if (applyVals[ind].has(keys[0])) {
-                                            applyVals[ind].set(keys[0], applyVals[ind].get(keys[0]) + 1);
+                                            if (countCheck.indexOf(record[val]) == -1) {
+                                                applyVals[ind].set(keys[0], applyVals[ind].get(keys[0]) + 1);
+                                                countCheck.push(record[val]);
+                                            }
                                         } else {
                                             applyVals[ind].set(keys[0], 1);
+                                            countCheck.push(record[val]);
                                         }
                                         break;
 
@@ -650,20 +647,17 @@ export default class Helpers {
                                         break;
 
                                     case 'AVG':
-                                        if (applyVals[ind].SUM) {
-                                            applyVals[ind].SUM += record[val];
-                                            applyVals[ind].COUNT++;
-                                        } else {
-                                            applyVals[ind].SUM = record[val];
-                                            applyVals[ind].COUNT = 1;
-                                        }
                                         break;
 
                                     case 'COUNT':
                                         if (applyVals[index].has(keys[0])) {
-                                            applyVals[index].set(keys[0], applyVals[index].get(keys[0]) + 1);
+                                            if (countCheck.indexOf(record[val]) == -1) {
+                                                applyVals[index].set(keys[0], applyVals[index].get(keys[0]) + 1);
+                                                countCheck.push(record[val]);
+                                            }
                                         } else {
                                             applyVals[index].set(keys[0], 1);
+                                            countCheck.push(record[val]);
                                         }
                                         break;
 
@@ -678,7 +672,7 @@ export default class Helpers {
                             })
                         }
                     });
-                    //console.log(applyVals);
+                    console.log(applyVals);
                     fulfill({
                         'recs': finalRecords,
                         'applys': applyVals
@@ -705,7 +699,6 @@ export default class Helpers {
                 let recordObj: any = {};
                 columns.forEach((column: any) => {
                     if (!column.includes("_")) {
-                        console.log(applys[i]);
                         recordObj[column] = applys[i].get(column);
                     } else {
                         recordObj[column] = records[i][column];
