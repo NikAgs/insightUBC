@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import {
     IInsightFacade, InsightResponse,
     QueryRequest, FILTER, OPTIONS, LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION,
-    courseRecord, roomRecord, GeoResponse, TRANSFORMATIONS
+    courseRecord, roomRecord, GeoResponse, TRANSFORMATIONS, APPLYTOKEN
 } from "./IInsightFacade";
 
 import * as parse5 from 'parse5';
@@ -538,7 +538,7 @@ export default class Helpers {
         })
     }
 
-    applyTransformations(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {
+    transform(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             if (transformations) {
@@ -547,27 +547,124 @@ export default class Helpers {
                 let retArr = [];
                 if (records.length != 0) {
                     let finalRecords: any[] = [];
-                    let prev: any[] = [];
                     let past: any[] = [];
-                    group.forEach((key: any) => {
-                        let firstRec: any = records[0];
-                        prev.push(firstRec[key]);
-                    });
-                    past.push(prev);
-                    finalRecords.push(records[0]);
+                    let applyVals: APPLYTOKEN[] = [];
+
                     records.forEach((record: any) => {
                         let recordObj: any[] = [];
                         group.forEach((key: any) => {
                             recordObj.push(record[key]);
                         });
-                        if (self.validate.encounteredRec(recordObj, past)) {
-                            // Do Apply stuff here
+                        let ind = self.validate.index(recordObj, past);
+                        //console.log(ind);
+                        if (ind !== -1) {
+                            apply.forEach((obj: any) => {
+                                let keys = Object.keys(obj);
+                                let actualTransform = obj[keys[0]];
+                                let actObjKeys = Object.keys(actualTransform);
+                                let val = actualTransform[actObjKeys[0]];
+                                if (applyVals[ind] == undefined) {
+                                    applyVals[ind] = {};
+                                }
+                                switch (actObjKeys[0]) {
+                                    case 'MAX':
+                                        //console.log("we out here");
+                                        if (applyVals[ind].MAX) {
+                                            if (record[val] > applyVals[ind].MAX) {
+                                                applyVals[ind].MAX = record[val];
+                                            }
+                                        } else {
+                                            applyVals[ind].MAX = record[val];
+                                        }
+                                        break;
+
+                                    case 'MIN':
+                                        if (applyVals[ind].MAX) {
+                                            if (record[val] < applyVals[ind].MAX) {
+                                                applyVals[ind].MAX = record[val];
+                                            }
+                                        } else {
+                                            applyVals[ind].MAX = record[val];
+                                        }
+                                        break;
+
+                                    case 'AVG':
+                                        break;
+
+                                    case 'COUNT':
+                                        if (applyVals[ind].COUNT) {
+                                            applyVals[ind].COUNT++;
+                                        } else {
+                                            applyVals[ind].COUNT = 1;
+                                        }
+                                        break;
+
+                                    case 'SUM':
+                                        if (applyVals[ind].SUM) {
+                                            applyVals[ind].SUM += record[val];
+                                        } else {
+                                            applyVals[ind].SUM = record[val];
+                                        }
+                                        break;
+                                }
+                            })
                         } else {
-                            prev = recordObj;
-                            past.push(prev);
+                            past.push(recordObj);
                             finalRecords.push(record);
+                            let index = past.indexOf(recordObj);
+                            apply.forEach((obj: any) => {
+                                let keys = Object.keys(obj);
+                                let actualTransform = obj[keys[0]];
+                                let actObjKeys = Object.keys(actualTransform);
+                                let val = actualTransform[actObjKeys[0]];
+                                if (applyVals[index] == undefined) {
+                                    applyVals[index] = {};
+                                }
+                                switch (actObjKeys[0]) {
+                                    case 'MAX':
+                                        //console.log("we out here");
+                                        if (applyVals[index].MAX) {
+                                            if (record[val] > applyVals[index].MAX) {
+                                                applyVals[index].MAX = record[val];
+                                            }
+                                        } else {
+                                            applyVals[index].MAX = record[val];
+                                        }
+                                        break;
+
+                                    case 'MIN':
+                                        if (applyVals[index].MAX) {
+                                            if (record[val] < applyVals[index].MAX) {
+                                                applyVals[index].MAX = record[val];
+                                            }
+                                        } else {
+                                            applyVals[index].MAX = record[val];
+                                        }
+                                        break;
+
+                                    case 'AVG':
+                                        break;
+
+                                    case 'COUNT':
+                                        if (applyVals[index].COUNT) {
+                                            applyVals[index].COUNT++;
+                                        } else {
+                                            applyVals[index].COUNT = 1;
+                                        }
+                                        break;
+
+                                    case 'SUM':
+                                        if (applyVals[index].SUM) {
+                                            applyVals[index].SUM += record[val];
+                                        } else {
+                                            applyVals[index].SUM = record[val];
+                                        }
+                                        break;
+                                }
+                            })
                         }
                     });
+                    console.log(applyVals);
                     fulfill(finalRecords);
                 }
             } else fulfill(records);

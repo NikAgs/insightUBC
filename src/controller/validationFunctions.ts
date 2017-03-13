@@ -101,7 +101,7 @@ export default class Validate {
                         });
 
                 } else {
-                    this.checkForOptions(optionsRequest, [''])
+                    this.checkForOptions(optionsRequest, undefined)
                         .then(() => this.checkForWhere(filter))
                         .then(() => fulfill())
                         .catch((err) => {
@@ -154,12 +154,13 @@ export default class Validate {
                         }
                     });
             }
+            let filtered = columns;
             if (applyKeys != undefined) {
-                columns = columns.filter(function (col) {
+                filtered = columns.filter(function (col) {
                     return (applyKeys.indexOf(col) == -1);
                 });
             }
-            self.checkColumnIsValid(columns, '')
+            self.checkColumnIsValid(filtered, '')
                 .then(() => {
                     if (order) {
                         return self.checkForOrder(order, columns);
@@ -353,14 +354,14 @@ export default class Validate {
         }
     }
 
-    encounteredRec(recordObj: string[], past: string[]) {
-        let bool = false;
+    index(recordObj: string[], past: string[]) {
+        let ind = -1;
         past.forEach((criteria: any) => {
-            if (this.sameArrays(recordObj,criteria)) {
-                bool = true;
+            if (this.sameArrays(recordObj, criteria)) {
+                ind = past.indexOf(criteria);
             }
         })
-        return bool;
+        return ind;
     }
 
     sameArrays(arr1: any, arr2: any) {

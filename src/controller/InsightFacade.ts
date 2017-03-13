@@ -142,7 +142,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
                 })
                 .then(() => this.helpers.runForFilter(filter, chosenDataset))
-                .then((response: [Object])=> this.helpers.applyTransformations(response, transformations))
+                .then((response: [Object])=> this.helpers.transform(response, transformations))
                 .then((response: [Object]) => this.helpers.runForOptions(response, optionsRequest))
                 .then((response: [Object]) => {
                     //console.log(response);

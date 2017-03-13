@@ -72,6 +72,14 @@ export interface APPLY {
     APPLY: any
 }
 
+export interface APPLYTOKEN {
+    "MAX"?: number;
+    "MIN"?: number;
+    "AVG"?: number;
+    "COUNT"?: number;
+    "SUM"?: number;
+}
+
 export interface TRANSFORMATIONS extends GROUP, APPLY {
 }
 
