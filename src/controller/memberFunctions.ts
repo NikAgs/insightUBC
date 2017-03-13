@@ -282,9 +282,9 @@ export default class Helpers {
                 .then(() => {
                     let finalObj: [Object];
                     // console.log(self.dataSet.length);
-                    self.dataSet.get(table).forEach(course => {
-                        if (course.length > 0) {
-                            course.forEach((record: any) => {
+                    self.dataSet.get(table).forEach(record => {
+                        if (record.length > 0) {
+                            record.forEach((record: any) => {
                                 if (self.validate.comparePartial(record[columnName], value)) {
                                     if (finalObj && finalObj.length > 0)
                                         finalObj.push(record);
@@ -327,9 +327,9 @@ export default class Helpers {
                     switch (comp) {
                         case "GT": {
                             // console.log(columnName, value, "In GT");
-                            self.dataSet.get(table).forEach(course => {
-                                if (course.length > 0) {
-                                    course.forEach((record: any) => {
+                            self.dataSet.get(table).forEach(record => {
+                                if (record.length > 0) {
+                                    record.forEach((record: any) => {
                                         let recordValue = record[columnName];
                                         if (recordValue > value) {
                                             if (finalObj && finalObj.length > 0)
@@ -346,9 +346,9 @@ export default class Helpers {
                         }
                         case "LT": {
                             // console.log(columnName, value, "In LT");
-                            self.dataSet.get(table).forEach(course => {
-                                if (course.length > 0) {
-                                    course.forEach((record: any) => {
+                            self.dataSet.get(table).forEach(record => {
+                                if (record.length > 0) {
+                                    record.forEach((record: any) => {
                                         if (record[columnName] < value) {
                                             if (finalObj && finalObj.length > 0)
                                                 finalObj.push(record);
@@ -364,9 +364,9 @@ export default class Helpers {
                         }
                         case "EQ": {
                             // console.log(columnName, value, "In Eq");
-                            self.dataSet.get(table).forEach(course => {
-                                if (course.length > 0) {
-                                    course.forEach((record: any) => {
+                            self.dataSet.get(table).forEach(record => {
+                                if (record.length > 0) {
+                                    record.forEach((record: any) => {
                                         if (record[columnName] == value) {
                                             if (finalObj && finalObj.length > 0)
                                                 finalObj.push(record);
@@ -388,10 +388,19 @@ export default class Helpers {
         });
     }
 
-    runForFilter(query: FILTER, id: string): Promise<[courseRecord]> {
+    runForFilter(query: FILTER, id: string): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             let filterKeys = Object.keys(query);
+            if (filterKeys.length < 1) {
+                let finalRecords: any = [];
+                self.dataSet.get(id).forEach((dataType: any) => {
+                    dataType.forEach((record: any) => {
+                        finalRecords.push(record);
+                    })
+                })
+                fulfill(finalRecords);
+            }
             filterKeys.forEach(key => {
                 if (key === "IS") {
                     this.filterForString(query[key], id)
@@ -434,7 +443,7 @@ export default class Helpers {
                 }
                 else if (key === "AND" || key === "OR") {
                     let filters = query[key];
-                    let promiseArray: [Promise<[courseRecord]>];
+                    let promiseArray: [Promise<[Object]>];
                     let finalObj: any = [];
                     if (filters.length < 2) {
                         reject({
@@ -497,8 +506,8 @@ export default class Helpers {
                             // console.log(key);
                             let finalObj: any = [];
                             // console.log("Records length", records.length);
-                            self.dataSet.get(id).forEach((courseArray => {
-                                let test = courseArray.filter(function (n: courseRecord) {
+                            self.dataSet.get(id).forEach((recordArray => {
+                                let test = recordArray.filter(function (n: Object) {
                                     return records.indexOf(n) === -1;
                                 });
                                 finalObj = finalObj.concat(test);
@@ -529,16 +538,43 @@ export default class Helpers {
         })
     }
 
-    applyTransformations(records: [courseRecord], transformations: TRANSFORMATIONS): Promise<[Object]> {
+    applyTransformations(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {
         let self = this;
-        let group = transformations.GROUP;
-        let apply = transformations.APPLY;
         return new Promise((fulfill, reject) => {
-            fulfill(records);
+            if (transformations) {
+                let group = transformations.GROUP;
+                let apply = transformations.APPLY;
+                let retArr = [];
+                if (records.length != 0) {
+                    let finalRecords: any[] = [];
+                    let prev: any[] = [];
+                    let past: any[] = [];
+                    group.forEach((key: any) => {
+                        let firstRec: any = records[0];
+                        prev.push(firstRec[key]);
+                    });
+                    past.push(prev);
+                    finalRecords.push(records[0]);
+                    records.forEach((record: any) => {
+                        let recordObj: any[] = [];
+                        group.forEach((key: any) => {
+                            recordObj.push(record[key]);
+                        });
+                        if (self.validate.encounteredRec(recordObj, past)) {
+                            // Do Apply stuff here
+                        } else {
+                            prev = recordObj;
+                            past.push(prev);
+                            finalRecords.push(record);
+                        }
+                    });
+                    fulfill(finalRecords);
+                }
+            } else fulfill(records);
         });
     }
 
-    runForOptions(records: [courseRecord], options: OPTIONS): Promise<[courseRecord]> {
+    runForOptions(records: [Object], options: OPTIONS): Promise<[Object]> {
         let self = this;
         return new Promise((fulfill, reject) => {
             // console.log("BEFORE OPTIONS", records.length);

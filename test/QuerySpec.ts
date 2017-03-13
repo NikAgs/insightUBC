@@ -30,7 +30,7 @@ describe("QuerySpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
-    
+
     it("Should add new rooms dataSet", (done) => {
         fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
             if (!err) {
@@ -39,7 +39,7 @@ describe("QuerySpec", function () {
                         //console.log(res, "204");
                         expect(res).to.deep.equal(
                             {
-                                code: 201,
+                                code: 204,
                                 body: {}
                             }
                         );
@@ -82,7 +82,7 @@ describe("QuerySpec", function () {
                 "FORM": "TABLE"
             },
             "TRANSFORMATIONS": {
-                "GROUP": ["rooms_shortname"],
+                "GROUP": ["rooms_shortname", "rooms_furniture"],
                 "APPLY": [{
                     "stringMax": {
                         "COUNT": "rooms_shortname"
@@ -92,7 +92,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -101,7 +101,7 @@ describe("QuerySpec", function () {
             });
     });
 
-    xit("Should return code 200", function () {
+    it("Should return code 200", function () {
         let query: QueryRequest = {
             "WHERE": {},
             "OPTIONS": {
@@ -118,6 +118,148 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
+                console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Order key not in columns", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_shortname", "rooms_furniture"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname", "rooms_furniture"],
+                "APPLY": []
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect.fail();
+
+            })
+            .catch(err => {
+                //console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("All COLUMNS keys need to be either in GROUP or in APPLY", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_shortname", "rooms_furniture"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname"],
+                "APPLY": []
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect.fail();
+            })
+            .catch(err => {
+                //console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Column not in Group or Apply", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "rooms_seats"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_shortname", "rooms_furniture"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname", "rooms_furniture"],
+                "APPLY": []
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect.fail();
+
+            })
+            .catch(err => {
+                //console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Empty WHERE", function () {
+        let query: QueryRequest = {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_furniture"
+                ],
+                "ORDER": "rooms_furniture",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
                 //console.log(JSON.stringify(res));
                 expect(res.code).to.equal(200);
             })
@@ -127,5 +269,14 @@ describe("QuerySpec", function () {
             });
     });
 
-
+    it("Should removeDataSet", () => {
+        return insFac.removeDataset("rooms")
+            .then(res => {
+                expect(res.code).to.equal(204);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
 });
