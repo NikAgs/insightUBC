@@ -589,6 +589,13 @@ export default class Helpers {
                                         break;
 
                                     case 'AVG':
+                                        if (applyVals[ind].SUM) {
+                                            applyVals[ind].SUM += record[val];
+                                            applyVals[ind].COUNT++;
+                                        } else {
+                                            applyVals[ind].SUM = record[val];
+                                            applyVals[ind].COUNT = 1;
+                                        }
                                         break;
 
                                     case 'COUNT':
@@ -643,6 +650,13 @@ export default class Helpers {
                                         break;
 
                                     case 'AVG':
+                                        if (applyVals[ind].SUM) {
+                                            applyVals[ind].SUM += record[val];
+                                            applyVals[ind].COUNT++;
+                                        } else {
+                                            applyVals[ind].SUM = record[val];
+                                            applyVals[ind].COUNT = 1;
+                                        }
                                         break;
 
                                     case 'COUNT':
