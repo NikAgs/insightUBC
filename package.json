@@ -14,7 +14,6 @@
     "icedfrisby": "^0.3.X",
     "joi": "^10.0.X",
     "mocha": "^3.2.0",
-    "react-scripts": "0.9.5",
     "tslint": "^4.1.X"
   },
   "scripts": {
@@ -27,11 +26,7 @@
     "testcover": "mocha -c --timeout 10000",
     "cover": "nyc -r json-summary --reporter=lcov yarn run testcover",
     "coverwin": "nyc -r json-summary --reporter=lcov yarn run testcover",
-    "start": "node src/App.js",
-    "start-app": "react-scripts start",
-    "build-app": "react-scripts build",
-    "test-app": "react-scripts test --env=jsdom",
-    "eject-app": "react-scripts eject"
+    "start": "node src/App.js"
   },
   "dependencies": {
     "@types/chai": "^3.4.34",
@@ -48,8 +43,6 @@
     "mochawesome": "^1.5.2",
     "nyc": "^10.0.0",
     "parse5": "^3.0.1",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
     "request": "^2.79.0",
     "request-promise-native": "^1.0.3",
     "restify": "^4.0.3",
