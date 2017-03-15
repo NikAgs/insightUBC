@@ -599,6 +599,7 @@ export default class Helpers {
                 case 'COUNT': {
                     recordToKeep = records[0];
                     recordToKeep.COUNT = records.length;
+                    // console.log(records.length, records);
                     if (finalName) {
                         recordToKeep[finalName] = recordToKeep.COUNT;
                     }
