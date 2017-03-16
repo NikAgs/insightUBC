@@ -11,6 +11,7 @@
   "version": "0.0.1",
   "devDependencies": {
     "bunyan": "^1.8.5",
+    "concurrently": "^3.4.0",
     "icedfrisby": "^0.3.X",
     "joi": "^10.0.X",
     "mocha": "^3.2.0",
@@ -26,7 +27,8 @@
     "testcover": "mocha -c --timeout 10000",
     "cover": "nyc -r json-summary --reporter=lcov yarn run testcover",
     "coverwin": "nyc -r json-summary --reporter=lcov yarn run testcover",
-    "start": "node src/App.js"
+    "start": "node src/App.js",
+    "start-app": "concurrently \"yarn start\" \"cd ./src/rest/client && yarn start\""
   },
   "dependencies": {
     "@types/chai": "^3.4.34",
