@@ -64,8 +64,8 @@ describe("EchoSpec", function () {
                 // some assertions
                 console.log(err.status)
             });
-    }); 
-    
+    });
+
     it("PUT description fail", function () {
         return chai.request("localhost:3000")
             .put('/dataset/rooms')
@@ -153,10 +153,10 @@ describe("EchoSpec", function () {
 
     it("Should be able to stop server", function () {
         return ServerS.stop()
-            .then((res) => {
+            .then((res: any) => {
                 expect(res).to.equal(true);
             })
-            .catch(err => {
+            .catch((err: any) => {
                 console.log(err);
             })
     });

@@ -542,6 +542,7 @@ export default class Helpers {
         return new Promise((fulfill, reject) => {
             if (records.length != 0) {
                 let recordArrayObj: any = {};
+                // use hash map
                 records.forEach((record: any) => {
                     let key: string = "";
                     grouping.forEach((group: string) => { return key += record[group] });
