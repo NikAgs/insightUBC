@@ -7,12 +7,8 @@ import {
 import AppContainer from './App';
 import Courses from './components/Courses';
 import Rooms from './components/Rooms';
-import createBrowserHistory from 'history/createBrowserHistory'
+// import createBrowserHistory from 'history/createBrowserHistory'
 import { Nav, Navbar, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
-
-const history = createBrowserHistory()
-
-
 
 const Routes = (
     <Router>
@@ -20,9 +16,9 @@ const Routes = (
             <Navbar collapseOnSelect>
                 <Navbar.Header>
                     <Navbar.Brand>
-                        <NavLink to="/">
+                        <Link to="/">
                             UBC Course-Room Allocator
-                        </NavLink>
+                        </Link>
                     </Navbar.Brand>
                     <Navbar.Toggle />
                 </Navbar.Header>
@@ -41,6 +37,8 @@ const Routes = (
             </Navbar>
             <Route exact path="/" component={AppContainer} />
             <Route path="/courses" component={Courses} />
+            <Route path="/rooms" component={Rooms} />
+            
         </div>
     </Router>
 );

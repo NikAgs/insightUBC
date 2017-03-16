@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Col, Grid, Row } from 'react-bootstrap';
-import QueryBox from './components/QueryBox'
 
 export default class AppContainer extends Component {
 
@@ -12,7 +11,7 @@ export default class AppContainer extends Component {
         <Row>
           <div className="App">
             <Col xs={12}>
-              <QueryBox />
+             {children}
             </Col>
           </div>
         </Row>
