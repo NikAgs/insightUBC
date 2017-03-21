@@ -1,44 +1,235 @@
 import React, { Component } from 'react';
-import { Button, Col, Grid } from 'react-bootstrap';
-import Form from './Form'
-
-
+import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
+// import OutputTable from './OutputTable';
+import JsonTable from 'react-json-table';
 export default class Courses extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            errors: {},
-            rows: [{
-                "key": 1,
-                "NAME": "Jack Sparrow",
-                "PHONENUMBER": "113-555-8789"
-            },
-            {
-                "key": 2,
-                "NAME": "Daisy Duck",
-                "PHONENUMBER": "457-898-4545"
-            },
-            {
-                "key": 3,
-                "NAME": "Huey Duck",
-                "PHONENUMBER": "457-898-4546"
-            }],
-            columnNames: [{
-                title: 'Name', dataIndex: 'NAME', key: 'name'
-            }, {
-                title: 'Phone', dataIndex: 'PHONENUMBER', key: 'age'
-            }, {
-                title: 'Apeartions', dataIndex: '', key: 'opeartions', render: () => <a href="#">Delete</a>,
-            }]
-        };
+        this.searchCourse = this.searchCourse.bind(this);
+        this.handleOptionChange = this.handleOptionChange.bind(this);
+        this.getList = this.getList.bind(this);
+        this.state = { selectedOption: "UP", ans: [], showQuery: false };
+        this.handleButtonClick = this.handleButtonClick.bind(this);
+    }
+
+    searchCourse(event) {
+        event.preventDefault();
+        let courseTitle = this.title.value || null;
+        let dept = this.department.value || null;
+        let size = parseInt(this.size.value) || null;
+        let instructor = this.instructor.value || null;
+        let order = this.state.selectedOption || "UP";
+        let orderArr = this.order.value.split(", ");
+        let self = this;
+        if (orderArr[0] == "") {
+            orderArr = null;
+        }
+        let orderObj = "";
+        let filters = [];
+        if (courseTitle) {
+            courseTitle = "*" + courseTitle + "*";
+            let tObj = {};
+            tObj.IS = {};
+            tObj.IS.courses_title = courseTitle;
+            filters.push(tObj);
+        }
+        if (instructor) {
+            instructor = "*" + instructor + "*";
+            let tObj = {};
+            tObj.IS = {};
+            tObj.IS.courses_instructor = instructor;
+            filters.push(tObj);
+        }
+        if (dept) {
+            dept = "*" + dept + "*";
+            let tObj = {};
+            tObj.IS = {};
+            tObj.IS.courses_dept = dept;
+            filters.push(tObj);
+        }
+        if (size) {
+            //size does not exist for courses
+        }
+        if (orderArr) {
+            orderObj = {};
+            orderObj.dir = order;
+            orderObj.keys = orderArr;
+        }
+        let finalQueryObj = {};
+        finalQueryObj.OPTIONS = {};
+        finalQueryObj.OPTIONS.ORDER = orderObj;
+        finalQueryObj.OPTIONS.FORM = "TABLE";
+        finalQueryObj.OPTIONS.COLUMNS = this.getList();
+        finalQueryObj.WHERE = {};
+        if (filters.length > 1) {
+            finalQueryObj.WHERE.AND = filters;
+        }
+        else {
+            finalQueryObj.WHERE = filters[0];
+        }
+        // data.append("json", JSON.stringify(testObj));
+        console.log(finalQueryObj);
+        fetch('http://localhost:4321/query', {
+            method: "POST",
+            body: JSON.stringify(finalQueryObj)
+        })
+            .then((res) => { return res.json(); })
+            .then((data) => {
+                console.log(data);
+                if (data && data.render === "TABLE") {
+                    self.setState({
+                        ans: data.result,
+                        showQuery: false
+                    })
+                }
+            })
+    }
+
+    getList() {
+        let columnsArr = [];
+        console.log(this.sdepartment.checked)
+        this.sdepartment.checked && columnsArr.push("courses_dept");
+        this.sid.checked && columnsArr.push("courses_id");
+        this.savg.checked && columnsArr.push("courses_avg");
+        this.sinstructor.checked && columnsArr.push("courses_instructor");
+        this.stitle.checked && columnsArr.push("courses_title");
+        this.spass.checked && columnsArr.push("courses_pass");
+        this.sfail.checked && columnsArr.push("courses_fail");
+        this.saudit.checked && columnsArr.push("courses_audit");
+        this.syear.checked && columnsArr.push("courses_year");
+        return columnsArr;
+    }
+
+    handleOptionChange(changeEvent) {
+        this.setState({
+            selectedOption: changeEvent.target.value
+        });
+    }
+
+    handleButtonClick(event) {
+        event.preventDefault();
+        console.log("here");
+        this.setState({ showQuery: true });
     }
 
     render() {
+        const formBody = (
+            <div>
+                <form className="form-horizontal" onSubmit={this.searchCourse}>
+                    <fieldset>
+                        <ListGroup>
+                            <ListGroupItem>
+                                <div className="row">
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Course Title</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <input type='text' name='name' ref={ref => this.title = ref} placeholder='Title' className="form-control" />
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Department</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <input type='text' name='name' ref={ref => this.department = ref} placeholder='Department Code' className="form-control" />
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Instructor Name</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <input type='text' name='name' ref={ref => this.instructor = ref} placeholder='Name' className="form-control" />
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Size</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <input type='number' name='name' ref={ref => this.size = ref} placeholder='Size' className="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </ListGroupItem>
+                            <ListGroupItem>
+                                <div className="row">
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Order By:</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <input type='text' name='name' ref={ref => this.order = ref} placeholder='Seperated By Comma' className="form-control" />
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Type:</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <label className="radio-inline">
+                                                <input type="radio" name="orderRadio"
+                                                    value='UP'
+                                                    checked={this.state.selectedOption === 'UP'}
+                                                    onChange={this.handleOptionChange} />
+                                                Ascending
+									</label>
+                                            <label className="radio-inline">
+                                                <input type="radio" name="orderRadio"
+                                                    value='DOWN'
+                                                    checked={this.state.selectedOption === 'DOWN'}
+                                                    onChange={this.handleOptionChange} />
+                                                Descending
+									</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </ListGroupItem>
+                            <ListGroupItem>
+                                <div className="row">
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-3 col-md-2">Details:</label>
+                                        <div className=" col-sm-9 col-md-10">
+                                            <Checkbox inline inputRef={ref => { this.stitle = ref; }}>
+                                                Title </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.sdepartment = ref; }}>
+                                                Department </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.sid = ref; }}>
+                                                ID </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.savg = ref; }}>
+                                                Avergae </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.sinstructor = ref; }}>
+                                                Instructors </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.spass = ref; }}>
+                                                Pass </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.sfail = ref; }}>
+                                                Fail </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.saudit = ref; }}>
+                                                Audit </Checkbox>
+                                            <Checkbox inline inline inputRef={ref => { this.syear = ref; }}>
+                                                Year </Checkbox>
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-6">
+                                        <div className=" col-xs-12 text-center">
+                                            <input type="submit" className="btn btn-success" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </ListGroupItem>
+                        </ListGroup>
+                    </fieldset>
+
+                </form>
+            </div>
+        )
+
+        const searchButton = (
+            <ListGroup className="text-right">
+                <Button onClick={this.handleButtonClick}>New Query</Button>
+            </ListGroup>
+        )
         return (
             <Grid fluid={true}>
                 <Col xs={12}>
-                    <Form />
+                    {
+                        this.state.showQuery ? formBody : searchButton
+                    }
+                    <div className="table-responsive">
+                        <JsonTable className="table" rows={this.state.ans} />
+                    </div>
                 </Col>
             </Grid>
         );
