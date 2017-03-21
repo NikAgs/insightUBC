@@ -26,7 +26,7 @@ const Routes = (
                     <Nav>
                         <NavItem eventKey={1}><NavLink to="courses">Courses Explorer</NavLink></NavItem>
                         <NavDropdown eventKey={3} title="Rooms" id="basic-nav-dropdown">
-                            <MenuItem eventKey={3.1}>Rooms Explorer</MenuItem>
+                            <MenuItem eventKey={3.1}><NavLink to="rooms">Rooms Explorer</NavLink></MenuItem>
                             <MenuItem eventKey={3.2}>Rooms Scheduling</MenuItem>
                         </NavDropdown>
                     </Nav>

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
 // import OutputTable from './OutputTable';
 import JsonTable from 'react-json-table';
+
 export default class Courses extends Component {
 
     constructor(props) {
@@ -9,19 +10,18 @@ export default class Courses extends Component {
         this.searchCourse = this.searchCourse.bind(this);
         this.handleOptionChange = this.handleOptionChange.bind(this);
         this.getList = this.getList.bind(this);
-        this.state = { selectedOption: "UP", ans: [], showQuery: false };
+        this.state = { selectedOption: "UP", ans: [], showQuery: true };
         this.handleButtonClick = this.handleButtonClick.bind(this);
+        this.buildQuery = this.buildQuery.bind(this);
     }
 
-    searchCourse(event) {
-        event.preventDefault();
+    buildQuery(){
         let courseTitle = this.title.value || null;
         let dept = this.department.value || null;
         let size = parseInt(this.size.value) || null;
         let instructor = this.instructor.value || null;
         let order = this.state.selectedOption || "UP";
         let orderArr = this.order.value.split(", ");
-        let self = this;
         if (orderArr[0] == "") {
             orderArr = null;
         }
@@ -68,6 +68,13 @@ export default class Courses extends Component {
         else {
             finalQueryObj.WHERE = filters[0];
         }
+        return finalQueryObj;
+    }
+
+    searchCourse(event) {
+        event.preventDefault();
+        let self = this;
+        let finalQueryObj = this.buildQuery();
         // data.append("json", JSON.stringify(testObj));
         console.log(finalQueryObj);
         fetch('http://localhost:4321/query', {
@@ -109,7 +116,6 @@ export default class Courses extends Component {
 
     handleButtonClick(event) {
         event.preventDefault();
-        console.log("here");
         this.setState({ showQuery: true });
     }
 
