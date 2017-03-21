@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { Grid, ListGroup, ListGroupItem } from 'react-bootstrap';
-
+// import OutputTable from './OutputTable';
+import JsonTable from 'react-json-table';
 export default class Form extends Component {
 
     constructor(props) {
         super(props);
         this.searchCourse = this.searchCourse.bind(this);
         this.handleOptionChange = this.handleOptionChange.bind(this);
-        this.state = { selectedOption: "UP" }
+        this.state = { selectedOption: "UP", ans: [] }
     }
 
     searchCourse(event) {
@@ -17,8 +18,12 @@ export default class Form extends Component {
         let size = parseInt(this.size.value) || null;
         let instructor = this.instructor.value || null;
         let order = this.state.selectedOption || "UP";
-        let orderArr = this.order.value.split(",") || [];
-        let orderObj = {};
+        let orderArr = this.order.value.split(", ");
+        let self = this;
+        if (orderArr[0] == "") {
+            orderArr = null;
+        }
+        let orderObj = "";
         let filters = [];
         if (courseTitle) {
             courseTitle = "*" + courseTitle + "*";
@@ -43,9 +48,9 @@ export default class Form extends Component {
         }
         if (size) {
             //size does not exist for courses
-
         }
-        if (orderArr.length > 0) {
+        if (orderArr) {
+            orderObj = {};
             orderObj.dir = order;
             orderObj.keys = orderArr;
         }
@@ -53,6 +58,7 @@ export default class Form extends Component {
         finalQueryObj.OPTIONS = {};
         finalQueryObj.OPTIONS.ORDER = orderObj;
         finalQueryObj.OPTIONS.FORM = "TABLE";
+        finalQueryObj.OPTIONS.COLUMNS = ["courses_dept", "courses_instructor", "courses_title"];
         finalQueryObj.WHERE = {};
         if (filters.length > 1) {
             finalQueryObj.WHERE.AND = filters;
@@ -60,8 +66,22 @@ export default class Form extends Component {
         else {
             finalQueryObj.WHERE = filters[0];
         }
-        console.log(finalQueryObj);
-        return;
+        // data.append("json", JSON.stringify(testObj));
+        console.log(finalQueryObj)
+
+        fetch('http://localhost:4321/query', {
+            method: "POST",
+            body: JSON.stringify(finalQueryObj)
+        })
+            .then((res) => { return res.json(); })
+            .then((data) => {
+                console.log(data);
+                if (data && data.render === "TABLE") {
+                    self.setState({
+                        ans: data.result
+                    })
+                }
+            })
     }
 
     handleOptionChange(changeEvent) {
@@ -69,6 +89,7 @@ export default class Form extends Component {
             selectedOption: changeEvent.target.value
         });
     }
+
     render() {
         const formBody = (
             <div>
@@ -163,6 +184,9 @@ export default class Form extends Component {
         return (
             <Grid fluid={true}>
                 {formBody}
+                <div className="table-responsive">
+                    <JsonTable className="table" rows={this.state.ans} />
+                </div>
             </Grid>
         );
     }

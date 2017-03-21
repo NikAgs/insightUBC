@@ -8,6 +8,7 @@ import restify = require('restify');
 import Log from "../Util";
 import { InsightResponse } from "../controller/IInsightFacade";
 import InsightFacade from "../controller/InsightFacade";
+import * as fs from 'fs';
 
 /**
  * This configures the REST endpoints for the server.
@@ -58,6 +59,26 @@ export default class Server {
                     name: 'insightUBC'
                 });
 
+                that.rest.use(restify.CORS());
+
+                fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
+                    if (!err) {
+                        return that.insFac.addDataset("rooms", data)
+                    }
+                    else {
+                        console.log(err);
+                    }
+                });
+
+                fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
+                    if (!err) {
+                        return that.insFac.addDataset("courses", data)
+                    }
+                    else {
+                        console.log(err);
+                    }
+                });
+                
                 that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     res.send(200);
                     return next();
@@ -67,6 +88,7 @@ export default class Server {
 
                 that.rest.put('/dataset/:id', (req: restify.Request, res: restify.Response, next: restify.Next) => {
                     if (req.params.body) {
+                        console.log(req.params.body);
                         let dataStr = new Buffer(req.params.body).toString('base64');
                         return that.insFac.addDataset(req.params.id, dataStr)
                             .then(sol => {
@@ -90,7 +112,7 @@ export default class Server {
                 });
 
                 that.rest.post('/query', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    return that.insFac.performQuery(req.body)
+                    return that.insFac.performQuery(JSON.parse(req.body))
                         .then(sol => {
                             // console.log("Res", sol);
                             // res.code = sol.code;
