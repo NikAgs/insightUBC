@@ -9,13 +9,14 @@ export default class Courses extends Component {
         super(props);
         this.searchCourse = this.searchCourse.bind(this);
         this.handleOptionChange = this.handleOptionChange.bind(this);
+        this.handleQueryChange = this.handleQueryChange.bind(this);
         this.getList = this.getList.bind(this);
-        this.state = { selectedOption: "UP", ans: [], showQuery: true };
+        this.state = { selectedOption: "UP", selectedQuery: "AND", ans: [], showQuery: true };
         this.handleButtonClick = this.handleButtonClick.bind(this);
         this.buildQuery = this.buildQuery.bind(this);
     }
 
-    buildQuery(){
+    buildQuery() {
         let courseTitle = this.title.value || null;
         let dept = this.department.value || null;
         let size = parseInt(this.size.value) || null;
@@ -63,7 +64,8 @@ export default class Courses extends Component {
         finalQueryObj.OPTIONS.COLUMNS = this.getList();
         finalQueryObj.WHERE = {};
         if (filters.length > 1) {
-            finalQueryObj.WHERE.AND = filters;
+            let type = this.state.selectedQuery;
+            finalQueryObj.WHERE[type] = filters;
         }
         else {
             finalQueryObj.WHERE = filters[0];
@@ -119,6 +121,14 @@ export default class Courses extends Component {
         this.setState({ showQuery: true });
     }
 
+
+    handleQueryChange(changeEvent) {
+        this.setState({
+            selectedQuery: changeEvent.target.value
+        });
+    }
+
+
     render() {
         const formBody = (
             <div>
@@ -170,14 +180,14 @@ export default class Courses extends Component {
                                                     checked={this.state.selectedOption === 'UP'}
                                                     onChange={this.handleOptionChange} />
                                                 Ascending
-									</label>
+									        </label>
                                             <label className="radio-inline">
                                                 <input type="radio" name="orderRadio"
                                                     value='DOWN'
                                                     checked={this.state.selectedOption === 'DOWN'}
                                                     onChange={this.handleOptionChange} />
                                                 Descending
-									</label>
+									        </label>
                                         </div>
                                     </div>
 
@@ -208,7 +218,26 @@ export default class Courses extends Component {
                                                 Year </Checkbox>
                                         </div>
                                     </div>
-                                    <div className="form-group col-sm-6">
+                                    <div className="form-group col-sm-3">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Query Type:</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <label className="radio-inline">
+                                                <input type="radio" name="queryRadio"
+                                                    value='AND'
+                                                    checked={this.state.selectedQuery === 'AND'}
+                                                    onChange={this.handleQueryChange} />
+                                                AND
+									        </label>
+                                            <label className="radio-inline">
+                                                <input type="radio" name="queryRadio"
+                                                    value='OR'
+                                                    checked={this.state.selectedQuery === 'OR'}
+                                                    onChange={this.handleQueryChange} />
+                                                OR
+									        </label>
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-3">
                                         <div className=" col-xs-12 text-center">
                                             <input type="submit" className="btn btn-success" />
                                         </div>

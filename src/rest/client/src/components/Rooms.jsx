@@ -9,8 +9,9 @@ export default class Rooms extends Component {
         super(props);
         this.searchRooms = this.searchRooms.bind(this);
         this.handleOptionChange = this.handleOptionChange.bind(this);
+        this.handleQueryChange = this.handleQueryChange.bind(this);
         this.getList = this.getList.bind(this);
-        this.state = { selectedOption: "UP", ans: [], showQuery: true };
+        this.state = { selectedOption: "UP", selectedQuery: "AND", ans: [], showQuery: true };
         this.handleButtonClick = this.handleButtonClick.bind(this);
     }
 
@@ -66,6 +67,10 @@ export default class Rooms extends Component {
         }
         if (size) {
             //size does not exist for courses
+            let tObj = {};
+            tObj.GT = {};
+            tObj.GT.rooms_seats = size;
+            filters.push(tObj);
         }
         if (orderArr) {
             orderObj = {};
@@ -79,7 +84,8 @@ export default class Rooms extends Component {
         finalQueryObj.OPTIONS.COLUMNS = this.getList();
         finalQueryObj.WHERE = {};
         if (filters.length > 1) {
-            finalQueryObj.WHERE.AND = filters;
+            let type = this.state.selectedQuery;
+            finalQueryObj.WHERE[type] = filters;
         }
         else {
             finalQueryObj.WHERE = filters[0];
@@ -147,6 +153,12 @@ export default class Rooms extends Component {
         });
     }
 
+    handleQueryChange(changeEvent) {
+        this.setState({
+            selectedQuery: changeEvent.target.value
+        });
+    }
+
     handleButtonClick(event) {
         event.preventDefault();
         this.setState({ showQuery: true });
@@ -161,13 +173,13 @@ export default class Rooms extends Component {
                             <ListGroupItem>
                                 <div className="row">
                                     <div className="form-group col-sm-6">
-                                        <label className="control-label text-semibold col-sm-4 col-md-3">Room Fullname</label>
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Building Fullname</label>
                                         <div className="col-sm-8 col-md-9">
                                             <input type='text' name='name' ref={ref => this.fullname = ref} placeholder='Fullname' className="form-control" />
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-6">
-                                        <label className="control-label text-semibold col-sm-4 col-md-3">Shortname</label>
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Building Shortname</label>
                                         <div className="col-sm-8 col-md-9">
                                             <input type='text' name='name' ref={ref => this.shortname = ref} placeholder='Shortname' className="form-control" />
                                         </div>
@@ -185,9 +197,9 @@ export default class Rooms extends Component {
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-6">
-                                        <label className="control-label text-semibold col-sm-4 col-md-3">Size</label>
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Seats</label>
                                         <div className="col-sm-8 col-md-9">
-                                            <input type='text' name='name' ref={ref => this.size = ref} placeholder='Size' className="form-control" />
+                                            <input type='text' name='name' ref={ref => this.size = ref} placeholder='Seats over...' className="form-control" />
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-6">
@@ -257,7 +269,26 @@ export default class Rooms extends Component {
                                                 Furniture </Checkbox>
                                         </div>
                                     </div>
-                                    <div className="form-group col-sm-6">
+                                    <div className="form-group col-sm-3">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Query Type:</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <label className="radio-inline">
+                                                <input type="radio" name="queryRadio"
+                                                    value='AND'
+                                                    checked={this.state.selectedQuery === 'AND'}
+                                                    onChange={this.handleQueryChange} />
+                                                AND
+									        </label>
+                                            <label className="radio-inline">
+                                                <input type="radio" name="queryRadio"
+                                                    value='OR'
+                                                    checked={this.state.selectedQuery === 'OR'}
+                                                    onChange={this.handleQueryChange} />
+                                                OR
+									        </label>
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-sm-3">
                                         <div className=" col-xs-12 text-center">
                                             <input type="submit" className="btn btn-success" />
                                         </div>
