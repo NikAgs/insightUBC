@@ -23,6 +23,7 @@ export default class Courses extends Component {
         let instructor = this.instructor.value || null;
         let order = this.state.selectedOption || "UP";
         let orderArr = this.order.value.split(", ");
+        let groupBy = this.groupSection.checked;
         if (orderArr[0] == "") {
             orderArr = null;
         }
@@ -57,12 +58,19 @@ export default class Courses extends Component {
             orderObj.dir = order;
             orderObj.keys = orderArr;
         }
+
         let finalQueryObj = {};
         finalQueryObj.OPTIONS = {};
         finalQueryObj.OPTIONS.ORDER = orderObj;
         finalQueryObj.OPTIONS.FORM = "TABLE";
         finalQueryObj.OPTIONS.COLUMNS = this.getList();
         finalQueryObj.WHERE = {};
+        if (groupBy) {
+            finalQueryObj.TRANSFORMATIONS = {
+                "GROUP": ["courses_dept", "courses_id"],
+                "APPLY": []
+            }
+        }
         if (filters.length > 1) {
             let type = this.state.selectedQuery;
             finalQueryObj.WHERE[type] = filters;
@@ -97,7 +105,6 @@ export default class Courses extends Component {
 
     getList() {
         let columnsArr = [];
-        console.log(this.sdepartment.checked)
         this.sdepartment.checked && columnsArr.push("courses_dept");
         this.sid.checked && columnsArr.push("courses_id");
         this.savg.checked && columnsArr.push("courses_avg");
@@ -195,32 +202,32 @@ export default class Courses extends Component {
                             </ListGroupItem>
                             <ListGroupItem>
                                 <div className="row">
-                                    <div className="form-group col-sm-6">
+                                    <div className="form-group col-sm-5">
                                         <label className="control-label text-semibold col-sm-3 col-md-2">Details:</label>
                                         <div className=" col-sm-9 col-md-10">
                                             <Checkbox inline inputRef={ref => { this.stitle = ref; }}>
                                                 Title </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.sdepartment = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.sdepartment = ref; }}>
                                                 Department </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.sid = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.sid = ref; }}>
                                                 ID </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.savg = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.savg = ref; }}>
                                                 Avergae </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.sinstructor = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.sinstructor = ref; }}>
                                                 Instructors </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.spass = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.spass = ref; }}>
                                                 Pass </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.sfail = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.sfail = ref; }}>
                                                 Fail </Checkbox>
                                             <Checkbox inline inline inputRef={ref => { this.saudit = ref; }}>
                                                 Audit </Checkbox>
-                                            <Checkbox inline inline inputRef={ref => { this.syear = ref; }}>
+                                            <Checkbox inline  inputRef={ref => { this.syear = ref; }}>
                                                 Year </Checkbox>
                                         </div>
                                     </div>
-                                    <div className="form-group col-sm-3">
-                                        <label className="control-label text-semibold col-sm-4 col-md-3">Query Type:</label>
-                                        <div className="col-sm-8 col-md-9">
+                                    <div className="form-group col-sm-4">
+                                        <label className="control-label text-semibold col-sm-6 col-md-4">Query Type:</label>
+                                        <div className="col-sm-6 col-md-8">
                                             <label className="radio-inline">
                                                 <input type="radio" name="queryRadio"
                                                     value='AND'
@@ -238,6 +245,14 @@ export default class Courses extends Component {
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-3">
+                                        <label className="control-label text-semibold col-sm-6 col-md-6">Group Sections:</label>
+                                        <div className=" col-sm-6 col-md-6">
+                                            <Checkbox inline inputRef={ref => { this.groupSection = ref; }} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="form-group col-sm-12">
                                         <div className=" col-xs-12 text-center">
                                             <input type="submit" className="btn btn-success" />
                                         </div>
