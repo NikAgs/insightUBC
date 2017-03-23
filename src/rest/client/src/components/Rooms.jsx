@@ -21,7 +21,6 @@ export default class Rooms extends Component {
         this.handleButtonClick = this.handleButtonClick.bind(this);
     }
 
-
     buildQuery() {
         let fullname = this.fullname.value || null;
         let shortname = this.shortname.value || null;
@@ -210,17 +209,22 @@ export default class Rooms extends Component {
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-6">
-                                        <label className="control-label text-semibold col-sm-4 col-md-3">Room Number</label>
-                                        <div className="col-sm-8 col-md-9">
-                                            <input type='text' name='name' ref={ref => this.number = ref} placeholder='Number' className="form-control" />
-                                        </div>
-                                    </div>
-                                    <div className="form-group col-sm-6">
                                         <label className="control-label text-semibold col-sm-4 col-md-3">Maximum Distance</label>
                                         <div className="col-sm-8 col-md-9">
                                             <input type='number' name='name' ref={ref => this.location = ref} placeholder='Meters' className="form-control" />
                                         </div>
                                     </div>
+                                </div>
+                            </ListGroupItem>
+                            <ListGroupItem>
+                                <div className="row">
+                                    <div className="form-group col-sm-6">
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Room Number</label>
+                                        <div className="col-sm-8 col-md-9">
+                                            <input type='text' name='name' ref={ref => this.number = ref} placeholder='Number' className="form-control" />
+                                        </div>
+                                    </div>
+
                                     <div className="form-group col-sm-6">
                                         <label className="control-label text-semibold col-sm-4 col-md-3">Seats</label>
                                         <div className="col-sm-8 col-md-9">

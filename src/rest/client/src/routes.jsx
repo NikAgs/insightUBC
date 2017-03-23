@@ -7,6 +7,7 @@ import {
 import AppContainer from './App';
 import Courses from './components/Courses';
 import Rooms from './components/Rooms';
+import Scheduler from './components/Scheduler';
 // import createBrowserHistory from 'history/createBrowserHistory'
 import { Nav, Navbar, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 
@@ -27,7 +28,7 @@ const Routes = (
                         <NavItem eventKey={1}><NavLink to="courses">Courses Explorer</NavLink></NavItem>
                         <NavDropdown eventKey={3} title="Rooms" id="basic-nav-dropdown">
                             <MenuItem eventKey={3.1}><NavLink to="rooms">Rooms Explorer</NavLink></MenuItem>
-                            <MenuItem eventKey={3.2}>Rooms Scheduling</MenuItem>
+                            <MenuItem eventKey={3.2}><NavLink to="scheduler">Rooms Scheduling</NavLink></MenuItem>
                         </NavDropdown>
                     </Nav>
                     <Nav pullRight>
@@ -38,7 +39,7 @@ const Routes = (
             <Route exact path="/" component={AppContainer} />
             <Route path="/courses" component={Courses} />
             <Route path="/rooms" component={Rooms} />
-            
+            <Route path="/scheduler" component={Scheduler} />
         </div>
     </Router>
 );

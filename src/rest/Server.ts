@@ -5,12 +5,10 @@
 
 import restify = require('restify');
 
-import _ = require('lodash');
-var geodist = require('geodist');
-
 import Log from "../Util";
 import { InsightResponse } from "../controller/IInsightFacade";
 import InsightFacade from "../controller/InsightFacade";
+import RestFacade from "../controller/RestFacade";
 import * as fs from 'fs';
 
 /**
@@ -21,12 +19,14 @@ export default class Server {
     private port: number;
     private rest: restify.Server;
     private insFac: InsightFacade = null;
+    private restFac: RestFacade = null;
 
 
     constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
         this.port = port;
         this.insFac = new InsightFacade();
+        this.restFac = new RestFacade(this.insFac);
     }
 
     /**
@@ -67,6 +67,12 @@ export default class Server {
                 fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
                     if (!err) {
                         return that.insFac.addDataset("rooms", data)
+                            .then(res => {
+                                Log.info('Added rooms ' + res);
+                            })
+                            .catch(err => {
+                                Log.error(err);
+                            })
                     }
                     else {
                         console.log(err);
@@ -76,6 +82,12 @@ export default class Server {
                 fs.readFile("coursesBase64", 'utf8', (err: any, data: any) => {
                     if (!err) {
                         return that.insFac.addDataset("courses", data)
+                            .then(res => {
+                                Log.info('Added courses ' + res);
+                            })
+                            .catch(err => {
+                                Log.error(err);
+                            })
                     }
                     else {
                         console.log(err);
@@ -133,25 +145,25 @@ export default class Server {
                     let dataRec = JSON.parse(req.body)
                     return that.insFac.performQuery(dataRec.query)
                         .then((sol: any) => {
-                            let records = sol.body.result;
-                            let givenRec = _.find(records, (o: any) => {
-                                return o.rooms_shortname == dataRec.buildingName || o.rooms_fullname == dataRec.buildingName;
-                            });
-                            let maxDistance = dataRec.maxDistance;
-                            let latLon: any = {};
-                            if (givenRec) {
-                                latLon.lat = givenRec.rooms_lat;
-                                latLon.lon = givenRec.rooms_lon;
-                                console.log(givenRec, maxDistance);
-                                let finalRecords: Object[] = [];
-                                records.forEach((rec: any) => {
-                                    let tempObj = _.pick(rec, ['rooms_lat', 'rooms_lon']);
-                                    if (geodist(latLon, tempObj, { unit: "meters", limit: maxDistance })) {
-                                        finalRecords.push(_.omit(rec, ['rooms_lat', 'rooms_lon']));
-                                    }
-                                });
-                                sol.body.result = finalRecords;
-                            }
+                            return that.restFac.filterByDistance(sol, dataRec.buildingName, dataRec.maxDistance);
+                        })
+                        .then((sol: any) => {
+                            res.send(sol.code, sol.body);
+                            return next();
+                        })
+                        .catch((err) => {
+                            console.log("Err", err);
+                            res.send(err.code, err.body);
+                            return next();
+                        })
+                });
+
+                that.rest.post('/schedule', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    let dataRec = JSON.parse(req.body)
+                    return that.restFac.scheduleCourses(dataRec)
+                        .then((sol: any) => that.restFac.filterByDistance(sol, dataRec.buildingName, dataRec.maxDistance))
+                        .then((sol: any) => {
+                            console.log(sol);
                             res.send(sol.code, sol.body);
                             return next();
                         })

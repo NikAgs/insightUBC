@@ -120,7 +120,7 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
-    performQuery(query: QueryRequest): Promise<InsightResponse> {
+    performQuery(query: any): Promise<InsightResponse> {
         return new Promise((fulfill, reject) => {
             let filter = query.WHERE;
             let optionsRequest = query.OPTIONS;
