@@ -20,6 +20,10 @@
   version "0.0.31"
   resolved "https://registry.yarnpkg.com/@types/jszip/-/jszip-0.0.31.tgz#841abc138e53f6e66653714d467935b6dbdf9819"
 
+"@types/lodash@^4.14.57":
+  version "4.14.57"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.57.tgz#f0095fb15ec1004455613f3ad73766583e62f830"
+
 "@types/mocha@^2.2.33":
   version "2.2.40"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.40.tgz#9811dd800ece544cd84b5b859917bf584a150c4c"
@@ -772,6 +776,10 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
 
+geodist@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/geodist/-/geodist-0.2.1.tgz#9619a5d935529335716faafad32228c29dc0b920"
+
 get-caller-file@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-1.0.2.tgz#f702e63127e7e231c160a80c1554acb70d5047e5"
@@ -1381,7 +1389,7 @@ lodash@^3.1.0, lodash@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
 
-lodash@^4.13.1, lodash@^4.2.0, lodash@^4.5.1:
+lodash@^4.13.1, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.5.1:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 

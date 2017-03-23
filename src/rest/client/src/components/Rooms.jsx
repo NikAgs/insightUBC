@@ -11,7 +11,13 @@ export default class Rooms extends Component {
         this.handleOptionChange = this.handleOptionChange.bind(this);
         this.handleQueryChange = this.handleQueryChange.bind(this);
         this.getList = this.getList.bind(this);
-        this.state = { selectedOption: "UP", selectedQuery: "AND", ans: [], showQuery: true };
+        this.state = {
+            selectedOption: "UP",
+            selectedQuery: "AND",
+            ans: [],
+            showQuery: true,
+            findLocationBound: false
+        };
         this.handleButtonClick = this.handleButtonClick.bind(this);
     }
 
@@ -29,6 +35,9 @@ export default class Rooms extends Component {
         if (orderArr[0] == "") {
             orderArr = null;
         }
+        let finalQueryObj = {};
+        finalQueryObj.OPTIONS = {};
+        finalQueryObj.OPTIONS.COLUMNS = this.getList();
         let orderObj = "";
         let filters = [];
         if (furniture) {
@@ -45,19 +54,25 @@ export default class Rooms extends Component {
             tObj.IS.rooms_type = rtype;
             filters.push(tObj);
         }
-        if (fullname) {
-            fullname = "*" + fullname + "*";
-            let tObj = {};
-            tObj.IS = {};
-            tObj.IS.rooms_fullname = fullname;
-            filters.push(tObj);
-        }
-        if (shortname) {
-            shortname = "*" + shortname + "*";
-            let tObj = {};
-            tObj.IS = {};
-            tObj.IS.rooms_shortname = shortname;
-            filters.push(tObj);
+        if (!location) {
+            if (fullname) {
+                fullname = "*" + fullname + "*";
+                let tObj = {};
+                tObj.IS = {};
+                tObj.IS.rooms_fullname = fullname;
+                filters.push(tObj);
+            }
+            if (shortname) {
+                shortname = "*" + shortname + "*";
+                let tObj = {};
+                tObj.IS = {};
+                tObj.IS.rooms_shortname = shortname;
+                filters.push(tObj);
+            }
+        } else {
+            let buildingName = fullname ? fullname : shortname;
+            this.setState({ findLocationBound: true, buildingName: buildingName });
+            finalQueryObj.OPTIONS.COLUMNS = finalQueryObj.OPTIONS.COLUMNS.concat(["rooms_lat", "rooms_lon"]);
         }
         if (number) {
             let tObj = {};
@@ -77,20 +92,21 @@ export default class Rooms extends Component {
             orderObj.dir = order;
             orderObj.keys = orderArr;
         }
-        let finalQueryObj = {};
-        finalQueryObj.OPTIONS = {};
         finalQueryObj.OPTIONS.ORDER = orderObj;
         finalQueryObj.OPTIONS.FORM = "TABLE";
-        finalQueryObj.OPTIONS.COLUMNS = this.getList();
         finalQueryObj.WHERE = {};
         if (filters.length > 1) {
             let type = this.state.selectedQuery;
             finalQueryObj.WHERE[type] = filters;
         }
-        else {
+        else if (filters.length == 1) {
             finalQueryObj.WHERE = filters[0];
         }
         return finalQueryObj;
+    }
+
+    filterByLocation(array, buildingName) {
+        return array;
     }
 
     searchRooms(event) {
@@ -98,39 +114,48 @@ export default class Rooms extends Component {
         let self = this;
         let finalQueryObj = this.buildQuery();
         // data.append("json", JSON.stringify(testObj));
-        console.log(finalQueryObj);
-        let testObj = {
-            "WHERE": {
-                "IS": {
-                    "rooms_furniture": "*Tables*"
-                }
-            },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "rooms_fullname",
-                    "rooms_shortname",
-                    "rooms_number",
-                    "rooms_name",
-                    "rooms_furniture",
-                    "rooms_href"
-                ],
-                "FORM": "TABLE"
-            }
-        }
-        fetch('http://localhost:4321/query', {
-            method: "POST",
-            body: JSON.stringify(finalQueryObj)
-        })
-            .then((res) => { return res.json(); })
-            .then((data) => {
-                console.log(data);
-                if (data && data.render === "TABLE") {
-                    self.setState({
-                        ans: data.result,
-                        showQuery: false
-                    })
-                }
+        console.log(this.state.findLocationBound);
+
+        if (parseInt(this.location.value) > 0) {
+            let testObj = {};
+            let fullname = this.fullname.value || null;
+            let shortname = this.shortname.value || null;
+            testObj.query = finalQueryObj;
+            testObj.buildingName = fullname ? fullname : shortname;
+            testObj.maxDistance = this.location.value;
+            console.log("Here", testObj);
+            fetch('http://localhost:4321/distanceQuery', {
+                method: "POST",
+                body: JSON.stringify(testObj)
             })
+                .then((res) => { return res.json(); })
+                .then((data) => {
+                    console.log(data);
+                    if (data && data.render === "TABLE") {
+                        self.setState({
+                            ans: data.result,
+                            showQuery: false
+                        });
+                    }
+                })
+        }
+        else {
+            fetch('http://localhost:4321/query', {
+                method: "POST",
+                body: JSON.stringify(finalQueryObj)
+            })
+                .then((res) => { return res.json(); })
+                .then((data) => {
+                    console.log(data);
+                    if (data && data.render === "TABLE") {
+                        self.setState({
+                            ans: data.result,
+                            showQuery: false
+                        })
+                    }
+                })
+        }
+        this.form.value = "";
     }
 
 
@@ -167,7 +192,7 @@ export default class Rooms extends Component {
     render() {
         const formBody = (
             <div>
-                <form className="form-horizontal" onSubmit={this.searchRooms}>
+                <form className="form-horizontal" ref={ref => this.form = ref} onSubmit={this.searchRooms}>
                     <fieldset>
                         <ListGroup>
                             <ListGroupItem>
@@ -191,7 +216,7 @@ export default class Rooms extends Component {
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-6">
-                                        <label className="control-label text-semibold col-sm-4 col-md-3">Location</label>
+                                        <label className="control-label text-semibold col-sm-4 col-md-3">Maximum Distance</label>
                                         <div className="col-sm-8 col-md-9">
                                             <input type='number' name='name' ref={ref => this.location = ref} placeholder='Meters' className="form-control" />
                                         </div>

@@ -67,7 +67,7 @@ export default class Courses extends Component {
             let type = this.state.selectedQuery;
             finalQueryObj.WHERE[type] = filters;
         }
-        else {
+        else if (filters.length == 1) {
             finalQueryObj.WHERE = filters[0];
         }
         return finalQueryObj;

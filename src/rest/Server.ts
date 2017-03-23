@@ -5,6 +5,9 @@
 
 import restify = require('restify');
 
+import _ = require('lodash');
+var geodist = require('geodist');
+
 import Log from "../Util";
 import { InsightResponse } from "../controller/IInsightFacade";
 import InsightFacade from "../controller/InsightFacade";
@@ -78,7 +81,7 @@ export default class Server {
                         console.log(err);
                     }
                 });
-                
+
                 that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     res.send(200);
                     return next();
@@ -125,6 +128,40 @@ export default class Server {
                             return next();
                         })
                 });
+
+                that.rest.post('/distanceQuery', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    let dataRec = JSON.parse(req.body)
+                    return that.insFac.performQuery(dataRec.query)
+                        .then((sol: any) => {
+                            let records = sol.body.result;
+                            let givenRec = _.find(records, (o: any) => {
+                                return o.rooms_shortname == dataRec.buildingName || o.rooms_fullname == dataRec.buildingName;
+                            });
+                            let maxDistance = dataRec.maxDistance;
+                            let latLon: any = {};
+                            if (givenRec) {
+                                latLon.lat = givenRec.rooms_lat;
+                                latLon.lon = givenRec.rooms_lon;
+                                console.log(givenRec, maxDistance);
+                                let finalRecords: Object[] = [];
+                                records.forEach((rec: any) => {
+                                    let tempObj = _.pick(rec, ['rooms_lat', 'rooms_lon']);
+                                    if (geodist(latLon, tempObj, { unit: "meters", limit: maxDistance })) {
+                                        finalRecords.push(_.omit(rec, ['rooms_lat', 'rooms_lon']));
+                                    }
+                                });
+                                sol.body.result = finalRecords;
+                            }
+                            res.send(sol.code, sol.body);
+                            return next();
+                        })
+                        .catch((err) => {
+                            console.log("Err", err);
+                            res.send(err.code, err.body);
+                            return next();
+                        })
+                });
+
 
                 that.rest.del('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     return that.insFac.removeDataset(req.params.id)
