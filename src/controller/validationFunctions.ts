@@ -53,17 +53,17 @@ export default class Validate {
         return new Promise((fulfill, reject) => {
             let options = query.OPTIONS;
             let columns = options.COLUMNS;
-            let courseQuery = true;
+            let ids: string[] = [];
             if (columns.length > 0) {
                 let id = '';
                 columns.forEach(column => {
                     let sub = column.substr(0, column.indexOf('_'));
                     if (sub !== '') {
-                        id = sub;
+                        ids.push(sub);
                     }
                 });
-                if (id !== '') {
-                    fulfill(id);
+                if (ids.length != 0) {
+                    fulfill(ids);
                 } else {
                     reject({
                         code: 400,
@@ -72,7 +72,6 @@ export default class Validate {
                         }
                     })
                 }
-
             }
             else
                 reject({

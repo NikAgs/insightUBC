@@ -207,7 +207,7 @@ export default class Helpers {
                         course.courses_title = entry.Title;
                         course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;
-                        course.courses_year = (entry.Section === 'overall') ? 1900 : entry.Year;
+                        course.courses_year = (entry.Section === 'overall') ? 1900 : parseInt(entry.Year);
                         if (course != {}) {
                             arr.push(course);
                         }
@@ -445,7 +445,7 @@ export default class Helpers {
                     let filters = query[key];
                     let promiseArray: [Promise<[Object]>];
                     let finalObj: any = [];
-                    if (filters.length < 2) {
+                    if (filters.length < 1) {
                         reject({
                             code: 400,
                             body: {

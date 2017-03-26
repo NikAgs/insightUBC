@@ -34,15 +34,15 @@ describe("InsightSpec", function () {
         let query: any = {
             "WHERE": {
                 "GT": {
-                    "class_avg": 98
+                    "courses_avg": 98
                 }
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "class_dept",
-                    "class_avg"
+                    "courses_dept",
+                    "courses_avg"
                 ],
-                "ORDER": "class_avg",
+                "ORDER": "courses_avg",
                 "FORM": "TABLE"
             }
         }
@@ -55,34 +55,6 @@ describe("InsightSpec", function () {
                 //console.log(err);
                 expect(err.code).to.equal(424);
             });
-    });
-
-
-    it("Should add new rooms dataSet", (done) => {
-        fs.readFile("roomsBase64", 'utf8', (err: any, data: any) => {
-            if (!err) {
-                return insFac.addDataset("rooms", data)
-                    .then(res => {
-                        //console.log(res, "204");
-                        expect(res).to.deep.equal(
-                            {
-                                code: 204,
-                                body: {}
-                            }
-                        );
-                        done();
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        done();
-                    });
-            }
-            else {
-                console.log(err);
-                expect.fail();
-                done();
-            }
-        });
     });
 
     it("Should return error on invalid dataSet", (done) => {
@@ -160,6 +132,97 @@ describe("InsightSpec", function () {
                 done();
             }
         });
+    });
+
+    it("Aurora: performQuery 424.", function () {
+        var query: QueryRequest = {
+            "WHERE": {
+                "NOT":
+                {
+                    "LT": {
+                        "courses_avg": 50
+                    }
+                }
+
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "stub_id",
+                    "daddy_avg",
+                    "courses_dept"
+                ],
+                "ORDER": "courses_dept",
+                "FORM": "TABLE"
+            }
+        };
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+                expect.fail();
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(424);
+            });
+    });
+
+    it("performQuery 424", function () {
+        var query: QueryRequest = {
+            "WHERE": {
+                "NOT":
+                {
+                    "LT": {
+                        "courses_avg": 50
+                    }
+                }
+
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "yes_dept",
+                    "stub_id",
+                    "daddy_avg"
+                ],
+                "ORDER": "yes_dept",
+                "FORM": "TABLE"
+            }
+        };
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res);
+                expect.fail();
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(424);
+            });
+    });
+
+    it("Should be able to filter courses for given year", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "EQ": {
+                    "courses_year": 2016
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "courses_year"
+                ],
+                "ORDER": "courses_year",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
     });
 
     it("Should not set empty dataSet", () => {
@@ -249,7 +312,6 @@ describe("InsightSpec", function () {
                 expect.fail();
             });
     });
-
 
     it("Should return code 200", function () {
         let query: QueryRequest = {
@@ -354,12 +416,12 @@ describe("InsightSpec", function () {
             });
     });
 
-    it("Wrong number of filters", function () {
+    it("Only 1 filter in AND", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [{
                     "IS": {
-                        "course_dept": 'cpsc'
+                        "courses_dept": "cpsc"
                     }
                 }]
             },
@@ -374,19 +436,18 @@ describe("InsightSpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res);
-                expect.fail();
+                console.log(res.body);
+                expect(res.code).to.equal(200);
             })
             .catch(err => {
-                //console.log(err);
-                expect(err.code).to.equal(400);
+                console.log(err);
+                expect.fail();
             });
     });
 
     it("Wrong Options COLUMNS", function () {
         let query: QueryRequest = {
             "WHERE": {
-
                 "NOT":
                 {
                     "LT": {
@@ -1911,17 +1972,6 @@ describe("InsightSpec", function () {
 
     it("Should remove courses dataSet", () => {
         return insFac.removeDataset("courses")
-            .then(res => {
-                expect(res.code).to.equal(204);
-            })
-            .catch(err => {
-                console.log(err);
-                expect.fail();
-            });
-    });
-
-    it("Should remove rooms dataSet", () => {
-        return insFac.removeDataset("rooms")
             .then(res => {
                 expect(res.code).to.equal(204);
             })
