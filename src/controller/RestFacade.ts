@@ -7,8 +7,9 @@ import * as fs from "fs";
 import InsightFacade from "./InsightFacade";
 
 import _ = require('lodash');
-var geodist = require('geodist');
-
+let geodist = require('geodist');
+let schedule = require('schedulejs');
+let later = require('later');
 
 export default class RestFacade {
 
@@ -27,27 +28,101 @@ export default class RestFacade {
             });
             // console.log(givenRec, buildingName, distance);
             let latLon: any = {};
-            if (givenRec) {
-                latLon.lat = givenRec.rooms_lat;
-                latLon.lon = givenRec.rooms_lon;
-                // console.log(givenRec, maxDistance);
-                let finalRecords: Object[] = [];
-                records.forEach((rec: any) => {
-                    let tempObj = _.pick(rec, ['rooms_lat', 'rooms_lon']);
-                    if (geodist(latLon, tempObj, { unit: "meters", limit: distance })) {
-                        finalRecords.push(_.omit(rec, ['rooms_lat', 'rooms_lon']));
-                    }
-                });
-                query.body.result = finalRecords;
-                fulfill(query);
+            if (distance > 0) {
+                if (givenRec) {
+                    latLon.lat = givenRec.rooms_lat;
+                    latLon.lon = givenRec.rooms_lon;
+                    // console.log(givenRec, maxDistance);
+                    let finalRecords: Object[] = [];
+                    records.forEach((rec: any) => {
+                        let tempObj = _.pick(rec, ['rooms_lat', 'rooms_lon']);
+                        if (geodist(latLon, tempObj, { unit: "meters", limit: distance })) {
+                            finalRecords.push(_.omit(rec, ['rooms_lat', 'rooms_lon']));
+                        }
+                    });
+                    query.body.result = finalRecords;
+                    fulfill(query);
+                }
+                else {
+                    reject({
+                        code: 400,
+                        body: { "error": "Cannot find the given building" }
+                    });
+                }
             }
             else {
-                reject({
-                    code: 400,
-                    body: { "error": "Cannot find the given building" }
-                });
+                fulfill(query);
             }
+
         });
+    }
+
+    findSchedule(roomsResponse: any, courses: any) {
+        let self = this;
+        let rooms = roomsResponse.body.result;
+        return new Promise((fulfill, reject) => {
+            //create resources
+            let resourcesData: any = [];
+            _.forEach(rooms, (room) => {
+                let tempObj: any = {};
+                tempObj.id = room.rooms_name;
+                // tempObj.isNotReservable = false;
+                tempObj.available = later.parse.text('every weekday after 8am');
+                resourcesData.push(tempObj);
+            })
+
+            let tasksData: any = [];
+            let count = 0;
+            courses.sort((a: any, b: any) => {
+                return a["size"] > b["size"] ? 1 : -1;
+            });
+            _.forEach(courses, (course) => {
+                _.times(course.sections, (i) => {
+                    let availableRooms: {}[] = _.map(_.filter(rooms, (o: any) => {
+                        return o.rooms_seats > course.size
+                    }), "rooms_name");
+                    // console.log(availableRooms);
+                    let tempObj = self.makeTaskObj(count, course, i, availableRooms);
+                    if (tempObj) {
+                        tasksData.push(tempObj);
+                    }
+                    count++;
+                })
+            })
+            // console.log(resourcesData, tasksData);
+            var start = new Date(2017, 3, 6);
+            schedule.date.localTime();
+            let finalSchedule = schedule.create(tasksData, resourcesData, later.parse.text('every weekday'), new Date());
+            // console.log(finalSchedule);
+            let returnObj: any = {};
+            returnObj.schedule = finalSchedule;
+            returnObj.rooms = rooms;
+            returnObj.courses = courses;
+            fulfill(returnObj);
+        })
+    }
+
+    makeTaskObj(count: number, course: any, iterator: number, availableRooms: {}[]) {
+        let tempObj: any = {};
+        if (availableRooms.length > 0) {
+            if (count % 5 < 3) {
+                tempObj.id = course.courseId + "_" + (iterator + 1);
+                tempObj.duration = 60;
+                tempObj.minLength = 60;
+                tempObj.resources = [availableRooms];
+                tempObj.available = later.parse.text('on Monday');
+                tempObj.size = course.size;
+            } else {
+                tempObj.id = course.courseId + "_" + iterator;
+                tempObj.duration = 90;
+                tempObj.minLength = 90;
+                tempObj.resources = [availableRooms];
+                tempObj.available = later.parse.text('on Tuesday');
+                tempObj.size = course.size;
+            }
+            return tempObj;
+        }
+        return null;
     }
 
     scheduleCourses(query: any) {
@@ -97,56 +172,7 @@ export default class RestFacade {
                         courseData.push(tempObj);
                     })
                     // FINAL COURSE DATA THAT IS REQUIRED
-                    return;
-                })
-                .then(() => {
-                    let buildingName = query.buildingName;
-                    if (query.distance) {
-                        let roomsQuery = {
-                            "WHERE": {
-                            },
-                            "OPTIONS": {
-                                "COLUMNS": [
-                                    "rooms_seats",
-                                    "rooms_lat",
-                                    "rooms_lon",
-                                    "rooms_fullname",
-                                    "rooms_shortname",
-                                    "rooms_number",
-                                    "rooms_name"
-                                ],
-                                "FORM": "TABLE"
-                            }
-                        }
-                        return self.insFac.performQuery(roomsQuery)
-                            .then(res => self.filterByDistance(res, buildingName, query.distance))
-                    }
-                    else {
-                        let roomsQuery = {
-                            "WHERE": {
-                                "IS": query.buildingQuery
-                            },
-                            "OPTIONS": {
-                                "COLUMNS": [
-                                    "rooms_seats",
-                                    "rooms_lat",
-                                    "rooms_lon",
-                                    "rooms_fullname",
-                                    "rooms_shortname",
-                                    "rooms_number",
-                                    "rooms_name"
-                                ],
-                                "FORM": "TABLE"
-                            }
-                        }
-                        return self.insFac.performQuery(roomsQuery)
-                    }
-                })
-                .then((res: any) => {
-                    // console.log(res.body.result, courseData);
-                    let roomsData = res.body.result;
-                    
-                    fulfill(res);
+                    fulfill(courseData);
                 })
                 .catch(err => {
                     console.log(err);

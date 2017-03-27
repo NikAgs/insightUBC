@@ -159,12 +159,51 @@ export default class Server {
                 });
 
                 that.rest.post('/schedule', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    let dataRec = JSON.parse(req.body)
+                    let dataRec = JSON.parse(req.body);
+                    let roomsQuery: Object;
+                    console.log(dataRec);
+                    if (dataRec.distance > 0) {
+                        roomsQuery = {
+                            WHERE: {},
+                            OPTIONS: {
+                                COLUMNS: ["rooms_seats",
+                                    "rooms_lat",
+                                    "rooms_lon",
+                                    "rooms_fullname",
+                                    "rooms_shortname",
+                                    "rooms_number",
+                                    "rooms_name"],
+                                FORM: "TABLE"
+                            }
+                        }
+                    }
+                    else {
+                        roomsQuery = {
+                            WHERE: { IS: dataRec.buildingQuery },
+                            OPTIONS: {
+                                COLUMNS: ["rooms_seats",
+                                    "rooms_lat",
+                                    "rooms_lon",
+                                    "rooms_fullname",
+                                    "rooms_shortname",
+                                    "rooms_number",
+                                    "rooms_name"],
+                                FORM: "TABLE"
+                            }
+                        }
+                        // console.log(roomsQuery);
+                    }
+                    let coursesData: any;
                     return that.restFac.scheduleCourses(dataRec)
-                        .then((sol: any) => that.restFac.filterByDistance(sol, dataRec.buildingName, dataRec.maxDistance))
                         .then((sol: any) => {
-                            console.log(sol);
-                            res.send(sol.code, sol.body);
+                            coursesData = sol;
+                            return that.insFac.performQuery(roomsQuery)
+                        })
+                        .then((sol: any) => that.restFac.filterByDistance(sol, dataRec.buildingName, dataRec.distance))
+                        .then((rooms: any) => that.restFac.findSchedule(rooms, coursesData))
+                        .then((sol: any) => {
+                            // console.log(sol);
+                            res.send(sol);
                             return next();
                         })
                         .catch((err) => {

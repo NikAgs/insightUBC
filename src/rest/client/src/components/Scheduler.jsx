@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
 // import OutputTable from './OutputTable';
 import JsonTable from 'react-json-table';
+import TimeTable from './Timetable';
 
 export default class Scheduler extends Component {
 
@@ -9,7 +10,7 @@ export default class Scheduler extends Component {
         super(props);
         this.getSchedule = this.getSchedule.bind(this);
         this.handleQueryChange = this.handleQueryChange.bind(this);
-        this.state = { selectedQuery: "AND", ans: [], showQuery: true };
+        this.state = { selectedQuery: "AND", showQuery: true };
         this.handleButtonClick = this.handleButtonClick.bind(this);
         this.buildQuery = this.buildQuery.bind(this);
     }
@@ -60,10 +61,13 @@ export default class Scheduler extends Component {
             .then((res) => { return res.json(); })
             .then((data) => {
                 console.log(data);
-                if (data && data.render === "TABLE") {
+                if (data) {
                     self.setState({
-                        ans: data.result,
-                        showQuery: false
+                        rooms: data.rooms,
+                        courses: data.courses,
+                        scheduledTasks: data.schedule.scheduledTasks,
+                        failedTasks: data.schedule.failedTasks
+                        // showQuery: false
                     })
                 }
             })
@@ -172,9 +176,7 @@ export default class Scheduler extends Component {
                     {
                         this.state.showQuery ? formBody : searchButton
                     }
-                    <div className="table-responsive">
-                        <JsonTable className="table" rows={this.state.ans} />
-                    </div>
+                    <TimeTable rooms={this.state.rooms} scheduledTasks={this.state.scheduledTasks} failed={this.state.faiiledTasks}/>
                 </Col>
             </Grid>
         );

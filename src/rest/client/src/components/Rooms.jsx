@@ -122,7 +122,6 @@ export default class Rooms extends Component {
             testObj.query = finalQueryObj;
             testObj.buildingName = fullname ? fullname : shortname;
             testObj.maxDistance = this.location.value;
-            console.log("Here", testObj);
             fetch('http://localhost:4321/distanceQuery', {
                 method: "POST",
                 body: JSON.stringify(testObj)

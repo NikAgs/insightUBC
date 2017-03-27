@@ -191,9 +191,7 @@ export default class Validate {
             let apply = trans.APPLY;
             self.checkColumnIsValid(group, '')
                 .then(() => {
-                    if (apply.length == 0) {
-                        fulfill();
-                    } else {
+                    if (apply && apply.length > 0) {
                         let retArr: any[] = [];
                         apply.forEach((obj: any) => {
                             let keys = Object.keys(obj);
@@ -241,6 +239,8 @@ export default class Validate {
                                 }
                             }
                         })
+                    } else {
+                        fulfill();
                     }
                 })
                 .catch((err) => {
