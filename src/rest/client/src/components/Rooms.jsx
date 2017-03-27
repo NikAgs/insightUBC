@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
 // import OutputTable from './OutputTable';
 import JsonTable from 'react-json-table';
+import toastr from 'toastr'
 
 export default class Rooms extends Component {
 
@@ -114,7 +115,6 @@ export default class Rooms extends Component {
         let finalQueryObj = this.buildQuery();
         // data.append("json", JSON.stringify(testObj));
         console.log(this.state.findLocationBound);
-
         if (parseInt(this.location.value) > 0) {
             let testObj = {};
             let fullname = this.fullname.value || null;
@@ -135,6 +135,9 @@ export default class Rooms extends Component {
                             showQuery: false
                         });
                     }
+                    else {
+                        toastr.error(data.error);
+                    }
                 })
         }
         else {
@@ -150,6 +153,9 @@ export default class Rooms extends Component {
                             ans: data.result,
                             showQuery: false
                         })
+                    }
+                    else {
+                        toastr.error(data.error);
                     }
                 })
         }

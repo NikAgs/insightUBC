@@ -3,6 +3,7 @@ import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from
 // import OutputTable from './OutputTable';
 import JsonTable from 'react-json-table';
 import TimeTable from './Timetable';
+import toastr from 'toastr'
 
 export default class Scheduler extends Component {
 
@@ -66,9 +67,12 @@ export default class Scheduler extends Component {
                         rooms: data.rooms,
                         courses: data.courses,
                         scheduledTasks: data.schedule.scheduledTasks,
-                        failedTasks: data.schedule.failedTasks
-                        // showQuery: false
+                        failedTasks: data.schedule.failedTasks,
+                        showQuery: false
                     })
+                }
+                else {
+                    toastr.error(data.error);
                 }
             })
     }
@@ -164,7 +168,6 @@ export default class Scheduler extends Component {
                 </form>
             </div>
         )
-
         const searchButton = (
             <ListGroup className="text-right">
                 <Button onClick={this.handleButtonClick}>New Query</Button>
@@ -176,7 +179,7 @@ export default class Scheduler extends Component {
                     {
                         this.state.showQuery ? formBody : searchButton
                     }
-                    <TimeTable rooms={this.state.rooms} courses= {this.state.courses} scheduledTasks={this.state.scheduledTasks} failed={this.state.faiiledTasks}/>
+                    <TimeTable rooms={this.state.rooms} courses={this.state.courses} scheduledTasks={this.state.scheduledTasks} failed={this.state.faiiledTasks} />
                 </Col>
             </Grid>
         );

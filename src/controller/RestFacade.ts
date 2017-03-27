@@ -92,7 +92,7 @@ export default class RestFacade {
             // console.log(resourcesData, tasksData);
             var start = new Date(2017, 3, 6);
             schedule.date.localTime();
-            let finalSchedule = schedule.create(tasksData, resourcesData, later.parse.text('every weekday'), new Date());
+            let finalSchedule = schedule.create(tasksData, resourcesData, later.parse.text('every weekday'), new Date("March 5, 2017 11:00:00"));
             // console.log(finalSchedule);
             let returnObj: any = {};
             returnObj.schedule = finalSchedule;

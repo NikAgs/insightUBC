@@ -161,7 +161,7 @@ export default class Server {
                 that.rest.post('/schedule', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     let dataRec = JSON.parse(req.body);
                     let roomsQuery: Object;
-                    console.log(dataRec);
+                    // console.log(dataRec);
                     if (dataRec.distance > 0) {
                         roomsQuery = {
                             WHERE: {},

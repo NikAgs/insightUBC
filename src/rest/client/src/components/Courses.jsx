@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
 // import OutputTable from './OutputTable';
 import JsonTable from 'react-json-table';
+import toastr from 'toastr'
 
 export default class Courses extends Component {
 
@@ -99,6 +100,9 @@ export default class Courses extends Component {
                         ans: data.result,
                         showQuery: false
                     })
+                }
+                else {
+                    toastr.error(data.error);
                 }
             })
     }
