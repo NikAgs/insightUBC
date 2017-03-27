@@ -67,7 +67,7 @@ export default class RestFacade {
                 let tempObj: any = {};
                 tempObj.id = room.rooms_name;
                 // tempObj.isNotReservable = false;
-                tempObj.available = later.parse.text('every weekday after 8am');
+                tempObj.available = later.parse.text('every weekday after 8:00am');
                 resourcesData.push(tempObj);
             })
 
