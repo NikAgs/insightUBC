@@ -128,7 +128,7 @@ export default class InsightFacade implements IInsightFacade {
             let transformations = query.TRANSFORMATIONS;
             this.helpers.validate.findDataset(query)
                 .then((ids: string[]) => {
-                    let missingIDs: any[] = [];
+                    let missingIDs: string[] = [];
                     ids.forEach(id => {
                         if (!this.helpers.dataSet.has(id)) {
                             missingIDs.push(id);
