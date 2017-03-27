@@ -49,17 +49,24 @@ export default class Validate {
         }));
     };
 
-    findDataset(query: QueryRequest) {
+    findDataset(query: QueryRequest, apply: Object[]) {
         return new Promise((fulfill, reject) => {
             let options = query.OPTIONS;
             let columns = options.COLUMNS;
             let ids: string[] = [];
+            let applyKeys: string[] = [];
+            apply.forEach((obj: any) => {
+                let keys = Object.keys(obj);
+                applyKeys.push(keys[0]);
+            });
             if (columns.length > 0) {
                 let id = '';
                 columns.forEach(column => {
                     let sub = column.substr(0, column.indexOf('_'));
-                    if (sub !== '') {
-                        ids.push(sub);
+                    if (!applyKeys.includes(column)) {
+                        if (sub !== '') {
+                            ids.push(sub);
+                        }
                     }
                 });
                 if (ids.length != 0) {

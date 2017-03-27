@@ -126,7 +126,11 @@ export default class InsightFacade implements IInsightFacade {
             let optionsRequest = query.OPTIONS;
             let chosenDataset: string;
             let transformations = query.TRANSFORMATIONS;
-            this.helpers.validate.findDataset(query)
+            let apply = [];
+            if (transformations && transformations.APPLY) {
+                apply = transformations.APPLY;
+            }
+            this.helpers.validate.findDataset(query, apply)
                 .then((ids: string[]) => {
                     let missingIDs: string[] = [];
                     ids.forEach(id => {

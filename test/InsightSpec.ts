@@ -595,6 +595,70 @@ describe("InsightSpec", function () {
             });
     });
 
+    it("Empty Query Output", function () {
+        let query: any = {
+            "WHERE": {
+                "AND": [
+                    {
+                        "LT": {
+                            "courses_avg": 85
+                        }
+                    },
+                    {
+                        "GT": {
+                            "courses_avg": 90
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_avg",
+                    "courses_instructor"
+                ],
+                "ORDER": "courses_avg",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                console.log(res.body);
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
+    it("Extra keys in query", function () {
+        let query: any = {
+            "WHERE": {
+                "GT": {
+                    "courses_avg": 97
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_title",
+                    "courses_avg",
+                    "courses_instructor"
+                ],
+                "ORDER": "courses_title",
+                "VALUE": "courses_id",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                expect(res.code).to.equal(200);
+            })
+            .catch(err => {
+                console.log(err);
+                expect.fail();
+            });
+    });
+
     it("Wrong Sort", function () {
         let query: QueryRequest = {
             "WHERE": {
