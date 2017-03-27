@@ -129,7 +129,7 @@ export default class RestFacade {
         let courseData: any = [];
         let self = this;
         return new Promise((fulfill, reject) => {
-            let courseQuery = {
+            let courseQuery: any = {
                 "WHERE": {
                     "AND": [
                         {
@@ -152,6 +152,42 @@ export default class RestFacade {
                     "FORM": "TABLE"
                 }
             }
+            if (query.type) {
+                let obj: any = {};
+                obj[query.type] = [
+                    {
+                        "IS": {
+                            "courses_dept": query.department
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_id": query.courseNumber
+                        }
+                    }
+                ];
+                courseQuery = {
+                    "WHERE": {
+                        "AND": [{
+                            "EQ": {
+                                "courses_year": 2014
+                            }
+                        }]
+                    },
+                    "OPTIONS": {
+                        "COLUMNS": [
+                            "courses_dept",
+                            "courses_id",
+                            "courses_pass",
+                            "courses_fail"
+                        ],
+                        "FORM": "TABLE"
+                    }
+                }
+                courseQuery.WHERE.AND.push(obj);
+                console.log(courseQuery);
+            }
+
             self.insFac.performQuery(courseQuery)
                 .then((res: any) => {
                     let records = res.body.result;

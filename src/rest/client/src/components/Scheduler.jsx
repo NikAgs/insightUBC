@@ -62,7 +62,7 @@ export default class Scheduler extends Component {
             .then((res) => { return res.json(); })
             .then((data) => {
                 console.log(data);
-                if (data) {
+                if (data.rooms) {
                     self.setState({
                         rooms: data.rooms,
                         courses: data.courses,
