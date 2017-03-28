@@ -126,23 +126,33 @@ export default class InsightFacade implements IInsightFacade {
             let optionsRequest = query.OPTIONS;
             let chosenDataset: string;
             let transformations = query.TRANSFORMATIONS;
-            this.helpers.validate.findDataset(query)
-                .then((tableType: string) => {
-                    if (!this.helpers.dataSet.has(tableType)) {
+            let apply = [];
+            if (transformations && transformations.APPLY) {
+                apply = transformations.APPLY;
+            }
+            this.helpers.validate.findDataset(query, apply)
+                .then((ids: string[]) => {
+                    let missingIDs: string[] = [];
+                    ids.forEach(id => {
+                        if (!this.helpers.dataSet.has(id)) {
+                            missingIDs.push(id);
+                        }
+                    });
+                    if (missingIDs.length != 0) {
                         reject({
                             code: 424,
                             body: {
-                                "missing": ["courses"]   // This shouldd probably be fixed for d4
+                                "missing": missingIDs
                             }
                         });
                     }
                     else {
-                        chosenDataset = tableType;
+                        chosenDataset = ids[0];
                         return this.helpers.validate.checkForQuery(query);
                     }
                 })
                 .then(() => this.helpers.runForFilter(filter, chosenDataset))
-                .then((response: [Object])=> this.helpers.transform(response, transformations))
+                .then((response: [Object]) => this.helpers.transform(response, transformations))
                 .then((response: [Object]) => this.helpers.runForOptions(response, optionsRequest))
                 .then((response: [Object]) => {
                     //console.log(response);

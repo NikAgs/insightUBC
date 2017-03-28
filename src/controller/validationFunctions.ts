@@ -49,21 +49,28 @@ export default class Validate {
         }));
     };
 
-    findDataset(query: QueryRequest) {
+    findDataset(query: QueryRequest, apply: Object[]) {
         return new Promise((fulfill, reject) => {
             let options = query.OPTIONS;
             let columns = options.COLUMNS;
-            let courseQuery = true;
+            let ids: string[] = [];
+            let applyKeys: string[] = [];
+            apply.forEach((obj: any) => {
+                let keys = Object.keys(obj);
+                applyKeys.push(keys[0]);
+            });
             if (columns.length > 0) {
                 let id = '';
                 columns.forEach(column => {
                     let sub = column.substr(0, column.indexOf('_'));
-                    if (sub !== '') {
-                        id = sub;
+                    if (!applyKeys.includes(column)) {
+                        if (sub !== '') {
+                            ids.push(sub);
+                        }
                     }
                 });
-                if (id !== '') {
-                    fulfill(id);
+                if (ids.length != 0) {
+                    fulfill(ids);
                 } else {
                     reject({
                         code: 400,
@@ -72,7 +79,6 @@ export default class Validate {
                         }
                     })
                 }
-
             }
             else
                 reject({
@@ -124,18 +130,16 @@ export default class Validate {
     checkForWhere(filter: FILTER) {
         return new Promise((fulfill, reject) => {
             let addedFilters = Object.keys(filter);
-            let acceptedFilters = ['AND', 'OR', "NOT", 'EQ', 'GT', 'LT', 'IS']
-            addedFilters.forEach((fil) => {
-                if (acceptedFilters.indexOf(fil) == -1) {
-                    reject({
-                        code: 400,
-                        body: {
-                            "error": "Invalid QueryRequest"
-                        }
-                    });
-                }
-            });
-            fulfill();
+            if (Object.keys(filter).length <= 1) {
+                fulfill();
+            } else {
+                reject({
+                    code: 400,
+                    body: {
+                        "error": "Invalid QueryRequest"
+                    }
+                });
+            }
         });
     }
 
@@ -292,7 +296,6 @@ export default class Validate {
         })
     }
 
-    //TODO: Modify to work with Apply columns
     checkColumnIsValid(columnNames: string[], type: string): Promise<{}> {
         let self = this;
         return new Promise((fulfill, reject) => {

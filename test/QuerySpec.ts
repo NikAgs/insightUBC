@@ -229,7 +229,7 @@ describe("QuerySpec", function () {
             });
     });
 
-    it("Should return code 200", function () {
+    it("Empty Apply", function () {
         let query: QueryRequest = {
             "WHERE": {},
             "OPTIONS": {
@@ -246,7 +246,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -371,6 +371,51 @@ describe("QuerySpec", function () {
             })
             .catch(err => {
                 //console.log(err);
+                expect(err.code).to.equal(400);
+            });
+    });
+
+    it("Apply key with _ invalid", function () {
+        let query: QueryRequest = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "max_Seats"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["max_Seats"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname"],
+                "APPLY": [{
+                    "max_Seats": {
+                        "MAX": "rooms_seats"
+                    }
+                }]
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                // console.log(res.body);
+                expect.fail();
+
+            })
+            .catch(err => {
+                console.log(err);
                 expect(err.code).to.equal(400);
             });
     });

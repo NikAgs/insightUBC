@@ -39,7 +39,7 @@ export interface roomRecord {
 export interface OPTIONS {
     COLUMNS: [string];
     ORDER?: any;
-    FORM?: 'TABLE';
+    FORM: 'TABLE';
 }
 
 export interface FILTER extends LOGICCOMPARISON, MCOMPARISON, SCOMPARISON, NEGATION {
