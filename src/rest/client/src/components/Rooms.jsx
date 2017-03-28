@@ -41,14 +41,12 @@ export default class Rooms extends Component {
         let orderObj = "";
         let filters = [];
         if (furniture) {
-            furniture = "*" + furniture + "*";
             let tObj = {};
             tObj.IS = {};
             tObj.IS.rooms_furniture = furniture;
             filters.push(tObj);
         }
         if (rtype) {
-            rtype = "*" + rtype + "*";
             let tObj = {};
             tObj.IS = {};
             tObj.IS.rooms_type = rtype;
@@ -56,14 +54,12 @@ export default class Rooms extends Component {
         }
         if (!location) {
             if (fullname) {
-                fullname = "*" + fullname + "*";
                 let tObj = {};
                 tObj.IS = {};
                 tObj.IS.rooms_fullname = fullname;
                 filters.push(tObj);
             }
             if (shortname) {
-                shortname = "*" + shortname + "*";
                 let tObj = {};
                 tObj.IS = {};
                 tObj.IS.rooms_shortname = shortname;

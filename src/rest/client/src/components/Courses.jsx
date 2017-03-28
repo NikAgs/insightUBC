@@ -3,6 +3,7 @@ import { Grid, Col, ListGroup, Button, ListGroupItem, FormGroup, Checkbox } from
 // import OutputTable from './OutputTable';
 import JsonTable from 'react-json-table';
 import toastr from 'toastr'
+let _ = require('lodash');
 
 export default class Courses extends Component {
 
@@ -28,41 +29,37 @@ export default class Courses extends Component {
         if (orderArr[0] == "") {
             orderArr = null;
         }
-        let orderObj = "";
+        let orderObj;
+        if (orderArr) {
+            orderObj = {};
+            orderObj.dir = order;
+            orderObj.keys = orderArr;
+        }
+        this.setState({
+            order: orderObj
+        })
         let filters = [];
         if (courseTitle) {
-            courseTitle = "*" + courseTitle + "*";
             let tObj = {};
             tObj.IS = {};
             tObj.IS.courses_title = courseTitle;
             filters.push(tObj);
         }
         if (instructor) {
-            instructor = "*" + instructor + "*";
             let tObj = {};
             tObj.IS = {};
             tObj.IS.courses_instructor = instructor;
             filters.push(tObj);
         }
         if (dept) {
-            dept = "*" + dept + "*";
             let tObj = {};
             tObj.IS = {};
             tObj.IS.courses_dept = dept;
             filters.push(tObj);
         }
-        if (size) {
-            //size does not exist for courses
-        }
-        if (orderArr) {
-            orderObj = {};
-            orderObj.dir = order;
-            orderObj.keys = orderArr;
-        }
 
         let finalQueryObj = {};
         finalQueryObj.OPTIONS = {};
-        finalQueryObj.OPTIONS.ORDER = orderObj;
         finalQueryObj.OPTIONS.FORM = "TABLE";
         finalQueryObj.OPTIONS.COLUMNS = this.getList();
         finalQueryObj.WHERE = {};
@@ -71,7 +68,44 @@ export default class Courses extends Component {
                 "GROUP": ["courses_dept", "courses_id"],
                 "APPLY": []
             }
+            if (this.ssize.checked) {
+                finalQueryObj.TRANSFORMATIONS.APPLY.push({
+                    "pass": {
+                        "SUM": "courses_pass"
+                    }
+                }, {
+                        "fail": {
+                            "SUM": "courses_fail"
+                        }
+                    });
+                finalQueryObj.OPTIONS.COLUMNS.push("pass", "fail");
+            }
+            if (this.spass.checked) {
+                finalQueryObj.TRANSFORMATIONS.APPLY.push({
+                    "pass": {
+                        "SUM": "courses_pass"
+                    }
+                })
+                finalQueryObj.OPTIONS.COLUMNS.push("pass");
+            }
+            if (this.sfail.checked) {
+                finalQueryObj.TRANSFORMATIONS.APPLY.push({
+                    "fail": {
+                        "SUM": "courses_fail"
+                    }
+                });
+                finalQueryObj.OPTIONS.COLUMNS.push("fail");
+            }
+            if (this.savg.checked) {
+                finalQueryObj.TRANSFORMATIONS.APPLY.push({
+                    "average": {
+                        "AVG": "courses_avg"
+                    }
+                });
+                finalQueryObj.OPTIONS.COLUMNS.push("average");
+            }
         }
+
         if (filters.length > 1) {
             let type = this.state.selectedQuery;
             finalQueryObj.WHERE[type] = filters;
@@ -96,6 +130,25 @@ export default class Courses extends Component {
             .then((data) => {
                 console.log(data);
                 if (data && data.render === "TABLE") {
+                    let size = parseInt(this.size.value) || null;
+                    if (this.ssize.checked) {
+                        _.forEach(data.result, (o) => {
+                            o.size = o.pass + o.fail;
+                        })
+                        if (size) {
+                            _.remove(data.result, (n) => {
+                                return n.size < size;
+                            });
+                        }
+                    }
+                    let order = self.state.order;
+                    if (order) {
+                        let temp = _.sortBy(data.result, order.keys);
+                        if (order.dir && order.dir === "DOWN") {
+                            temp.reverse();
+                        }
+                        data.result = temp;
+                    }
                     self.setState({
                         ans: data.result,
                         showQuery: false
@@ -111,13 +164,16 @@ export default class Courses extends Component {
         let columnsArr = [];
         this.sdepartment.checked && columnsArr.push("courses_dept");
         this.sid.checked && columnsArr.push("courses_id");
-        this.savg.checked && columnsArr.push("courses_avg");
         this.sinstructor.checked && columnsArr.push("courses_instructor");
         this.stitle.checked && columnsArr.push("courses_title");
-        this.spass.checked && columnsArr.push("courses_pass");
-        this.sfail.checked && columnsArr.push("courses_fail");
         this.saudit.checked && columnsArr.push("courses_audit");
         this.syear.checked && columnsArr.push("courses_year");
+        this.ssize.checked && columnsArr.push("pass", "fail");
+        if (!this.groupSection.checked) {
+            this.spass.checked && columnsArr.push("courses_pass");
+            this.sfail.checked && columnsArr.push("courses_fail");
+            this.savg.checked && columnsArr.push("courses_avg");
+        }
         return columnsArr;
     }
 
@@ -211,22 +267,24 @@ export default class Courses extends Component {
                                         <div className=" col-sm-9 col-md-10">
                                             <Checkbox inline inputRef={ref => { this.stitle = ref; }}>
                                                 Title </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.sdepartment = ref; }}>
+                                            <Checkbox inline inputRef={ref => { this.sdepartment = ref; }}>
                                                 Department </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.sid = ref; }}>
+                                            <Checkbox inline inputRef={ref => { this.sid = ref; }}>
                                                 ID </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.savg = ref; }}>
-                                                Avergae </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.sinstructor = ref; }}>
+                                            <Checkbox inline inputRef={ref => { this.savg = ref; }}>
+                                                Average </Checkbox>
+                                            <Checkbox inline inputRef={ref => { this.sinstructor = ref; }}>
                                                 Instructors </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.spass = ref; }}>
+                                            <Checkbox inline inputRef={ref => { this.spass = ref; }}>
                                                 Pass </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.sfail = ref; }}>
+                                            <Checkbox inline inputRef={ref => { this.sfail = ref; }}>
                                                 Fail </Checkbox>
                                             <Checkbox inline inline inputRef={ref => { this.saudit = ref; }}>
                                                 Audit </Checkbox>
-                                            <Checkbox inline  inputRef={ref => { this.syear = ref; }}>
+                                            <Checkbox inline inputRef={ref => { this.syear = ref; }}>
                                                 Year </Checkbox>
+                                            <Checkbox inline inputRef={ref => { this.ssize = ref; }}>
+                                                Size </Checkbox>
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-4">
@@ -249,9 +307,8 @@ export default class Courses extends Component {
                                         </div>
                                     </div>
                                     <div className="form-group col-sm-3">
-                                        <label className="control-label text-semibold col-sm-6 col-md-6">Group Sections:</label>
-                                        <div className=" col-sm-6 col-md-6">
-                                            <Checkbox inline inputRef={ref => { this.groupSection = ref; }} />
+                                        <div className=" col-sm-12 col-md-12">
+                                            <Checkbox inline inputRef={ref => { this.groupSection = ref; }} >Group Sections </Checkbox>
                                         </div>
                                     </div>
                                 </div>
@@ -267,7 +324,7 @@ export default class Courses extends Component {
                     </fieldset>
 
                 </form>
-            </div>
+            </div >
         )
 
         const searchButton = (
