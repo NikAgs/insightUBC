@@ -19,18 +19,18 @@ const Routes = (
                 <Navbar.Header>
                     <Navbar.Brand>
                         <Link to="/">
-                            UBC Course-Room Allocator
+                            insightUBC
                         </Link>
                     </Navbar.Brand>
                     <Navbar.Toggle />
                 </Navbar.Header>
                 <Navbar.Collapse>
                     <Nav>
-                        <NavItem eventKey={1}><NavLink to="courses">Courses Explorer</NavLink></NavItem>
-                        <NavItem eventKey={1}><NavLink to="maps">UBC Map</NavLink></NavItem>
-                        <NavDropdown eventKey={3} title="Rooms" id="basic-nav-dropdown">
-                            <MenuItem eventKey={3.1}><NavLink to="rooms">Rooms Explorer</NavLink></MenuItem>
-                            <MenuItem eventKey={3.2}><NavLink to="scheduler">Rooms Scheduling</NavLink></MenuItem>
+                        <li><Link className="button" to="courses">Courses Explorer</Link></li>
+                        <li ><Link to="maps">UBC Map</Link></li>
+                        <NavDropdown eventKey={1} title="Rooms" id="basic-nav-dropdown">
+                            <li><NavLink to="rooms">Rooms Explorer</NavLink></li>
+                            <li ><NavLink to="scheduler">Rooms Scheduling</NavLink></li>
                         </NavDropdown>
                     </Nav>
                     <Nav pullRight>

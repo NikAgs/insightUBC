@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Col, Grid, Row } from 'react-bootstrap';
-import Uploader from './components/Uploader'
 export default class AppContainer extends Component {
 
   render() {
@@ -12,7 +11,17 @@ export default class AppContainer extends Component {
           <div className="App">
             <Col xs={12}>
               {children}
-              <Uploader />
+              <div className="text-center">
+                <h1>Welcome!</h1>
+                <h2>
+                  Team 114
+                  </h2>
+                <h3>
+                  Aman Gupta
+                <br />
+                  Nikhil Agarwal
+                </h3>
+              </div>
             </Col>
           </div>
         </Row>
