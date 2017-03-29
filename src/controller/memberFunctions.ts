@@ -560,7 +560,7 @@ export default class Helpers {
                 reject({
                     code: 400,
                     body: {
-                        "error": "No records found"
+                        "error": "No records found in group"
                     }
                 });
             }
@@ -599,7 +599,13 @@ export default class Helpers {
                 }
                 case 'COUNT': {
                     recordToKeep = records[0];
-                    recordToKeep.COUNT = records.length;
+                    let noDuplicates: any = [];
+                    records.forEach((rec: any) => {
+                        if (noDuplicates.indexOf(rec[columnOn]) == -1) {
+                            noDuplicates.push(rec[columnOn]);
+                        }
+                    });
+                    recordToKeep.COUNT = noDuplicates.length;
                     if (finalName) {
                         recordToKeep[finalName] = recordToKeep.COUNT;
                     }
@@ -690,7 +696,6 @@ export default class Helpers {
                     });
             }
         })
-
     }
 
     transform(records: [Object], transformations: TRANSFORMATIONS): Promise<[Object]> {

@@ -149,12 +149,12 @@ export default class Validate {
             let columns: string[] = options.COLUMNS;
             let order = options.ORDER;
             let form = options.FORM;
-            if (form !== "TABLE") {
+            if ((form !== "TABLE") || (!columns)) {
                 reject(
                     {
                         code: 400,
                         body: {
-                            "error": "Only TABLE form is supported"
+                            "error": "Invalid options"
                         }
                     });
             }
@@ -188,11 +188,18 @@ export default class Validate {
 
     checkForTransformations(query: QueryRequest) {
         let trans = query.TRANSFORMATIONS;
-        let cols = query.OPTIONS.COLUMNS
         let self = this;
         return new Promise((fulfill, reject) => {
             let group = trans.GROUP;
             let apply = trans.APPLY;
+            if (!(apply && group) || group.length == 0) {
+                reject({
+                    code: 400,
+                    body: {
+                        "error": "Invalid Transformation"
+                    }
+                })
+            }
             self.checkColumnIsValid(group, '')
                 .then(() => {
                     if (apply.length == 0) {
@@ -201,12 +208,11 @@ export default class Validate {
                         let retArr: any[] = [];
                         apply.forEach((obj: any) => {
                             let keys = Object.keys(obj);
-                            retArr.push(keys[0]);
-                            if (keys.length > 1) {
+                            if (keys.length != 1) {
                                 reject({
                                     code: 400,
                                     body: {
-                                        "error": "Not more than one key in APPLY TOKEN"
+                                        "error": "Invalid Apply key"
                                     }
                                 })
                             }
@@ -215,17 +221,26 @@ export default class Validate {
                                     reject({
                                         code: 400,
                                         body: {
-                                            "error": "Cannot include _"
+                                            "error": "Apply keys cannot include _"
                                         }
                                     })
                                 }
-                                let actualTransform = obj[keys[0]];
-                                let actObjKeys = Object.keys(actualTransform);
-                                if (self.acceptableTranforms.indexOf(actObjKeys[0]) == -1) {
+                                if (retArr.indexOf(keys[0]) != -1) {
                                     reject({
                                         code: 400,
                                         body: {
-                                            "error": "Not a permissable transform"
+                                            "error": "Duplicate Apply key names"
+                                        }
+                                    })
+                                }
+                                retArr.push(keys[0]);
+                                let actualTransform = obj[keys[0]];
+                                let actObjKeys = Object.keys(actualTransform);
+                                if ((actObjKeys.length != 1) || (self.acceptableTranforms.indexOf(actObjKeys[0]) == -1)) {
+                                    reject({
+                                        code: 400,
+                                        body: {
+                                            "error": "Invalid Apply token"
                                         }
                                     })
                                 }

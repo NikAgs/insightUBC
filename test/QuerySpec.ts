@@ -56,7 +56,7 @@ describe("QuerySpec", function () {
         });
     });
 
-    it("Should return code 200", function () {
+    it("Should return code 200 #1", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [{
@@ -92,7 +92,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -101,7 +101,7 @@ describe("QuerySpec", function () {
             });
     });
 
-    it("Should return code 200", function () {
+    it("Should return code 200 #2", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "AND": [{
@@ -136,7 +136,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -145,7 +145,7 @@ describe("QuerySpec", function () {
             });
     });
 
-    it("Should return code 200", function () {
+    it("Should return code 200 #3", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "IS": {
@@ -181,7 +181,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -190,7 +190,7 @@ describe("QuerySpec", function () {
             });
     });
 
-    it("Should return code 200", function () {
+    it("Should return code 200 #4", function () {
         let query: QueryRequest = {
             "WHERE": {
                 "IS": {
@@ -220,7 +220,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                // console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -246,7 +246,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                console.log(res.body);
+                //console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
