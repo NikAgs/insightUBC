@@ -181,7 +181,7 @@ describe("QuerySpec", function () {
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -200,7 +200,7 @@ describe("QuerySpec", function () {
             "OPTIONS": {
                 "COLUMNS": [
                     "rooms_shortname", "rooms_furniture",
-                    "sumSeats"
+                    "sumSeats", "sumSeats2"
                 ],
                 "ORDER": "rooms_shortname",
                 "FORM": "TABLE"
@@ -214,13 +214,18 @@ describe("QuerySpec", function () {
                         "sumSeats": {
                             "SUM": "rooms_seats"
                         }
+                    },
+                    {
+                        "sumSeats2": {
+                            "SUM": "rooms_seats"
+                        }
                     }
                 ]
             }
         }
         return insFac.performQuery(query)
             .then(res => {
-                //console.log(res.body);
+                console.log(res.body);
                 expect(res.code).to.equal(200);
             })
             .catch(err => {
@@ -439,6 +444,25 @@ describe("QuerySpec", function () {
             .catch(err => {
                 // console.log(err);
                 expect.fail();
+            });
+    });
+
+    it("No Columns", function () {
+        let query: any = {
+            "WHERE": {},
+            "OPTIONS": {
+                "ORDER": "rooms_furniture",
+                "FORM": "TABLE"
+            }
+        }
+        return insFac.performQuery(query)
+            .then(res => {
+                //console.log(res.body);
+                expect.fail();
+            })
+            .catch(err => {
+                console.log(err);
+                expect(err.code).to.equal(400);
             });
     });
 

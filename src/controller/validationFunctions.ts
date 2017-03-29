@@ -59,7 +59,7 @@ export default class Validate {
                 let keys = Object.keys(obj);
                 applyKeys.push(keys[0]);
             });
-            if (columns.length > 0) {
+            if (columns && columns.length > 0) {
                 let id = '';
                 columns.forEach(column => {
                     let sub = column.substr(0, column.indexOf('_'));
