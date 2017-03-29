@@ -8,29 +8,10 @@ export default class QualityTable extends Component {
 
     constructor(props) {
         super(props);
-        this.renderTable = this.renderTable.bind(this);
         this.renderCourses = this.renderCourses.bind(this);
+        this.renderFailed = this.renderFailed.bind(this);
     }
 
-
-    renderTable(courseId) {
-        // console.log(sObj);
-        let courseInfo;
-        const courses = this.props.courses;
-        courses.forEach((course) => {
-            if (_.includes(courseId, course["courseId"])) {
-                courseInfo = course;
-            }
-        })
-
-        if (courseInfo) {
-            return (
-                <tr key={courseId}>
-                    <td> {courseInfo && courseInfo.size} </td>
-                </tr>
-            );
-        }
-    }
 
     renderCourses(courseObj) {
         return (
@@ -42,10 +23,33 @@ export default class QualityTable extends Component {
         );
     }
 
+    renderFailed(failedName, i) {
+        let returnVal = failedName;
+        console.log(failedName);
+        if (failedName) {
+            if (failedName.indexOf("_") > -1) {
+                returnVal = failedName + " - Out of Scheduled Time"
+            }
+            else {
+                returnVal = failedName + " - Not enough seats in classes"
+            }
+            return <li key={i}>{returnVal}</li>
+        }
+        return null;
+    }
 
     render() {
         return (
             <Grid fluid={true}>
+                <Col xs={12}>
+                    <h3>
+                        Quality: {this.props.failed.length} / {this.props.courses.length} 
+                    </h3>
+                    <ul>
+                        {this.props.failed &&
+                            this.props.failed.map(this.renderFailed)}
+                    </ul>
+                </Col>
                 <Col xs={12}>
                     <Table>
                         <thead>
@@ -60,12 +64,6 @@ export default class QualityTable extends Component {
                                 this.props.courses.map(this.renderCourses)}
                         </tbody>
                     </Table>
-                </Col>
-                <Col xs={12}>
-                    <div className="table-responsive">
-                        {this.props.failed &&
-                            this.props.failed.map(this.renderTable)}
-                    </div>
                 </Col>
             </Grid>
         );

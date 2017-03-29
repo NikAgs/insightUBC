@@ -16,6 +16,43 @@ export default class TimeTable extends Component {
         this.renderSchedule = this.renderSchedule.bind(this);
     }
 
+    componentDidMount() {
+        let outSide = [];
+        let inSide = [];
+        if (this.props.courses) {
+            const courses = this.props.courses;
+            const scheduledCourses = Object.keys(this.props.scheduledTasks);
+            let minutesOfDay = function (m) {
+                return m.minutes() + m.hours() * 60;
+            }
+            _.forEach(scheduledCourses, (cName) => {
+                courses.forEach((course) => {
+                    if (_.includes(cName, course["courseId"])) {
+                        inSide.push(course["courseId"]);
+                    }
+                });
+                let sObj = this.props.scheduledTasks[cName];
+                // console.log(sObj);
+                let currentTime = moment.unix(sObj.earlyFinish / 1000);
+                let startTime = moment("8:00am", "HH:mm a");
+                let endTime = moment("5:00pm", "HH:mm a");
+                // console.log()
+                if (minutesOfDay(currentTime) > minutesOfDay(endTime)) {
+                    outSide.push(cName);
+                }
+            });
+            let courseNumber = _.map(courses, "courseId");
+            _.pullAll(courseNumber, inSide);
+            outSide = _.concat(outSide, this.props.failed, courseNumber);
+            _.pull(outSide, undefined);
+            this.setState({
+                notScheduled: outSide,
+                totalCourses: courses.length
+            })
+            console.log("If", outSide);
+        }
+        return;
+    }
 
     renderSchedule(sObj, cName, rName, duration) {
         // console.log(sObj);
@@ -28,11 +65,6 @@ export default class TimeTable extends Component {
         });
         if (sObj.schedule.length > 0 && sObj.schedule[0].resources.length > 0 &&
             sObj.schedule[0].resources[0] == rName && sObj.duration == duration) {
-            let startTime = moment(sObj.earlyFinish / 1000, "h:mma");
-            let givenTime = moment("5:00pm", "h:mma");
-            if (startTime.isAfter(givenTime) || startTime.isBefore(givenTime)) {
-                console.log("After", sObj);
-            }
             return (
                 <tr key={cName}>
                     <td> <Moment unix format="HH:mm">{sObj.earlyStart / 1000}</Moment> </td>
@@ -76,7 +108,7 @@ export default class TimeTable extends Component {
     }
 
     render() {
-        const modalBody = (<QualityTable courses={this.props.courses} failed={this.props.failed} />)
+        const modalBody = (<QualityTable courses={this.props.courses} failed={this.state.notScheduled} />)
         const qualityButton = <Button>Show Quality Score</Button>
         return (
             <Grid fluid={true}>

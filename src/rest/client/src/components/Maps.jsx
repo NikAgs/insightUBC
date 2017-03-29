@@ -83,7 +83,7 @@ class Maps extends Component {
     }
 
     onChildClick(key, childProps) {
-        console.log(childProps);
+        // console.log(childProps);
         let self = this;
         let finalQueryObj = {
             WHERE: {
