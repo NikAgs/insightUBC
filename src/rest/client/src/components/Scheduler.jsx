@@ -177,11 +177,11 @@ export default class Scheduler extends Component {
             <Grid fluid={true}>
                 <Col xs={12}>
                     {
-                        this.state.showQuery ? formBody : searchButton
-                    }
-                    {
-                        this.state.rooms &&
-                        <TimeTable rooms={this.state.rooms} courses={this.state.courses} scheduledTasks={this.state.scheduledTasks} failed={this.state.faiiledTasks} />
+                        this.state.showQuery ? formBody :
+                            <div>
+                                {searchButton}
+                                <TimeTable rooms={this.state.rooms} courses={this.state.courses} scheduledTasks={this.state.scheduledTasks} failed={this.state.faiiledTasks} />
+                            </div>
                     }
                 </Col>
             </Grid>
