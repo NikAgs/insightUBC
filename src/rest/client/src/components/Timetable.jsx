@@ -77,10 +77,10 @@ export default class TimeTable extends Component {
     }
 
 
-    getRooms(room) {
+    getRooms(room, i) {
         return (
-            <Row>
-                <div key={room.rooms_name}>
+            <Row key={i}>
+                <div>
                     <h1>{room.rooms_name} - {room.rooms_seats}</h1>
                     <Col sm={12} md={6}>
                         <h3>Monday / Wednesday / Friday</h3>

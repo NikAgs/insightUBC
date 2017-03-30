@@ -16,20 +16,25 @@ export default class QualityTable extends Component {
     componentDidMount() {
         const {courses, failed} = this.props;
         let count = 0;
-        _.forEach(courses, (course) => {
-            count += course.sections;
-        });
         let fCount = 0;
-        _.forEach(failed, (fCourse) => {
-            if (fCourse.indexOf("_") > -1) {
-                fCount++
-            } else {
-                let index = _.findIndex(courses, (o) => {
-                    return o.courseId == fCourse;
+        if (courses) {
+            _.forEach(courses, (course) => {
+                count += course.sections;
+            });
+            if (failed) {
+                _.forEach(failed, (fCourse) => {
+                    if (fCourse.indexOf("_") > -1) {
+                        fCount++
+                    } else {
+                        let index = _.findIndex(courses, (o) => {
+                            return o.courseId == fCourse;
+                        })
+                        fCount += courses[index].sections;
+                    }
                 })
-                fCount += courses[index].sections;
             }
-        })
+        }
+
         this.setState({
             totalCourses: count,
             failedCourses: fCount
