@@ -157,8 +157,7 @@ export default class RestFacade {
                         "COLUMNS": [
                             "courses_dept",
                             "courses_id",
-                            "courses_pass",
-                            "courses_fail"
+                            "courses_size"
                         ],
                         "FORM": "TABLE"
                     }
@@ -184,8 +183,7 @@ export default class RestFacade {
                         "COLUMNS": [
                             "courses_dept",
                             "courses_id",
-                            "courses_pass",
-                            "courses_fail"
+                            "courses_size"
                         ],
                         "FORM": "TABLE"
                     }
@@ -209,8 +207,7 @@ export default class RestFacade {
                         "COLUMNS": [
                             "courses_dept",
                             "courses_id",
-                            "courses_pass",
-                            "courses_fail"
+                            "courses_size"
                         ],
                         "FORM": "TABLE"
                     }
@@ -229,9 +226,9 @@ export default class RestFacade {
                         tempObj.courseId = values[0].courses_dept + values[0].courses_id;
                         tempObj.sections = Math.ceil(values.length / 3);
                         let maxRec = _.maxBy(values, (o: any) => {
-                            return o.courses_pass + o.courses_fail;
+                            return o.courses_size;
                         });
-                        tempObj.size = maxRec.courses_pass + maxRec.courses_fail;
+                        tempObj.size = maxRec.courses_size;
                         tempObj.courses_dept = values[0].courses_dept;
                         tempObj.courses_id = values[0].courses_id;
                         courseData.push(tempObj);

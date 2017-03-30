@@ -20,6 +20,7 @@ export interface courseRecord {
     courses_audit?: number;
     courses_uuid?: string;
     courses_year?: number;
+    courses_size?: number;
 }
 
 export interface roomRecord {

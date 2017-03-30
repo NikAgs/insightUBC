@@ -204,6 +204,7 @@ export default class Helpers {
                         course.courses_avg = entry.Avg;
                         course.courses_fail = entry.Fail;
                         course.courses_pass = entry.Pass;
+                        course.courses_size = entry.Fail + entry.Pass;
                         course.courses_title = entry.Title;
                         course.courses_instructor = entry.Professor;
                         course.courses_uuid = entry.id;

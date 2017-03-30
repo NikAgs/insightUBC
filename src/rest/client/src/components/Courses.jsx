@@ -70,15 +70,10 @@ export default class Courses extends Component {
             }
             if (this.ssize.checked) {
                 finalQueryObj.TRANSFORMATIONS.APPLY.push({
-                    "pass": {
-                        "SUM": "courses_pass"
+                    "size": {
+                        "SUM": "courses_size"
                     }
-                }, {
-                        "fail": {
-                            "SUM": "courses_fail"
-                        }
-                    });
-                finalQueryObj.OPTIONS.COLUMNS.push("pass", "fail");
+                });
             }
             if (this.spass.checked) {
                 finalQueryObj.TRANSFORMATIONS.APPLY.push({
@@ -86,7 +81,6 @@ export default class Courses extends Component {
                         "SUM": "courses_pass"
                     }
                 })
-                finalQueryObj.OPTIONS.COLUMNS.push("pass");
             }
             if (this.sfail.checked) {
                 finalQueryObj.TRANSFORMATIONS.APPLY.push({
@@ -94,7 +88,6 @@ export default class Courses extends Component {
                         "SUM": "courses_fail"
                     }
                 });
-                finalQueryObj.OPTIONS.COLUMNS.push("fail");
             }
             if (this.savg.checked) {
                 finalQueryObj.TRANSFORMATIONS.APPLY.push({
@@ -102,7 +95,6 @@ export default class Courses extends Component {
                         "AVG": "courses_avg"
                     }
                 });
-                finalQueryObj.OPTIONS.COLUMNS.push("average");
             }
         }
 
@@ -131,15 +123,10 @@ export default class Courses extends Component {
                 console.log(data);
                 if (data && data.render === "TABLE") {
                     let size = parseInt(this.size.value) || null;
-                    if (this.ssize.checked) {
-                        _.forEach(data.result, (o) => {
-                            o.size = o.pass + o.fail;
-                        })
-                        if (size) {
-                            _.remove(data.result, (n) => {
-                                return n.size < size;
-                            });
-                        }
+                    if (size) {
+                        _.remove(data.result, (n) => {
+                            return n.size < size;
+                        });
                     }
                     let order = self.state.order;
                     if (order) {
@@ -168,11 +155,17 @@ export default class Courses extends Component {
         this.stitle.checked && columnsArr.push("courses_title");
         this.saudit.checked && columnsArr.push("courses_audit");
         this.syear.checked && columnsArr.push("courses_year");
-        this.ssize.checked && columnsArr.push("pass", "fail");
         if (!this.groupSection.checked) {
             this.spass.checked && columnsArr.push("courses_pass");
             this.sfail.checked && columnsArr.push("courses_fail");
             this.savg.checked && columnsArr.push("courses_avg");
+            this.ssize.checked && columnsArr.push("courses_size");
+        }
+        else {
+            this.spass.checked && columnsArr.push("pass");
+            this.sfail.checked && columnsArr.push("fail");
+            this.savg.checked && columnsArr.push("average");
+            this.ssize.checked && columnsArr.push("size");
         }
         return columnsArr;
     }

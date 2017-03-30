@@ -26,13 +26,14 @@ export default class Validate {
         "courses_fail",
         "courses_audit",
         "courses_uuid",
-        "courses_year"
+        "courses_year",
+        "courses_size"
     ]
 
     public columnNames: string[] = this.roomsColumns.concat(this.coursesColumns);
 
 
-    public numericColumns: [string] = ['courses_avg', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id', 'courses_year'
+    public numericColumns: [string] = ['courses_avg', 'courses_size', 'courses_pass', 'courses_fail', 'courses_audit', 'courses_id', 'courses_year'
         , "rooms_lat", "rooms_lon", "rooms_seats"]
 
     public stringColumns: [string] = ['courses_dept', 'courses_id', 'courses_instructor', 'courses_title',
