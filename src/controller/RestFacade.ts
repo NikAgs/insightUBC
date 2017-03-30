@@ -128,6 +128,7 @@ export default class RestFacade {
     scheduleCourses(query: any) {
         let courseData: any = [];
         let self = this;
+        let courseRecords: any = [];
         return new Promise((fulfill, reject) => {
 
             let courseQuery: any;
@@ -148,8 +149,10 @@ export default class RestFacade {
                 courseQuery = {
                     "WHERE": {
                         "AND": [{
-                            "EQ": {
-                                "courses_year": 2014
+                            "NOT": {
+                                "EQ": {
+                                    courses_year: 1900
+                                }
                             }
                         }]
                     },
@@ -157,9 +160,17 @@ export default class RestFacade {
                         "COLUMNS": [
                             "courses_dept",
                             "courses_id",
-                            "courses_size"
+                            "maxSize"
                         ],
                         "FORM": "TABLE"
+                    },
+                    "TRANSFORMATIONS": {
+                        "GROUP": ["courses_dept", "courses_id"],
+                        "APPLY": [{
+                            "maxSize": {
+                                "MAX": "courses_size"
+                            }
+                        }]
                     }
                 }
                 courseQuery.WHERE.AND.push(obj);
@@ -167,68 +178,96 @@ export default class RestFacade {
             }
             else if (query.department) {
                 courseQuery = {
-                    "WHERE": {
-                        "AND": [
-                            {
-                                "IS": {
-                                    "courses_dept": query.department
-                                }
-                            }, {
+                    "WHERE":
+                    {
+                        "AND": [{
+                            "IS": {
+                                "courses_dept": query.department
+                            }
+                        }, {
+                            "NOT": {
                                 "EQ": {
-                                    "courses_year": 2014
+                                    courses_year: 1900
                                 }
-                            }]
+                            }
+                        }]
                     },
                     "OPTIONS": {
                         "COLUMNS": [
                             "courses_dept",
                             "courses_id",
-                            "courses_size"
+                            "maxSize"
                         ],
                         "FORM": "TABLE"
+                    },
+                    "TRANSFORMATIONS": {
+                        "GROUP": ["courses_dept", "courses_id"],
+                        "APPLY": [{
+                            "maxSize": {
+                                "MAX": "courses_size"
+                            }
+                        }]
                     }
                 }
             }
             else if (query.courseNumber) {
                 courseQuery = {
                     "WHERE": {
-                        "AND": [
-                            {
-                                "IS": {
-                                    "courses_id": query.courseNumber
-                                }
-                            }, {
+                        "AND": [{
+                            "IS": {
+                                "courses_id": query.courseNumber
+                            }
+                        }, {
+                            "NOT": {
                                 "EQ": {
-                                    "courses_year": 2014
+                                    courses_year: 1900
                                 }
-                            }]
+                            }
+                        }]
                     },
                     "OPTIONS": {
                         "COLUMNS": [
                             "courses_dept",
                             "courses_id",
-                            "courses_size"
+                            "maxSize"
                         ],
                         "FORM": "TABLE"
+                    },
+                    "TRANSFORMATIONS": {
+                        "GROUP": ["courses_dept", "courses_id"],
+                        "APPLY": [{
+                            "maxSize": {
+                                "MAX": "courses_size"
+                            }
+                        }]
                     }
                 }
             }
-
+            let sections2014 = {
+                "EQ": {
+                    "courses_year": 2014
+                }
+            };
             self.insFac.performQuery(courseQuery)
                 .then((res: any) => {
+                    courseRecords = res.body.result;
+                    courseQuery.WHERE.AND.push(sections2014);
+                })
+                .then(() => self.insFac.performQuery(courseQuery))
+                .then((res: any) => {
                     let records = res.body.result;
-                    let sectionGroups = _.groupBy(records, function (value: any) {
+                    let sectionRecords = _.groupBy(records, function (value: any) {
                         return value.courses_dept + '#' + value.courses_id;
                     });
-                    _.forEach(sectionGroups, (values: any) => {
+                    _.forEach(sectionRecords, (values: any) => {
                         let tempObj: any = {};
                         // console.log(values);
-                        tempObj.courseId = values[0].courses_dept + values[0].courses_id;
+                        let dept = values[0].courses_dept;
+                        let id = values[0].courses_id;
+                        tempObj.courseId = dept + id;
                         tempObj.sections = Math.ceil(values.length / 3);
-                        let maxRec = _.maxBy(values, (o: any) => {
-                            return o.courses_size;
-                        });
-                        tempObj.size = maxRec.courses_size;
+                        let maxRec: any = _.find(courseRecords, { 'courses_dept': dept, 'courses_id': id });
+                        tempObj.size = maxRec.maxSize;
                         tempObj.courses_dept = values[0].courses_dept;
                         tempObj.courses_id = values[0].courses_id;
                         courseData.push(tempObj);
