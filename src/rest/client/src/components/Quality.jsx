@@ -8,10 +8,33 @@ export default class QualityTable extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {};
         this.renderCourses = this.renderCourses.bind(this);
         this.renderFailed = this.renderFailed.bind(this);
     }
 
+    componentDidMount() {
+        const {courses, failed} = this.props;
+        let count = 0;
+        _.forEach(courses, (course) => {
+            count += course.sections;
+        });
+        let fCount = 0;
+        _.forEach(failed, (fCourse) => {
+            if (fCourse.indexOf("_") > -1) {
+                fCount++
+            } else {
+                let index = _.findIndex(courses, (o) => {
+                    return o.courseId == fCourse;
+                })
+                fCount += courses[index].sections;
+            }
+        })
+        this.setState({
+            totalCourses: count,
+            failedCourses: fCount
+        })
+    }
 
     renderCourses(courseObj) {
         return (
@@ -25,7 +48,6 @@ export default class QualityTable extends Component {
 
     renderFailed(failedName, i) {
         let returnVal = failedName;
-        console.log(failedName);
         if (failedName) {
             if (failedName.indexOf("_") > -1) {
                 returnVal = failedName + " - Out of Scheduled Time"
@@ -39,11 +61,12 @@ export default class QualityTable extends Component {
     }
 
     render() {
+        let {failedCourses, totalCourses} = this.state;
         return (
             <Grid fluid={true}>
                 <Col xs={12}>
                     <h3>
-                        Quality: {this.props.failed.length} / {this.props.courses.length} 
+                        Quality: {failedCourses} / {totalCourses}
                     </h3>
                     <ul>
                         {this.props.failed &&

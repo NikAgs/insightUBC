@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Col, ListGroup, Table, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
+import { Grid, Row, Col, ListGroup, Table, Button, ListGroupItem, FormGroup, Checkbox } from 'react-bootstrap';
 // import OutputTable from './OutputTable';
 import Moment from 'react-moment';
 let _ = require('lodash');
@@ -49,7 +49,7 @@ export default class TimeTable extends Component {
                 notScheduled: outSide,
                 totalCourses: courses.length
             })
-            console.log("If", outSide);
+            // console.log("If", outSide);
         }
         return;
     }
@@ -79,31 +79,38 @@ export default class TimeTable extends Component {
 
     getRooms(room) {
         return (
-            <div key={room.rooms_name}>
-                <h1>{room.rooms_name} - {room.rooms_seats}</h1>
-                <h3>Monday / Wednesday / Friday</h3>
-                <Table responsive>
-                    <thead>
-                        <tr><th>Start Time</th><th>End Time</th><th>Course Id</th><th>Students in Course</th></tr>
-                    </thead>
-                    <tbody>
-                        {Object.keys(this.props.scheduledTasks).map((schedule) => {
-                            return this.renderSchedule(this.props.scheduledTasks[schedule], schedule, room.rooms_name, 60);
-                        })}
-                    </tbody>
-                </Table>
-                <h3>Tuesday / Thursday</h3>
-                <Table responsive>
-                    <thead>
-                        <tr><th>Start Time</th><th>End Time</th><th>Course Id</th><th>Students in Course</th></tr>
-                    </thead>
-                    <tbody>
-                        {Object.keys(this.props.scheduledTasks).map((schedule) => {
-                            return this.renderSchedule(this.props.scheduledTasks[schedule], schedule, room.rooms_name, 90);
-                        })}
-                    </tbody>
-                </Table>
-            </div>
+            <Row>
+                <div key={room.rooms_name}>
+                    <h1>{room.rooms_name} - {room.rooms_seats}</h1>
+                    <Col sm={12} md={6}>
+                        <h3>Monday / Wednesday / Friday</h3>
+                        <Table responsive>
+                            <thead>
+                                <tr><th>Start Time</th><th>End Time</th><th>Course Id</th><th>Students in Course</th></tr>
+                            </thead>
+                            <tbody>
+                                {Object.keys(this.props.scheduledTasks).map((schedule) => {
+                                    return this.renderSchedule(this.props.scheduledTasks[schedule], schedule, room.rooms_name, 60);
+                                })}
+                            </tbody>
+                        </Table>
+                    </Col>
+                    <Col sm={12} md={6}>
+
+                        <h3>Tuesday / Thursday</h3>
+                        <Table responsive>
+                            <thead>
+                                <tr><th>Start Time</th><th>End Time</th><th>Course Id</th><th>Students in Course</th></tr>
+                            </thead>
+                            <tbody>
+                                {Object.keys(this.props.scheduledTasks).map((schedule) => {
+                                    return this.renderSchedule(this.props.scheduledTasks[schedule], schedule, room.rooms_name, 90);
+                                })}
+                            </tbody>
+                        </Table>
+                    </Col>
+                </div>
+            </Row>
         )
     }
 
@@ -111,17 +118,15 @@ export default class TimeTable extends Component {
         const modalBody = (<QualityTable courses={this.props.courses} failed={this.state.notScheduled} />)
         const qualityButton = <Button>Show Quality Score</Button>
         return (
-            <Grid fluid={true}>
+            <Grid>
                 <Col xs={12}>
                     {
                         this.props.rooms && <ModalOpen modalBody={modalBody} eventListener={qualityButton} />
                     }
                 </Col>
                 <Col xs={12}>
-                    <div className="table-responsive">
-                        {this.props.rooms &&
-                            this.props.rooms.map(this.getRooms)}
-                    </div>
+                    {this.props.rooms &&
+                        this.props.rooms.map(this.getRooms)}
                 </Col>
             </Grid>
         );

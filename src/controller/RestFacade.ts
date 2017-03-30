@@ -129,29 +129,8 @@ export default class RestFacade {
         let courseData: any = [];
         let self = this;
         return new Promise((fulfill, reject) => {
-            let courseQuery: any = {
-                "WHERE": {
-                    "AND": [
-                        {
-                            "IS": {
-                                "courses_dept": query.department
-                            }
-                        }, {
-                            "EQ": {
-                                "courses_year": 2014
-                            }
-                        }]
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_pass",
-                        "courses_fail"
-                    ],
-                    "FORM": "TABLE"
-                }
-            }
+
+            let courseQuery: any;
             if (query.type) {
                 let obj: any = {};
                 obj[query.type] = [
@@ -185,7 +164,57 @@ export default class RestFacade {
                     }
                 }
                 courseQuery.WHERE.AND.push(obj);
-                console.log(courseQuery);
+                // console.log(courseQuery);
+            }
+            else if (query.department) {
+                courseQuery = {
+                    "WHERE": {
+                        "AND": [
+                            {
+                                "IS": {
+                                    "courses_dept": query.department
+                                }
+                            }, {
+                                "EQ": {
+                                    "courses_year": 2014
+                                }
+                            }]
+                    },
+                    "OPTIONS": {
+                        "COLUMNS": [
+                            "courses_dept",
+                            "courses_id",
+                            "courses_pass",
+                            "courses_fail"
+                        ],
+                        "FORM": "TABLE"
+                    }
+                }
+            }
+            else if (query.courseNumber) {
+                courseQuery = {
+                    "WHERE": {
+                        "AND": [
+                            {
+                                "IS": {
+                                    "courses_id": query.courseNumber
+                                }
+                            }, {
+                                "EQ": {
+                                    "courses_year": 2014
+                                }
+                            }]
+                    },
+                    "OPTIONS": {
+                        "COLUMNS": [
+                            "courses_dept",
+                            "courses_id",
+                            "courses_pass",
+                            "courses_fail"
+                        ],
+                        "FORM": "TABLE"
+                    }
+                }
             }
 
             self.insFac.performQuery(courseQuery)
