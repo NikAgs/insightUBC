@@ -29,7 +29,9 @@ export default class QualityTable extends Component {
                         let index = _.findIndex(courses, (o) => {
                             return o.courseId == fCourse;
                         })
-                        fCount += courses[index].sections;
+                        if (index > -1) {
+                            fCount += courses[index].sections;
+                        }
                     }
                 })
             }
